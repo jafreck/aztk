@@ -59,7 +59,7 @@ def upload_file_to_container(container_name, file_path, blob_client=None, use_fu
 
 def __app_submit_cmd(
         name: str,
-        gpu_enabled: bool,
+        # gpu_enabled: bool,
         app: str,
         app_args: str,
         main_class: str,
@@ -141,7 +141,7 @@ def recieve_submit_request(application_file_path):
 
     cmd = __app_submit_cmd(
         name=application['name'],
-        gpu_enabled=application['gpu_enabled'],
+        # gpu_enabled=application['gpu_enabled'],
         app=os.path.basename(application['application']),
         app_args=application['application_args'],
         main_class=application['main_class'],

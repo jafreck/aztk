@@ -122,7 +122,7 @@ class Job:
         self.custom_scripts = custom_scripts
         self.spark_configuration = spark_configuration
         self.vm_size=vm_size
-        self.gpu_enabled = helpers.is_gpu_enabled(vm_size)
+        # self.gpu_enabled = helpers.is_gpu_enabled(vm_size)
         self.docker_repo = docker_repo
         self.max_dedicated_nodes = max_dedicated_nodes
         self.reccurence_interval = reccurence_interval

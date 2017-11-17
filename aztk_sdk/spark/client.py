@@ -132,9 +132,9 @@ class Client(BaseClient):
         try:
 
             zip_resource_files = upload_node_scripts.zip_scripts(self.blob_client, job.custom_scripts, job.spark_configuration)
-            start_task = create_cluster_helper.generate_cluster_start_task(self, zip_resource_files, job.gpu_enabled, job.docker_repo)
+            start_task = create_cluster_helper.generate_cluster_start_task(self, zip_resource_files, job.docker_repo) #TODO add job.gpu_enabled
 
-            job.application.gpu_enabled = job.gpu_enabled
+            # job.application.gpu_enabled = job.gpu_enabled
             task = submit_helper.generate_task(self, job.application)
 
             software_metadata_key = "spark"
