@@ -44,12 +44,8 @@ def __docker_run_cmd(docker_repo: str = None) -> str:
     cmd.add_option('-p', '18080:18080')     # Spark History Server UI
 
     cmd.add_option('-d', docker_repo)
-<<<<<<< Updated upstream
-    cmd.add_argument('/bin/bash /batch/startup/wd/docker_main.sh')
-=======
     cmd.add_argument('/bin/bash /mnt/batch/tasks/startup/wd/docker_main.sh')
        
->>>>>>> Stashed changes
     return cmd.to_str()
 
 def __get_docker_credentials(spark_client):
