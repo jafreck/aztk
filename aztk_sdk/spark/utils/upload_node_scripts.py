@@ -106,5 +106,8 @@ def zip_scripts(blob_client, custom_scripts, spark_conf):
             for jar in spark_conf.jars:
                 zipf = __add_file_to_zip(zipf, jar, 'jars', binary=True)
 
+    # add helper file to node_scripts/submit/
+    zip_file_to_dir(file=os.path.join(constants.ROOT_PATH, 'aztk_sdk', 'utils', 'command_builder.py'), directory='', zipf=zipf, binary=False)
+
     zipf.close()
     return __upload(blob_client)

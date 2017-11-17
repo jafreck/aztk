@@ -127,3 +127,33 @@ class Client(BaseClient):
             return task.state._value_
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
+    
+    def submit_job(self, job):
+        try:
+
+            zip_resource_files = upload_node_scripts.zip_scripts(self.blob_client, job.custom_scripts, job.spark_configuration)
+            start_task = create_cluster_helper.generate_cluster_start_task(self, zip_resource_files, job.gpu_enabled, job.docker_repo)
+
+            job.application.gpu_enabled = job.gpu_enabled
+            task = submit_helper.generate_task(self, job.application)
+
+            software_metadata_key = "spark"
+
+            vm_image = models.VmImage(
+                publisher='Canonical',
+                offer='UbuntuServer',
+                sku='16.04')
+            
+            autoscale_formula = "maxNumberofVMs = {0}; targetNumberofVMs = {1}; $TargetDedicatedNodes=min(maxNumberofVMs, targetNumberofVMs)".format(
+                job.max_dedicated_nodes, job.max_dedicated_nodes)
+
+            job = self.__submit_job(
+                job=job,
+                start_task=start_task,
+                task=task,
+                autoscale_formula=autoscale_formula,
+                software_metadata_key=software_metadata_key,
+                vm_image_model=vm_image)
+        
+        except batch_error.BatchErrorException as e:
+            raise error.AztkError(helpers.format_batch_exception(e))

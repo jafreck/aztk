@@ -18,9 +18,9 @@ def __docker_run_cmd(docker_repo: str = None) -> str:
     cmd = CommandBuilder('docker run')
     cmd.add_option('--net', 'host')
     cmd.add_option('--name', constants.DOCKER_SPARK_CONTAINER_NAME)
-    cmd.add_option('-v', '/mnt/batch/tasks:/batch')
+    cmd.add_option('-v', '/mnt/batch/tasks:/mnt/batch/tasks')
 
-    cmd.add_option('-e', 'DOCKER_WORKING_DIR=/batch/startup/wd')
+    cmd.add_option('-e', 'DOCKER_WORKING_DIR=/mnt/batch/tasks/startup/wd')
     cmd.add_option('-e', 'AZ_BATCH_ACCOUNT_NAME=$AZ_BATCH_ACCOUNT_NAME')
     cmd.add_option('-e', 'BATCH_ACCOUNT_KEY=$BATCH_ACCOUNT_KEY')
     cmd.add_option('-e', 'BATCH_ACCOUNT_URL=$BATCH_ACCOUNT_URL')
@@ -33,6 +33,8 @@ def __docker_run_cmd(docker_repo: str = None) -> str:
         '-e', 'AZ_BATCH_NODE_IS_DEDICATED=$AZ_BATCH_NODE_IS_DEDICATED')
     cmd.add_option('-e', 'SPARK_WEB_UI_PORT=$SPARK_WEB_UI_PORT')
     cmd.add_option('-e', 'SPARK_WORKER_UI_PORT=$SPARK_WORKER_UI_PORT')
+    cmd.add_option('-e', 'SPARK_CONTAINER_NAME=$SPARK_CONTAINER_NAME')
+    cmd.add_option('-e', 'SPARK_SUBMIT_LOGS_FILE=$SPARK_SUBMIT_LOGS_FILE')
     cmd.add_option('-e', 'SPARK_JUPYTER_PORT=$SPARK_JUPYTER_PORT')
     cmd.add_option('-e', 'SPARK_JOB_UI_PORT=$SPARK_JOB_UI_PORT')
     cmd.add_option('-p', '8080:8080')       # Spark Master UI
@@ -42,7 +44,12 @@ def __docker_run_cmd(docker_repo: str = None) -> str:
     cmd.add_option('-p', '18080:18080')     # Spark History Server UI
 
     cmd.add_option('-d', docker_repo)
+<<<<<<< Updated upstream
     cmd.add_argument('/bin/bash /batch/startup/wd/docker_main.sh')
+=======
+    cmd.add_argument('/bin/bash /mnt/batch/tasks/startup/wd/docker_main.sh')
+       
+>>>>>>> Stashed changes
     return cmd.to_str()
 
 def __get_docker_credentials(spark_client):
@@ -100,6 +107,8 @@ def generate_cluster_start_task(
     spark_worker_ui_port = constants.DOCKER_SPARK_WORKER_UI_PORT
     spark_jupyter_port = constants.DOCKER_SPARK_JUPYTER_PORT
     spark_job_ui_port = constants.DOCKER_SPARK_JOB_UI_PORT
+    spark_container_name = constants.DOCKER_SPARK_CONTAINER_NAME
+    spark_submit_logs_file = constants.SPARK_SUBMIT_LOGS_FILE
 
     # TODO use certificate
     environment_settings = [
@@ -121,6 +130,10 @@ def generate_cluster_start_task(
             name="SPARK_JUPYTER_PORT", value=spark_jupyter_port),
         batch_models.EnvironmentSetting(
             name="SPARK_JOB_UI_PORT", value=spark_job_ui_port),
+        batch_models.EnvironmentSetting(
+            name="SPARK_CONTAINER_NAME", value=spark_container_name),
+        batch_models.EnvironmentSetting(
+            name="SPARK_SUBMIT_LOGS_FILE", value=spark_submit_logs_file)
     ] + __get_docker_credentials(spark_client)
 
     # start task command

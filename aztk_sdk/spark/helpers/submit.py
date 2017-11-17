@@ -1,5 +1,6 @@
 from typing import List
-
+import os
+import yaml
 import azure.batch.models as batch_models
 from aztk_sdk.utils import constants, helpers
 from aztk_sdk.utils.command_builder import CommandBuilder
@@ -13,6 +14,7 @@ def __get_node(spark_client, node_id: str, cluster_id: str) -> batch_models.Comp
     return spark_client.batch_client.compute_node.get(cluster_id, node_id)
 
 
+<<<<<<< Updated upstream
 def __app_submit_cmd(
         spark_client,
         cluster_id: str,
@@ -78,6 +80,9 @@ def submit_application(spark_client, cluster_id, application, wait: bool = False
     """
     Submit a spark app
     """
+=======
+def generate_task(spark_client, application):
+>>>>>>> Stashed changes
 
     resource_files = []
 
@@ -120,44 +125,42 @@ def submit_application(spark_client, cluster_id, application, wait: bool = False
         files_resource_file_paths.append(files_resource_file_path)
         resource_files.append(files_resource_file_path)
 
+    # Upload application definition
+    application.application = os.path.basename(application.application)
+    application.jars = [os.path.basename(jar) for jar in application.jars]
+    application.py_files = [os.path.basename(py_files) for py_files in application.py_files]
+    application.files = [os.path.basename(files) for files in application.files]
+    application_definition_file = helpers.upload_text_to_container(
+        container_name=application.name,
+        file_path='application.yaml',
+        content=yaml.dump(vars(application)),
+        blob_client=spark_client.blob_client)
+    resource_files.append(application_definition_file)
+
     # create command to submit task
-    cmd = __app_submit_cmd(
-        spark_client=spark_client,
-        cluster_id=cluster_id,
-        name=application.name,
-        app=app_resource_file.file_path,
-        app_args=application.application_args,
-        main_class=application.main_class,
-        jars=[jar_resource_file_path.file_path for jar_resource_file_path in jar_resource_file_paths],
-        py_files=[py_files_resource.file_path for py_files_resource in py_files_resource_file_paths],
-        files=[file_resource_file_path.file_path for file_resource_file_path in files_resource_file_paths],
-        driver_java_options=application.driver_java_options,
-        driver_library_path=application.driver_library_path,
-        driver_class_path=application.driver_class_path,
-        driver_memory=application.driver_memory,
-        executor_memory=application.executor_memory,
-        driver_cores=application.driver_cores,
-        executor_cores=application.executor_cores)
-
-    # Get cluster size
-    cluster = spark_client.get_cluster(cluster_id)
-
-    # Affinitize task to master node
-    # master_node_affinity_id = helpers.get_master_node_id(cluster_id, spark_client.batch_client)
-    rls = spark_client.get_remote_login_settings(cluster.id, cluster.master_node_id)
+    task_cmd = 'sudo docker exec -i -e AZ_BATCH_TASK_WORKING_DIR=$AZ_BATCH_TASK_WORKING_DIR spark /bin/bash >> output.log 2>&1 -c "python \$DOCKER_WORKING_DIR/submit.py"'
 
     # Create task
     task = batch_models.TaskAddParameter(
         id=application.name,
-        affinity_info=batch_models.AffinityInformation(
-            affinity_id=cluster.master_node_id),
-        command_line=helpers.wrap_commands_in_shell(cmd),
+        command_line=helpers.wrap_commands_in_shell([task_cmd]),
         resource_files=resource_files,
         user_identity=batch_models.UserIdentity(
             auto_user=batch_models.AutoUserSpecification(
                 scope=batch_models.AutoUserScope.task,
                 elevation_level=batch_models.ElevationLevel.admin))
     )
+
+    return task
+
+
+def submit_application(spark_client, cluster_id, application, wait: bool = False):
+    """
+    Submit a spark app
+    """
+    cluster = spark_client.get_cluster(cluster_id)
+    application.gpu_enabled = cluster.gpu_enabled
+    task = generate_task(spark_client, application)
 
     # Add task to batch job (which has the same name as cluster_id)
     job_id = cluster_id

@@ -108,6 +108,25 @@ class AppModel:
         self.driver_cores = driver_cores
         self.executor_cores = executor_cores
 
+class Job:
+    def __init__(
+            self,
+            application=None,
+            custom_scripts=None,
+            spark_configuration=None,
+            vm_size=None,
+            docker_repo=None,
+            max_dedicated_nodes=None,
+            reccurence_interval=None):
+        self.application = application
+        self.custom_scripts = custom_scripts
+        self.spark_configuration = spark_configuration
+        self.vm_size=vm_size
+        self.gpu_enabled = helpers.is_gpu_enabled(vm_size)
+        self.docker_repo = docker_repo
+        self.max_dedicated_nodes = max_dedicated_nodes
+        self.reccurence_interval = reccurence_interval
+
 
 class AppLogsModel():
     def __init__(self, name: str, cluster_id: str, log: str, total_bytes: int, application_state: batch_models.TaskState):
