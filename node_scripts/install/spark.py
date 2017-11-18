@@ -89,7 +89,7 @@ def start_history_server():
     properties = parse_configuration_file(path_to_spark_defaults_conf)
 
     # only enable the history server if it was enabled in the configuration file
-    if spark_event_log_enabled_key in properties:
+    if properties and spark_event_log_enabled_key in properties:
         if spark_event_log_directory_key in properties:
             configure_history_server_log_path(properties[spark_event_log_directory_key])
 
@@ -133,7 +133,7 @@ def copy_spark_env():
         file_stat = os.stat(spark_env_path_dest)
         os.chmod(spark_env_path_dest, file_stat.st_mode | 0o777)
     except Exception as e:
-        print("Failed to copy spark-env.sh file")
+        print("Failed to copy spark-env.sh file with error:")
         print(e)
 
 
@@ -144,7 +144,7 @@ def copy_core_site():
     try:
         shutil.copyfile(spark_default_path_src, spark_default_path_dest)
     except Exception as e:
-        print("Failed to copy spark-defaults.conf file")
+        print("Failed to copy spark-defaults.conf file with error:")
         print(e)
 
 
@@ -154,7 +154,7 @@ def copy_core_site():
     try:
         shutil.copyfile(spark_default_path_src, spark_default_path_dest)
     except Exception as e:
-        print("Failed to copy core-site.xml file")
+        print("Failed to copy core-site.xml file with error:")
         print(e)
 
 
@@ -171,11 +171,12 @@ def copy_jars():
             print("copy {} to {}".format(src, dest))
             shutil.copyfile(src, dest)
     except Exception as e:
-        print("Failed to copy jar files")
+        print("Failed to copy jar files with error:")
         print(e)
 
 
 def parse_configuration_file(path_to_file: str):
+    try:
         file = open(path_to_file, 'r')
         properties = {}
         for line in file:
@@ -183,19 +184,21 @@ def parse_configuration_file(path_to_file: str):
                 split = line.split()
                 properties[split[0]] = split[1]
         return properties
-
+    except Exception as e:
+        print("Failed to parse configuration file:", path_to_file, "with error:")
+        print(e)
 
 def configure_history_server_log_path(path_to_log_file):
-        # Check if the file path starts with a local file extension
-        # If so, create the path on disk otherwise ignore
-        print('Configuring spark history server log directory {}.'.format(path_to_log_file))
-        if path_to_log_file.startswith('file:/'):
-            # create the local path on disk
-            directory = path_to_log_file.replace('file:', '')
-            if os.path.exists(directory):
-                print('Skipping. Directory {} already exists.'.format(directory))
-            else:
-                print('Create direcotory {}.'.format(directory))
-                os.makedirs(directory)
+    # Check if the file path starts with a local file extension
+    # If so, create the path on disk otherwise ignore
+    print('Configuring spark history server log directory {}.'.format(path_to_log_file))
+    if path_to_log_file.startswith('file:/'):
+        # create the local path on disk
+        directory = path_to_log_file.replace('file:', '')
+        if os.path.exists(directory):
+            print('Skipping. Directory {} already exists.'.format(directory))
         else:
-            print('Skipping. The eventLog directory is not local.')
+            print('Create direcotory {}.'.format(directory))
+            os.makedirs(directory)
+    else:
+        print('Skipping. The eventLog directory is not local.')

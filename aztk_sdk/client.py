@@ -6,6 +6,7 @@ import aztk_sdk.utils.helpers as helpers
 import aztk_sdk.utils.constants as constants
 import aztk_sdk.utils.get_ssh_key as get_ssh_key
 import aztk_sdk.models as models
+import time
 
 
 class Client:
@@ -152,27 +153,37 @@ class Client:
     
     def __get_remote_login_settings(self, pool_id: str, node_id: str):
         """
-        Get the remote_login_settings for node
-        :param pool_id
-        :param node_id
-        :returns aztk_sdk.models.RemoteLogin
+            Get the remote_login_settings for node
+            :param pool_id
+            :param node_id
+            :returns aztk_sdk.models.RemoteLogin
         """
         result = self.batch_client.compute_node.get_remote_login_settings(pool_id, node_id)
         return models.RemoteLogin(ip_address=result.remote_login_ip_address, port=str(result.remote_login_port))
 
     def __submit_job(self, job, start_task, task, autoscale_formula, software_metadata_key: str, vm_image_model):
-        # Get a verified node agent sku
+        """
+            Job Submission
+            :param job -> aztk_sdk.spark.models.Job
+            :param start_task -> batch_models.StartTask
+            :param task -> batch_models.TaskAddParameter
+            :param autoscale forumula -> str
+            :param software_metadata_key: str
+            :param vm_image_model -> aztk_sdk.models.VmImage
+            :returns None
+        """
+        # get a verified node agent sku
         sku_to_use, image_ref_to_use = \
             helpers.select_latest_verified_vm_image_with_node_agent_sku(
                 vm_image_model.publisher, vm_image_model.offer, vm_image_model.sku, self.batch_client)
 
-        # Set up a schedule for a recurring job
+        # set up a schedule for a recurring job
         auto_pool_specification = batch_models.AutoPoolSpecification(
-            pool_lifetime_option=batch_models.PoolLifetimeOption.job,
-            auto_pool_id_prefix=job.app.name,
-            keep_alive=False,
+            pool_lifetime_option=batch_models.PoolLifetimeOption.job_schedule,
+            auto_pool_id_prefix=job.application.name,
+            keep_alive=True,
             pool=batch_models.PoolSpecification(
-                display_name=job.app.name,
+                display_name=job.application.name,
                 virtual_machine_configuration=batch_models.VirtualMachineConfiguration(
                     image_reference=image_ref_to_use,
                     node_agent_sku_id=sku_to_use),
@@ -189,15 +200,28 @@ class Client:
             )
         )
 
+        # define job specification
         job_spec = batch_models.JobSpecification(
             pool_info=batch_models.PoolInformation(auto_pool_specification=auto_pool_specification),
-            display_name=job.app.name,
-            on_all_tasks_complete=batch_models.OnAllTasksComplete.terminate_job
+            display_name=job.application.name,
+            on_all_tasks_complete=batch_models.OnAllTasksComplete.terminate_job,
+            job_manager_task=task
         )
 
-        setup = batch_models.JobScheduleAddParameter(job.app.name, job.schedule, job_spec)
+        # define schedule
+        schedule = batch_models.Schedule(
+            do_not_run_until=job.do_not_run_until,
+            do_not_run_after=job.do_not_run_after,
+            start_window=job.start_window,
+            recurrence_interval=job.recurrence_interval
+        )
+
+        # create job schedule and add task
+        setup = batch_models.JobScheduleAddParameter(
+            id=job.application.name,
+            schedule=schedule,
+            job_specification=job_spec)
         self.batch_client.job_schedule.add(setup)
-        self.batch_client.task.add(job_id=job.app.name, task=task)
 
 
 

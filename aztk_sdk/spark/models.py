@@ -117,7 +117,10 @@ class Job:
             vm_size=None,
             docker_repo=None,
             max_dedicated_nodes=None,
-            reccurence_interval=None):
+            recurrence_interval=None,
+            do_not_run_until=None,
+            do_not_run_after=None,
+            start_window=None):
         self.application = application
         self.custom_scripts = custom_scripts
         self.spark_configuration = spark_configuration
@@ -125,7 +128,10 @@ class Job:
         # self.gpu_enabled = helpers.is_gpu_enabled(vm_size)
         self.docker_repo = docker_repo
         self.max_dedicated_nodes = max_dedicated_nodes
-        self.reccurence_interval = reccurence_interval
+        self.recurrence_interval = recurrence_interval
+        self.do_not_run_until = do_not_run_until
+        self.do_not_run_after = do_not_run_after
+        self.start_window = start_window
 
 
 class AppLogsModel():
