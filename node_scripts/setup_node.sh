@@ -55,6 +55,10 @@ else
     echo "Creating docker container."
     # Start docker
     eval $docker_run_cmd
+    
+    until [ "`/usr/bin/docker inspect -f {{.State.Running}} $container_name`"=="true" ]; do
+        sleep 0.1;
+    done;
 
     # Setup symbolic link for the docker logs
     docker_log=$(docker inspect --format='{{.LogPath}}' $container_name)
