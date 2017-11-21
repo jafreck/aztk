@@ -6,7 +6,6 @@ import aztk_sdk.utils.helpers as helpers
 import aztk_sdk.utils.constants as constants
 import aztk_sdk.utils.get_ssh_key as get_ssh_key
 import aztk_sdk.models as models
-import time
 
 
 class Client:

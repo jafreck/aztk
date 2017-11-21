@@ -157,3 +157,11 @@ class Client(BaseClient):
         
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
+
+
+    def get_job_log(self, job):
+        try:
+            log_file = aztk_sdk.utils.constants.SPARK_SUBMIT_LOGS_FILE
+            return self.blob_client.get_blob_to_text(job.application.name, log_file).content
+        except batch_error.BatchErrorException as e:
+            raise error.AztkError(helpers.format_batch_exception(e))
