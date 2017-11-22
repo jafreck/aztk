@@ -58,7 +58,7 @@ def __includeFile(filename: str) -> bool:
 def __create_zip():
     ensure_dir(local_tmp_zipfile)
     zipf = zipfile.ZipFile(local_tmp_zipfile, 'w', zipfile.ZIP_DEFLATED)
-    zipdir(os.path.join(root, "node_scripts/spark/"), zipf)
+    zipdir(os.path.join(root, "node_scripts/dask"), zipf)
 
     logging.debug("Ziped node_scripts")
     return zipf
@@ -67,7 +67,7 @@ def __create_zip():
 def __upload(blob_client):
     logging.debug("Uploading node scripts...")
     return helpers.upload_file_to_container(
-        container_name="spark-node-scripts",
+        container_name="dask-node-scripts",
         file_path=local_tmp_zipfile,
         blob_client=blob_client,
         use_full_path=False)
@@ -93,17 +93,14 @@ def __add_file_to_zip(zipf, file_path, zip_file_path, binary):
     return zipf
 
 
-def zip_scripts(blob_client, custom_scripts, spark_conf):
+def zip_scripts(blob_client, custom_scripts, dask_conf):
     zipf = __create_zip()
     if custom_scripts:
         zipf = __add_custom_scripts(zipf, custom_scripts)
 
-    if spark_conf:
-        zipf = __add_file_to_zip(zipf, spark_conf.spark_defaults_conf, 'conf', binary=False)
-        zipf = __add_file_to_zip(zipf, spark_conf.spark_env_sh, 'conf', binary=False)
-        zipf = __add_file_to_zip(zipf, spark_conf.core_site_xml, 'conf', binary=False)
-        if spark_conf.jars:
-            for jar in spark_conf.jars:
+    if dask_conf:
+        if dask_conf.jars:
+            for jar in dask_conf.jars:
                 zipf = __add_file_to_zip(zipf, jar, 'jars', binary=True)
 
     zipf.close()
