@@ -20,7 +20,7 @@ def setup_node():
 
 def setup_as_master():
     print("Setting up as master.")
-    dask.start_dask_master()
+    dask.start_dask_task_scheduler()
     dask.start_dask_worker()
 
 
