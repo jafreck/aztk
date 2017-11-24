@@ -19,17 +19,7 @@ def __app_submit_cmd(
         name: str,
         app: str,
         app_args: str,
-        main_class: str,
-        jars: List[str],
-        py_files: List[str],
-        files: List[str],
-        driver_java_options: str,
-        driver_library_path: str,
-        driver_class_path: str,
-        driver_memory: str,
-        executor_memory: str,
-        driver_cores: str,
-        executor_cores: str):
+        files: []):
     cluster = dask_client.get_cluster(cluster_id)
     master_id = cluster.master_node_id
     master_ip = __get_node(dask_client, master_id, cluster_id).ip_address
@@ -38,27 +28,13 @@ def __app_submit_cmd(
 
     # set file paths to correct path on container
     files_path = '/batch/workitems/{0}/{1}/{2}/wd/'.format(cluster_id, "job-1", name)
-    jars = [files_path + jar for jar in jars]
-    py_files = [files_path + py_file for py_file in py_files]
     files = [files_path + f for f in files]
 
     # 2>&1 redirect stdout and stderr to be in the same file
-    dask_submit_cmd = CommandBuilder(
-        '{0}/bin/dask-submit'.format(dask_home))
-    dask_submit_cmd.add_option(
-        '--master', 'dask://{0}:7077'.format(master_ip))
+    dask_submit_cmd = CommandBuilder('dask-submit')
+    dask_submit_cmd.add_option('{0}:7077'.format(master_ip))
     dask_submit_cmd.add_option('--name', name)
-    dask_submit_cmd.add_option('--class', main_class)
-    dask_submit_cmd.add_option('--jars', jars and ','.join(jars))
-    dask_submit_cmd.add_option('--py-files', py_files and ','.join(py_files))
     dask_submit_cmd.add_option('--files', files and ','.join(files))
-    dask_submit_cmd.add_option('--driver-java-options', driver_java_options)
-    dask_submit_cmd.add_option('--driver-library-path', driver_library_path)
-    dask_submit_cmd.add_option('--driver-class-path', driver_class_path)
-    dask_submit_cmd.add_option('--driver-memory', driver_memory)
-    dask_submit_cmd.add_option('--executor-memory', executor_memory)
-    dask_submit_cmd.add_option('--driver-cores', driver_cores)
-    dask_submit_cmd.add_option('--executor-cores', executor_cores)
 
     dask_submit_cmd.add_argument(
         '/batch/workitems/{0}/{1}/{2}/wd/'.format(cluster_id, "job-1", name) +
@@ -89,27 +65,6 @@ def submit_application(dask_client, cluster_id, application, wait: bool = False)
     # Upload application file
     resource_files.append(app_resource_file)
 
-    # Upload dependent JARS
-    jar_resource_file_paths = []
-    for jar in application.jars:
-        current_jar_resource_file_path = helpers.upload_file_to_container(container_name=application.name,
-                                                                          file_path=jar,
-                                                                          blob_client=dask_client.blob_client,
-                                                                          use_full_path=False)
-        jar_resource_file_paths.append(current_jar_resource_file_path)
-        resource_files.append(current_jar_resource_file_path)
-
-    # Upload dependent python files
-    py_files_resource_file_paths = []
-    for py_file in application.py_files:
-        current_py_files_resource_file_path = helpers.upload_file_to_container(container_name=application.name,
-                                                                               file_path=py_file,
-                                                                               blob_client=dask_client.blob_client,
-                                                                               use_full_path=False)
-        py_files_resource_file_paths.append(
-            current_py_files_resource_file_path)
-        resource_files.append(current_py_files_resource_file_path)
-
     # Upload other dependent files
     files_resource_file_paths = []
     for file in application.files:
@@ -127,17 +82,8 @@ def submit_application(dask_client, cluster_id, application, wait: bool = False)
         name=application.name,
         app=app_resource_file.file_path,
         app_args=application.application_args,
-        main_class=application.main_class,
-        jars=[jar_resource_file_path.file_path for jar_resource_file_path in jar_resource_file_paths],
-        py_files=[py_files_resource.file_path for py_files_resource in py_files_resource_file_paths],
-        files=[file_resource_file_path.file_path for file_resource_file_path in files_resource_file_paths],
-        driver_java_options=application.driver_java_options,
-        driver_library_path=application.driver_library_path,
-        driver_class_path=application.driver_class_path,
-        driver_memory=application.driver_memory,
-        executor_memory=application.executor_memory,
-        driver_cores=application.driver_cores,
-        executor_cores=application.executor_cores)
+        files=[file_resource_file_path.file_path for file_resource_file_path in files_resource_file_paths]
+    )
 
     # Get cluster size
     cluster = dask_client.get_cluster(cluster_id)

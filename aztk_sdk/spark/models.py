@@ -27,7 +27,7 @@ class Cluster(aztk_sdk.models.Cluster):
             return None
 
         for metadata in self.pool.metadata:
-            if metadata.name == constants.MASTER_NODE_METADATA_KEY:
+            if metadata.name == constants.SPARK_MASTER_NODE_METADATA_KEY:
                 return metadata.value
 
         return None

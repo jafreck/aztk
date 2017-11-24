@@ -56,7 +56,8 @@ GLOBAL_INIT_DIRECTORY_DEST = os.path.join(HOME_DIRECTORY_PATH, '.aztk')
 """
     Key of the metadata entry for the pool that is used to store the master node id
 """
-MASTER_NODE_METADATA_KEY = "_spark_master_node"
+SPARK_MASTER_NODE_METADATA_KEY = "_spark_master_node"
+DASK_MASTER_NODE_METADATA_KEY = "_dask_master_node"
 
 """
     Timeout in seconds to wait for the master to be ready

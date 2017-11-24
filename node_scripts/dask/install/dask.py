@@ -53,26 +53,16 @@ def wait_for_master():
 
 
 def start_dask_task_scheduler():
-    from distributed import Scheduler
-
-    loop = IOLoop.current()
-    t = Thread(target=loop.start, daemon=True)
-    t.start()
-
-    s = Scheduler(loop=loop)
-    s.start('tcp://:8786')   # Listen on TCP port 8786
-
+    call(["dask-scheduler"])
 
 
 def start_dask_worker():
-    from distributed import Nanny
+    wait_for_master() #TODO: why is this necessary?
+    master_node_id = pick_master.get_master_node_id(
+        batch_client.pool.get(config.pool_id))
+    master_node = get_node(master_node_id)
 
-    loop = IOLoop.current()
-    t = Thread(target=loop.start, daemon=True)
-    t.start()
-
-    w = Nanny('tcp://127.0.0.1:8786', loop=loop)
-    w.start()  # choose randomly assigned port
+    call(["dask-worker", "{0}:{1}".format(master_node.ip_address, "8786")])
 
 
 def setup_conf():
