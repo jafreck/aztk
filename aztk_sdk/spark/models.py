@@ -111,6 +111,7 @@ class AppModel:
 class Job:
     def __init__(
             self,
+            id,
             application=None,
             custom_scripts=None,
             spark_configuration=None,
@@ -121,6 +122,7 @@ class Job:
             do_not_run_until=None,
             do_not_run_after=None,
             start_window=None):
+        self.id = id
         self.application = application
         self.custom_scripts = custom_scripts
         self.spark_configuration = spark_configuration

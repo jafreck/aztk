@@ -179,7 +179,7 @@ class Client:
         # set up a schedule for a recurring job
         auto_pool_specification = batch_models.AutoPoolSpecification(
             pool_lifetime_option=batch_models.PoolLifetimeOption.job_schedule,
-            auto_pool_id_prefix=job.application.name,
+            auto_pool_id_prefix=job.id,
             keep_alive=True,
             pool=batch_models.PoolSpecification(
                 display_name=job.application.name,
@@ -202,7 +202,7 @@ class Client:
         # define job specification
         job_spec = batch_models.JobSpecification(
             pool_info=batch_models.PoolInformation(auto_pool_specification=auto_pool_specification),
-            display_name=job.application.name,
+            display_name=job.id,
             on_all_tasks_complete=batch_models.OnAllTasksComplete.terminate_job,
             job_manager_task=task
         )
@@ -217,7 +217,7 @@ class Client:
 
         # create job schedule and add task
         setup = batch_models.JobScheduleAddParameter(
-            id=job.application.name,
+            id=job.id,
             schedule=schedule,
             job_specification=job_spec)
         self.batch_client.job_schedule.add(setup)
