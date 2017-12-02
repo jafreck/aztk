@@ -71,29 +71,20 @@ class VmImage(aztk_sdk.models.VmImage):
     pass
 
 
-class ProgramModel:
+class Application:
     def __init__(
             self,
             name=None,
             application=None,
             application_args=None,
-            main_class=None,
-            jars=[],
-            py_files=[],
-            files=[],
-            driver_java_options=None,
-            driver_library_path=None,
-            driver_class_path=None,
-            driver_memory=None,
-            executor_memory=None,
-            driver_cores=None,
-            executor_cores=None):
+            files=[]):
         self.name = name
         self.application = application
         self.application_args = application_args
+        self.files = files
 
 
-class ProgramLogsModel():
+class ProgramLog():
     def __init__(self, name: str, cluster_id: str, log: str, total_bytes: int, application_state: batch_models.TaskState):
         self.name = name
         self.cluster_id = cluster_id

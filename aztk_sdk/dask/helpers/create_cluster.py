@@ -32,7 +32,9 @@ def __docker_run_cmd(docker_repo: str = None) -> str:
     cmd.add_option(
         '-e', 'AZ_BATCH_NODE_IS_DEDICATED=$AZ_BATCH_NODE_IS_DEDICATED')
     cmd.add_option('-e', 'DASK_WEB_UI_PORT=$DASK_WEB_UI_PORT')
-    cmd.add_option('-p', '8087:8087')       # Dask Web UI
+    cmd.add_option('-p', '8787:8787')       # Dask Web UI
+    cmd.add_option('-p', '8788:8788')       # Dask Web UI
+    cmd.add_option('-p', '8789:8789')       # Dask Web UI
     cmd.add_option('-p', '8786:8786')       # Dask TCP port
     cmd.add_option('-d', docker_repo)
     cmd.add_argument('/bin/bash /mnt/batch/tasks/startup/wd/docker_main.sh')

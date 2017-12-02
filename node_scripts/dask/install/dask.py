@@ -54,6 +54,7 @@ def wait_for_master():
 
 def start_dask_task_scheduler():
     call(["dask-scheduler"])
+    # call(["dask-remote", "--port",  "8788"])
 
 
 def start_dask_worker():

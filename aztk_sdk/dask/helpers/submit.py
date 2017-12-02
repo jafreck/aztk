@@ -18,32 +18,37 @@ def __app_submit_cmd(
         cluster_id: str,
         name: str,
         app: str,
-        app_args: str,
+        app_args: [],
         files: []):
     cluster = dask_client.get_cluster(cluster_id)
     master_id = cluster.master_node_id
     master_ip = __get_node(dask_client, master_id, cluster_id).ip_address
 
-    dask_home = constants.DOCKER_SPARK_HOME
 
     # set file paths to correct path on container
-    files_path = '/batch/workitems/{0}/{1}/{2}/wd/'.format(cluster_id, "job-1", name)
+    files_path = 'mnt/batch/tasks/workitems/{0}/{1}/{2}/wd/'.format(cluster_id, "job-1", name)
     files = [files_path + f for f in files]
 
     # 2>&1 redirect stdout and stderr to be in the same file
-    dask_submit_cmd = CommandBuilder('dask-submit')
-    dask_submit_cmd.add_option('{0}:7077'.format(master_ip))
-    dask_submit_cmd.add_option('--name', name)
-    dask_submit_cmd.add_option('--files', files and ','.join(files))
+    # dask_submit_cmd = CommandBuilder('dask-submit')
+    # dask_submit_cmd.add_option('{0}:7077'.format(master_ip), enable=True)
+    # dask_submit_cmd.add_argument(app)
 
-    dask_submit_cmd.add_argument(
-        '/batch/workitems/{0}/{1}/{2}/wd/'.format(cluster_id, "job-1", name) +
-        app + ' ' + ' '.join(['\'' + app_arg + '\'' for app_arg in app_args if app_args]))
+    # app_args = ' '.join(['\'' + app_arg + '\'' for app_arg in (app_args if app_args else [])])
+    # dask_submit_cmd.add_argument(
+    #     'mnt/batch/tasks/workitems/{0}/{1}/{2}/wd/'.format(cluster_id, "job-1", name) +
+    #     app + ' ' + app_args)
+    
+    app_args = ' '.join(['\'' + app_arg + '\'' for app_arg in (app_args if app_args else [])])
+    dask_submit_cmd = CommandBuilder('python')
+    dask_submit_cmd.add_argument(app + ' ' + app_args)
 
     docker_exec_cmd = CommandBuilder('sudo docker exec')
-    docker_exec_cmd.add_option('-i', constants.DOCKER_SPARK_CONTAINER_NAME)
+    docker_exec_cmd.add_option('-i', constants.DOCKER_DASK_CONTAINER_NAME)
     docker_exec_cmd.add_argument('/bin/bash  >> {0} 2>&1 -c \"cd '.format(
         constants.SPARK_SUBMIT_LOGS_FILE) + files_path + '; ' + dask_submit_cmd.to_str() + '\"')
+
+    print(docker_exec_cmd.to_str())
 
     return [
         docker_exec_cmd.to_str()
