@@ -220,6 +220,7 @@ class Client:
             id=job.id,
             schedule=schedule,
             job_specification=job_spec)
+        
         self.batch_client.job_schedule.add(setup)
 
 

@@ -135,7 +135,24 @@ class Client(BaseClient):
             start_task = create_cluster_helper.generate_cluster_start_task(self, zip_resource_files, job.docker_repo) #TODO add job.gpu_enabled
 
             # job.application.gpu_enabled = job.gpu_enabled
-            task = submit_helper.generate_task(self, job.application)
+
+            # TODO: 
+            #   create a  task for all applications in job.applications
+            #       1. upload resource fiels and create task: batch_models.TaskAddParameter
+            #       2. searialize(pickle) the tasks (their resource files will already have been uploaded)
+            #           2a. Look at where the resource files are uploaded and possible change location
+            #       3. Add these serialized tasks as resource files for the Job Manager Task
+            #   make a job manager task that:
+            #       1. zips and uploads the serialized tasks it needs to schedule
+            #       2. On node:
+            #           2a. Unzip and deserialize tasks
+            #           2b. create a batch_client
+            #           2c. schedule tasks (which already have their resource files uploaded)
+             
+            tasks = []
+            for application in job.applications:
+                tasks.append(submit_helper.generate_task(self, application))
+
 
             software_metadata_key = "spark"
 

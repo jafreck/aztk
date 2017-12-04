@@ -112,7 +112,7 @@ class Job:
     def __init__(
             self,
             id,
-            application=None,
+            applications=None,
             custom_scripts=None,
             spark_configuration=None,
             vm_size=None,
@@ -123,7 +123,7 @@ class Job:
             do_not_run_after=None,
             start_window=None):
         self.id = id
-        self.application = application
+        self.applications = applications
         self.custom_scripts = custom_scripts
         self.spark_configuration = spark_configuration
         self.vm_size=vm_size
