@@ -54,6 +54,6 @@ if __name__ == "__main__":
     tasks_path = []
     for file in os.listdir(os.environ['AZ_BATCH_TASK_WORKING_DIR']):
         if file.endswith(".yaml"):
-            tasks_path.append(tasks_path)
+            tasks_path.append(file)
 
     schedule_tasks(tasks_path)
