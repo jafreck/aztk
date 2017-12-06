@@ -180,10 +180,41 @@ class Client(BaseClient):
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
 
-
-    def get_job_log(self, job):
+    def list_jobs(self):
         try:
+            return job_submit_helper.list_jobs(self)
+        except batch_error.BatchErrorException as e:
+            raise error.AztkError(helpers.format_batch_exception(e))
+       
+    def list_applicaitons(self, job):
+        try:
+            return job_submit_helper.list_applications(self, job)
+        except batch_error.BatchErrorException as e:
+            raise error.AztkError(helpers.format_batch_exception(e))
+       
+    def get_job(self, job):
+        try:
+            return job_submit_helper.get(self, job)
+        except batch_error.BatchErrorException as e:
+            raise error.AztkError(helpers.format_batch_exception(e))
+    
+    def get_application(self, job, app_id):
+        try:
+            return job_submit_helper.get_application(self, job, app_id)
+        except batch_error.BatchErrorException as e:
+            raise error.AztkError(helpers.format_batch_exception(e))
+
+    def get_app_logs(self, job):
+        try:
+            # time stamp ???
             log_file = aztk_sdk.utils.constants.SPARK_SUBMIT_LOGS_FILE
             return self.blob_client.get_blob_to_text(job.application.name, log_file).content
+        except batch_error.BatchErrorException as e:
+            raise error.AztkError(helpers.format_batch_exception(e))
+
+    def stop_app(self, job, app):
+        try:
+            # stop spark-submit ?, kill task
+            return job_submit_helper.stop_app(self, job, app)
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))

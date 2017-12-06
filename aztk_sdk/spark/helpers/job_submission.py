@@ -42,3 +42,35 @@ def generate_task(spark_client, job, application_tasks):
     )
 
     return task
+
+
+def list_jobs(spark_client):
+    pass
+
+
+def list_applications(spark_client, job):
+    pass
+
+
+def submit(spark_client, job):
+    pass
+
+
+def stop(spark_client, job):
+    pass
+
+
+def delete(spark_client, job):
+    pass
+
+
+def get_app(spark_client, job, app):
+    pass
+
+
+def get_app_logs(spark_client, job):
+    pass
+
+
+def stop_app(spark_client, job, app):
+    pass
