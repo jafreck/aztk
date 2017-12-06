@@ -21,7 +21,12 @@ def schedule_tasks(tasks_path):
     blob_client = config.blob_client
     
     for task_definition in tasks_path:
-        task = yaml.load(task_definition)
+        with open(task_definition, 'r') as stream:
+            try:
+                task = yaml.load(stream)
+            except yaml.YAMLError as exc:
+                print(exc)
+
         print(type(task))
 
         # resource_files = []
@@ -54,6 +59,6 @@ if __name__ == "__main__":
     tasks_path = []
     for file in os.listdir(os.environ['AZ_BATCH_TASK_WORKING_DIR']):
         if file.endswith(".yaml"):
-            tasks_path.append(file)
+            tasks_path.append(os.path.join(os.environ['AZ_BATCH_TASK_WORKING_DIR'], file))
 
     schedule_tasks(tasks_path)

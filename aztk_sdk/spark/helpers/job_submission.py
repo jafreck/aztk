@@ -11,7 +11,7 @@ from aztk_sdk.utils.command_builder import CommandBuilder
 '''
 def __app_cmd():
     # TODO: convert to CommandBuilder
-    return 'sudo docker exec -i -e AZ_BATCH_TASK_WORKING_DIR=$AZ_BATCH_TASK_WORKING_DIR spark /bin/bash >> output.log 2>&1 -c "python \$DOCKER_WORKING_DIR/job_submission.py"'
+    return 'sudo docker exec -i -e AZ_BATCH_TASK_WORKING_DIR=$AZ_BATCH_TASK_WORKING_DIR -e AZ_BATCH_JOB_ID=$AZ_BATCH_JOB_ID spark /bin/bash >> output.log 2>&1 -c "python \$DOCKER_WORKING_DIR/job_submission.py"'
 
 def generate_task(spark_client, job, application_tasks):
     time_stamp = str(datetime.datetime.utcnow()).replace(' ', '_')

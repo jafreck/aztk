@@ -15,7 +15,8 @@ while master is None:
         batch_client = config.batch_client
         pool = batch_client.pool.get(config.pool_id)
         master = get_master_node_id(pool)
-        time.sleep(0.1)
+        time.sleep(1)
     
-    except Exception:
-        time.sleep(0.1)
+    except Exception as e:
+        print(e)
+        time.sleep(1)
