@@ -160,12 +160,12 @@ class Client:
         result = self.batch_client.compute_node.get_remote_login_settings(pool_id, node_id)
         return models.RemoteLogin(ip_address=result.remote_login_ip_address, port=str(result.remote_login_port))
 
-    def __submit_job(self, job, start_task, task, autoscale_formula, software_metadata_key: str, vm_image_model):
+    def __submit_job(self, job, start_task, job_manager_task, autoscale_formula, software_metadata_key: str, vm_image_model):
         """
             Job Submission
             :param job -> aztk_sdk.spark.models.Job
             :param start_task -> batch_models.StartTask
-            :param task -> batch_models.TaskAddParameter
+            :param job_manager_task -> batch_models.TaskAddParameter
             :param autoscale forumula -> str
             :param software_metadata_key: str
             :param vm_image_model -> aztk_sdk.models.VmImage
@@ -182,7 +182,7 @@ class Client:
             auto_pool_id_prefix=job.id,
             keep_alive=True,
             pool=batch_models.PoolSpecification(
-                display_name=job.application.name,
+                display_name=job.id,
                 virtual_machine_configuration=batch_models.VirtualMachineConfiguration(
                     image_reference=image_ref_to_use,
                     node_agent_sku_id=sku_to_use),
@@ -204,7 +204,7 @@ class Client:
             pool_info=batch_models.PoolInformation(auto_pool_specification=auto_pool_specification),
             display_name=job.id,
             on_all_tasks_complete=batch_models.OnAllTasksComplete.terminate_job,
-            job_manager_task=task
+            job_manager_task=job_manager_task
         )
 
         # define schedule

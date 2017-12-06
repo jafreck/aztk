@@ -47,7 +47,7 @@ def upload_file_to_container(container_name, file_path, blob_client=None, use_fu
         container_name,
         blob_name,
         permission=blob.BlobPermissions.READ,
-        expiry=datetime.datetime.utcnow() + datetime.timedelta(hours=2))
+        expiry=datetime.datetime.utcnow() + datetime.timedelta(hours=364))
 
     sas_url = blob_client.make_blob_url(container_name,
                                         blob_name,
@@ -80,9 +80,9 @@ def __app_submit_cmd(
 
     # set file paths to correct path on container
     files_path = os.environ['AZ_BATCH_TASK_WORKING_DIR']
-    jars = [files_path + os.path.basename(jar) for jar in jars]
-    py_files = [files_path + os.path.basename(py_file) for py_file in py_files]
-    files = [files_path + os.path.basename(f) for f in files]
+    jars = [os.path.join(files_path, os.path.basename(jar)) for jar in jars]
+    py_files = [os.path.join(files_path, os.path.basename(py_file)) for py_file in py_files]
+    files = [os.path.join(files_path, os.path.basename(f)) for f in files]
 
     # 2>&1 redirect stdout and stderr to be in the same file
     spark_submit_cmd = CommandBuilder(
@@ -105,6 +105,8 @@ def __app_submit_cmd(
     spark_submit_cmd.add_argument(
         os.environ['AZ_BATCH_TASK_WORKING_DIR'] + '/' + app + ' ' +
         ' '.join(['\'' + app_arg + '\'' for app_arg in app_args if app_args]))
+
+    print("SPARK SUBMIT CMD: ", spark_submit_cmd.to_str())
 
     return spark_submit_cmd
 

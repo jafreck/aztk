@@ -1,6 +1,7 @@
 from typing import List
 import os
 import yaml
+import datetime
 import azure.batch.models as batch_models
 from aztk_sdk.utils import constants, helpers
 from aztk_sdk.utils.command_builder import CommandBuilder
@@ -14,11 +15,15 @@ def __get_node(spark_client, node_id: str, cluster_id: str) -> batch_models.Comp
     return spark_client.batch_client.compute_node.get(cluster_id, node_id)
 
 
-def generate_task(spark_client, application):
+def generate_task(spark_client, container_id, application):
 
     resource_files = []
 
-    app_resource_file = helpers.upload_file_to_container(container_name=application.name,
+    time_stamp = str(datetime.datetime.utcnow()).replace(' ', '_')
+
+    app_resource_file = helpers.upload_file_to_container(container_name=container_id,
+                                                         application_name=application.name,
+                                                         time_stamp=time_stamp,
                                                          file_path=application.application,
                                                          blob_client=spark_client.blob_client,
                                                          use_full_path=False)
@@ -29,7 +34,9 @@ def generate_task(spark_client, application):
     # Upload dependent JARS
     jar_resource_file_paths = []
     for jar in application.jars:
-        current_jar_resource_file_path = helpers.upload_file_to_container(container_name=application.name,
+        current_jar_resource_file_path = helpers.upload_file_to_container(container_name=container_id,
+                                                                          application_name=application.name,
+                                                                          time_stamp=time_stamp,
                                                                           file_path=jar,
                                                                           blob_client=spark_client.blob_client,
                                                                           use_full_path=False)
@@ -39,7 +46,9 @@ def generate_task(spark_client, application):
     # Upload dependent python files
     py_files_resource_file_paths = []
     for py_file in application.py_files:
-        current_py_files_resource_file_path = helpers.upload_file_to_container(container_name=application.name,
+        current_py_files_resource_file_path = helpers.upload_file_to_container(container_name=container_id,
+                                                                               application_name=application.name,
+                                                                               time_stamp=time_stamp,
                                                                                file_path=py_file,
                                                                                blob_client=spark_client.blob_client,
                                                                                use_full_path=False)
@@ -50,10 +59,13 @@ def generate_task(spark_client, application):
     # Upload other dependent files
     files_resource_file_paths = []
     for file in application.files:
-        files_resource_file_path = helpers.upload_file_to_container(container_name=application.name,
+        files_resource_file_path = helpers.upload_file_to_container(container_name=container_id,
+                                                                    application_name=application.name,
+                                                                    time_stamp=time_stamp,
                                                                     file_path=file,
                                                                     blob_client=spark_client.blob_client,
                                                                     use_full_path=False)
+        print(files_resource_file_path.file_path)
         files_resource_file_paths.append(files_resource_file_path)
         resource_files.append(files_resource_file_path)
 
@@ -63,7 +75,9 @@ def generate_task(spark_client, application):
     application.py_files = [os.path.basename(py_files) for py_files in application.py_files]
     application.files = [os.path.basename(files) for files in application.files]
     application_definition_file = helpers.upload_text_to_container(
-        container_name=application.name,
+        container_name=container_id,
+        application_name=application.name,
+        time_stamp=time_stamp,
         file_path='application.yaml',
         content=yaml.dump(vars(application)),
         blob_client=spark_client.blob_client)
@@ -92,7 +106,7 @@ def submit_application(spark_client, cluster_id, application, wait: bool = False
     """
     # cluster = spark_client.get_cluster(cluster_id)
     # application.gpu_enabled = cluster.gpu_enabled
-    task = generate_task(spark_client, application)
+    task = generate_task(spark_client, cluster_id, application)
 
     # Add task to batch job (which has the same name as cluster_id)
     job_id = cluster_id

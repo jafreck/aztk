@@ -7,6 +7,7 @@ from aztk_sdk.spark import models
 from aztk_sdk.utils import helpers
 from aztk_sdk.spark.helpers import create_cluster as create_cluster_helper
 from aztk_sdk.spark.helpers import submit as submit_helper
+from aztk_sdk.spark.helpers import job_submission as job_submit_helper
 from aztk_sdk.spark.helpers import get_log as get_log_helper
 from aztk_sdk.spark.utils import upload_node_scripts, util
 
@@ -20,7 +21,10 @@ class Client(BaseClient):
     '''
     def create_cluster(self, cluster_conf: models.ClusterConfiguration, wait: bool = False):
         try:
-            zip_resource_files = upload_node_scripts.zip_scripts(self.blob_client, cluster_conf.custom_scripts, cluster_conf.spark_configuration)
+            zip_resource_files = upload_node_scripts.zip_scripts(self.blob_client,
+                                                                 cluster_conf.cluster_id,
+                                                                 cluster_conf.custom_scripts,
+                                                                 cluster_conf.spark_configuration)
             start_task = create_cluster_helper.generate_cluster_start_task(self, zip_resource_files, cluster_conf.docker_repo)
 
             software_metadata_key = "spark"
@@ -130,8 +134,7 @@ class Client(BaseClient):
     
     def submit_job(self, job):
         try:
-
-            zip_resource_files = upload_node_scripts.zip_scripts(self.blob_client, job.custom_scripts, job.spark_configuration)
+            zip_resource_files = upload_node_scripts.zip_scripts(self.blob_client, job.id, job.custom_scripts, job.spark_configuration)
             start_task = create_cluster_helper.generate_cluster_start_task(self, zip_resource_files, job.docker_repo) #TODO add job.gpu_enabled
 
             # job.application.gpu_enabled = job.gpu_enabled
@@ -149,9 +152,11 @@ class Client(BaseClient):
             #           2b. create a batch_client
             #           2c. schedule tasks (which already have their resource files uploaded)
              
-            tasks = []
+            application_tasks = []
             for application in job.applications:
-                tasks.append(submit_helper.generate_task(self, application))
+                application_tasks.append((application, submit_helper.generate_task(self, job.id, application)))
+
+            job_manager_task = job_submit_helper.generate_task(self, job, application_tasks)
 
 
             software_metadata_key = "spark"
@@ -167,7 +172,7 @@ class Client(BaseClient):
             job = self.__submit_job(
                 job=job,
                 start_task=start_task,
-                task=task,
+                job_manager_task=job_manager_task,
                 autoscale_formula=autoscale_formula,
                 software_metadata_key=software_metadata_key,
                 vm_image_model=vm_image)
