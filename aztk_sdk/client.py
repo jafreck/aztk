@@ -180,7 +180,7 @@ class Client:
         auto_pool_specification = batch_models.AutoPoolSpecification(
             pool_lifetime_option=batch_models.PoolLifetimeOption.job_schedule,
             auto_pool_id_prefix=job.id,
-            keep_alive=True,
+            keep_alive=False,
             pool=batch_models.PoolSpecification(
                 display_name=job.id,
                 virtual_machine_configuration=batch_models.VirtualMachineConfiguration(

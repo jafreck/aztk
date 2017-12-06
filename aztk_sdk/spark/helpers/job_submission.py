@@ -29,10 +29,12 @@ def generate_task(spark_client, job, application_tasks):
     task_cmd = __app_cmd()
 
     # Create task
-    task = batch_models.TaskAddParameter(
+    task = batch_models.JobManagerTask(
         id=job.id,
         command_line=helpers.wrap_commands_in_shell([task_cmd]),
         resource_files=resource_files,
+        kill_job_on_completion=False, 
+        allow_low_priority_node=True,
         user_identity=batch_models.UserIdentity(
             auto_user=batch_models.AutoUserSpecification(
                 scope=batch_models.AutoUserScope.task,

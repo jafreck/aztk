@@ -7,8 +7,6 @@ master = None
 
 while master is None:
     try:
-        print("running")
-        
         from core import config
         from install.pick_master import get_master_node_id
 
@@ -18,5 +16,4 @@ while master is None:
         time.sleep(1)
     
     except Exception as e:
-        print(e)
         time.sleep(1)

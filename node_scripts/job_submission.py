@@ -27,28 +27,6 @@ def schedule_tasks(tasks_path):
             except yaml.YAMLError as exc:
                 print(exc)
 
-        print(type(task))
-
-        # resource_files = []
-
-        # for resource_file_definition in task['resource_files']:
-        #     resource_files.append(
-        #         batch_modelsresource_file.ResourceFile(
-        #             blob_source=resource_file_definition['blob_source']
-        #             file_path=resource_file_definition['file_path']
-        #         )
-        #     )
-        # # define batch_models.TaskAddParameter
-        # task = batch_models.TaskAddParameter(
-        #     id=task['id'],
-        #     command_line=task['command_line'],
-        #     resource_files=resource_files,
-        #     user_identity=batch_models.UserIdentity(
-        #         auto_user=batch_models.AutoUserSpecification(
-        #             scope=batch_models.AutoUserScope.task,
-        #             elevation_level=batch_models.ElevationLevel.admin))
-        # )
-
         # schedule the task
         batch_client.task.add(job_id=os.environ['AZ_BATCH_JOB_ID'], task=task)
 
