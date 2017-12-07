@@ -117,7 +117,7 @@ def execute(args: typing.NamedTuple):
 
     aztk.client.submit(
         cluster_id=args.cluster_id,
-        application = aztk_sdk.spark.models.AppModel(
+        application = aztk_sdk.spark.models.ApplicationConfiguration(
             name=args.name,
             application=args.app,
             application_args=args.app_args,

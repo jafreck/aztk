@@ -76,7 +76,7 @@ class VmImage(aztk_sdk.models.VmImage):
     pass
 
 
-class AppModel:
+class ApplicationConfiguration:
     def __init__(
             self,
             name=None,
@@ -108,6 +108,36 @@ class AppModel:
         self.driver_cores = driver_cores
         self.executor_cores = executor_cores
 
+class Application:
+    def __init__(self, cloud_task: batch_models.CloudTask):
+        self.name=cloud_task.id
+        self.last_modified=cloud_task.last_modified
+        self.creation_time=cloud_task.creation_time
+        self.state=cloud_task.state
+        self.state_transition_time=cloud_task.state_transition_time
+        self.previous_state=cloud_task.previous_state
+        self.previous_state_transition_time=cloud_task.previous_state_transition_time
+        self.execution_info=cloud_task.execution_info
+        self.node_info=cloud_task.node_info
+        self.multi_instance_settings=cloud_task.multi_instance_settings
+        self.stats=cloud_task.stats
+
+        self._display_name=cloud_task.display_name
+        self._exit_conditions=cloud_task.exit_conditions
+        self._command_line=cloud_task.command_line
+        self._container_settings=cloud_task.container_settings
+        self._resource_files=cloud_task.resource_files
+        self._output_files=cloud_task.output_files
+        self._environment_settings=cloud_task.environment_settings
+        self._affinity_info=cloud_task.affinity_info
+        self._constraints=cloud_task.constraints
+        self._user_identity=cloud_task.user_identity
+        self._depends_on=cloud_task.depends_on
+        self._application_package_references=cloud_task.application_package_references
+        self._authentication_token_settings=cloud_task.authentication_token_settings
+        self._url=cloud_task.url
+        self._e_tag=cloud_task.e_tag
+
 class JobConfiguration:
     def __init__(
             self,
@@ -135,6 +165,15 @@ class JobConfiguration:
         self.do_not_run_after = do_not_run_after
         self.start_window = start_window
 
+class JobState():
+    complete = 'completed'
+    active = "active"
+    completed = "completed"
+    disabled = "disabled"
+    terminating = "terminating"
+    deleting = "deleting"
+
+
 class Job():
     def __init__(self, cloud_job_schedule: batch_models.CloudJobSchedule):
         self.id = cloud_job_schedule.id
@@ -143,6 +182,11 @@ class Job():
         self.creation_time = cloud_job_schedule.creation_time
         self.schedule = cloud_job_schedule.schedule
         self.exection_info = cloud_job_schedule.execution_info
+        if self.state == 'completed':
+            self.next_run_time = cloud_job_schedule.execution_info.next_run_time
+        else:
+            self.next_run_time = None
+        self.recent_run_id = cloud_job_schedule.execution_info.recent_job.id
         self.stats = cloud_job_schedule.stats
     
     def __str__(self):
@@ -153,6 +197,8 @@ class Job():
                          creation_time= self.creation_time,
                          schedule= self.schedule,
                          exection_info= self.exection_info,
+                         next_run_time= self.next_run_time,
+                         recent_run_id= self.recent_run_id,
                          stats= self.stats)
                 )
 

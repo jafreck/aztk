@@ -15,7 +15,12 @@ Submit helper methods
 '''
 
 
-def upload_file_to_container(container_name, file_path, blob_client=None, use_full_path=False, node_path=None) -> batch_models.ResourceFile:
+def upload_file_to_container(container_name,
+                             application_name,
+                             file_path,
+                             blob_client=None,
+                             use_full_path=False,
+                             node_path=None) -> batch_models.ResourceFile:
     """
     Uploads a local file to an Azure Blob storage container.
     :param blob_client: A blob service client.
@@ -27,11 +32,13 @@ def upload_file_to_container(container_name, file_path, blob_client=None, use_fu
     :return: A ResourceFile initialized with a SAS URL appropriate for Batch
     tasks.
     """
+    file_path = file_path
     blob_name = None
     if use_full_path:
         blob_name = file_path.strip("/")
     else:
         blob_name = os.path.basename(file_path)
+        blob_path = application_name + '/' + blob_name
 
     if not node_path:
         node_path = blob_name
@@ -40,17 +47,17 @@ def upload_file_to_container(container_name, file_path, blob_client=None, use_fu
                                  fail_on_exist=False)
 
     blob_client.create_blob_from_path(container_name,
-                                      blob_name,
+                                      blob_path,
                                       file_path)
 
     sas_token = blob_client.generate_blob_shared_access_signature(
         container_name,
-        blob_name,
+        blob_path,
         permission=blob.BlobPermissions.READ,
-        expiry=datetime.datetime.utcnow() + datetime.timedelta(hours=364))
+        expiry=datetime.datetime.utcnow() + datetime.timedelta(days=7))
 
     sas_url = blob_client.make_blob_url(container_name,
-                                        blob_name,
+                                        blob_path,
                                         sas_token=sas_token)
 
     return batch_models.ResourceFile(file_path=node_path,
@@ -126,7 +133,8 @@ def upload_log(blob_client, application):
     '''
     log_file = os.path.join(os.environ['AZ_BATCH_TASK_WORKING_DIR'], os.environ['SPARK_SUBMIT_LOGS_FILE'])
     upload_file_to_container(
-        container_name=application['name'],
+        container_name=os.environ['AZ_BATCH_POOL_ID'],
+        application_name=application['name'],
         file_path=log_file,
         blob_client=blob_client,
         use_full_path=False)

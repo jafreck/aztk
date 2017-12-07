@@ -76,7 +76,7 @@ class Client(BaseClient):
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
 
-    def submit(self, cluster_id: str, application: models.AppModel, wait: bool = False):
+    def submit(self, cluster_id: str, application: models.ApplicationConfiguration, wait: bool = False):
         try:
             submit_helper.submit_application(self, cluster_id, application, wait)
         except batch_error.BatchErrorException as e:
@@ -121,7 +121,7 @@ class Client(BaseClient):
 
     def get_application_log(self, cluster_id: str, application_name: str, tail=False, current_bytes: int = 0):
         try:
-            return get_log_helper.get_log(self.batch_client, cluster_id, application_name, tail, current_bytes)
+            return get_log_helper.get_log(self.batch_client, self.blob_client, cluster_id, application_name, tail, current_bytes)
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
 
@@ -141,19 +141,6 @@ class Client(BaseClient):
             start_task = create_cluster_helper.generate_cluster_start_task(self, zip_resource_files, job_configuration.docker_repo) #TODO add job.gpu_enabled
 
             # job.application.gpu_enabled = job.gpu_enabled
-
-            # TODO: 
-            #   create a  task for all applications in job.applications
-            #       1. upload resource fiels and create task: batch_models.TaskAddParameter
-            #       2. searialize(pickle) the tasks (their resource files will already have been uploaded)
-            #           2a. Look at where the resource files are uploaded and possible change location
-            #       3. Add these serialized tasks as resource files for the Job Manager Task
-            #   make a job manager task that:
-            #       1. zips and uploads the serialized tasks it needs to schedule
-            #       2. On node:
-            #           2a. Unzip and deserialize tasks
-            #           2b. create a batch_client
-            #           2c. schedule tasks (which already have their resource files uploaded)
              
             application_tasks = []
             for application in job_configuration.applications:
@@ -170,10 +157,10 @@ class Client(BaseClient):
                 sku='16.04')
             
             autoscale_formula = "maxNumberofVMs = {0}; targetNumberofVMs = {1}; $TargetDedicatedNodes=min(maxNumberofVMs, targetNumberofVMs)".format(
-                job_configuration.max_dedicated_nodes, job.max_dedicated_nodes)
+                job_configuration.max_dedicated_nodes, job_configuration.max_dedicated_nodes)
 
             job = self.__submit_job(
-                job=job,
+                job_configuration=job_configuration,
                 start_task=start_task,
                 job_manager_task=job_manager_task,
                 autoscale_formula=autoscale_formula,
@@ -185,7 +172,7 @@ class Client(BaseClient):
 
     def list_jobs(self):
         try:
-            return job_submit_helper.list_jobs(self)
+            return [models.Job(cloud_job_schedule) for cloud_job_schedule in self.batch_client.job_schedule.list()]
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
        
@@ -197,27 +184,31 @@ class Client(BaseClient):
        
     def get_job(self, job_id):
         try:
-            return models.Job(job_submit_helper.get(self, job_id))
+            return models.Job(self.batch_client.job_schedule.get(job_id))
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
     
+    def stop_job(self, job_id):
+        try:
+            return job_submit_helper.stop(self, job_id)
+        except batch_error.BatchErrorException as e:
+            raise error.AztkError(helpers.format_batch_exception(e))
+
     def get_application(self, job_id, app_id):
         try:
-            return job_submit_helper.get_application(self, job_id, app_id)
+            return models.Application(job_submit_helper.get_application(self, job_id, app_id))
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
 
-    def get_app_logs(self, job_id):
+    def get_job_application_log(self, job_id, app_id):
         try:
-            # time stamp ???
-            log_file = aztk_sdk.utils.constants.SPARK_SUBMIT_LOGS_FILE
-            return self.blob_client.get_blob_to_text(job_id.application.name, log_file).content
+            return job_submit_helper.get_application_log(self, job_id, app_id)
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
 
-    def stop_app(self, job_id, app_id):
+    def stop_job_app(self, job_id, app_id):
         try:
             # stop spark-submit ?, kill task
-            return job_submit_helper.stop_app(self, job_id, app)
+            return job_submit_helper.stop_app(self, job_id, app_id)
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))

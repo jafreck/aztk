@@ -19,11 +19,8 @@ def generate_task(spark_client, container_id, application):
 
     resource_files = []
 
-    time_stamp = str(datetime.datetime.utcnow()).replace(' ', '_')
-
     app_resource_file = helpers.upload_file_to_container(container_name=container_id,
                                                          application_name=application.name,
-                                                         time_stamp=time_stamp,
                                                          file_path=application.application,
                                                          blob_client=spark_client.blob_client,
                                                          use_full_path=False)
@@ -36,7 +33,6 @@ def generate_task(spark_client, container_id, application):
     for jar in application.jars:
         current_jar_resource_file_path = helpers.upload_file_to_container(container_name=container_id,
                                                                           application_name=application.name,
-                                                                          time_stamp=time_stamp,
                                                                           file_path=jar,
                                                                           blob_client=spark_client.blob_client,
                                                                           use_full_path=False)
@@ -48,7 +44,6 @@ def generate_task(spark_client, container_id, application):
     for py_file in application.py_files:
         current_py_files_resource_file_path = helpers.upload_file_to_container(container_name=container_id,
                                                                                application_name=application.name,
-                                                                               time_stamp=time_stamp,
                                                                                file_path=py_file,
                                                                                blob_client=spark_client.blob_client,
                                                                                use_full_path=False)
@@ -61,7 +56,6 @@ def generate_task(spark_client, container_id, application):
     for file in application.files:
         files_resource_file_path = helpers.upload_file_to_container(container_name=container_id,
                                                                     application_name=application.name,
-                                                                    time_stamp=time_stamp,
                                                                     file_path=file,
                                                                     blob_client=spark_client.blob_client,
                                                                     use_full_path=False)
@@ -77,7 +71,6 @@ def generate_task(spark_client, container_id, application):
     application_definition_file = helpers.upload_text_to_container(
         container_name=container_id,
         application_name=application.name,
-        time_stamp=time_stamp,
         file_path='application.yaml',
         content=yaml.dump(vars(application)),
         blob_client=spark_client.blob_client)

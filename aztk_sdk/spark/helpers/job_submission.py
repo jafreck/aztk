@@ -14,13 +14,11 @@ def __app_cmd():
     return 'sudo docker exec -i -e AZ_BATCH_TASK_WORKING_DIR=$AZ_BATCH_TASK_WORKING_DIR -e AZ_BATCH_JOB_ID=$AZ_BATCH_JOB_ID spark /bin/bash >> output.log 2>&1 -c "python \$DOCKER_WORKING_DIR/job_submission.py"'
 
 def generate_task(spark_client, job, application_tasks):
-    time_stamp = str(datetime.datetime.utcnow()).replace(' ', '_')
     # Upload dependent JARS
     resource_files = []
     for application, task in application_tasks:
         task_definition_resource_file = helpers.upload_text_to_container(container_name=job.id,
                                                                           application_name=application.name + '.yaml',
-                                                                          time_stamp=time_stamp,
                                                                           file_path=application.name + '.yaml',
                                                                           content=yaml.dump(task),
                                                                           blob_client=spark_client.blob_client)
@@ -43,17 +41,16 @@ def generate_task(spark_client, job, application_tasks):
 
     return task
 
-def get(spark_client, job_id):
-    # get information about the AZTK job
-    return spark_client.batch_client.job_schedule.get(job_id)
 
-
-def list_jobs(spark_client):
-    return [job for job in spark_client.batch_client.job_schedule.list()]
-
+def __get_recent_job(spark_client, job_id):
+    job_schedule = spark_client.batch_client.job_schedule.get(job_id)
+    return spark_client.batch_client.job.get(job_schedule.execution_info.recent_job.id)
 
 def list_applications(spark_client, job_id):
-    pass
+    job = spark_client.get_job(job_id)
+
+    # get tasks from Batch job
+    return [application.id for application in spark_client.batch_client.task.list(job.recent_run_id) if application.id != job_id]
 
 
 def submit(spark_client, job_id):
@@ -61,25 +58,40 @@ def submit(spark_client, job_id):
 
 
 def stop(spark_client, job_id):
-    # complete any current running jobs from the job schedule
-    # complete the job_schedule
-    pass
+    # disable the currently running job from the job schedule if exists
+    recent_run_job_id = __get_recent_job(spark_client, job_id)
+    if recent_run_job_id.state == batch_models.JobState.active:
+        spark_client.batch_client.job.disable(job_id=recent_run_job_id, disable_tasks=batch_models.DisableJobOption.requeue)
+
+    # disable the job_schedule
+    spark_client.batch_client.job_schedule.disable(job_id)
 
 
 def delete(spark_client, job_id):
-    pass
+    # terminate currently running job and tasks
+    recent_run_job_id = __get_recent_job(spark_client, job_id)
+    spark_client.batch_client.job.terminate(recent_run_job_id)
+    # terminate job_schedule
+    spark_client.batch_client.job_schedule.terminate(job_id)
 
 
 def get_app(spark_client, job_id, app_id):
     # info about the app
-    pass
+    recent_run_job_id = __get_recent_job(spark_client, job_id)
+    return spark_client.batch_client.task.get(job_id=recent_run_job_id, task_id=app_id)
 
 
-def get_app_logs(spark_client, job_id, app_id):
-    pass
+def get_application_log(spark_client, job_id, app_id):
+    recent_run_job_id = __get_recent_job(spark_client, job_id)
+
+    return spark_client.get_application_log(job_id=recent_run_job_id, app_id=app_id)
 
 
 def stop_app(spark_client, job_id, app_id):
-    # stop spark job on node -- ssh in, stop
+    recent_run_job_id = __get_recent_job(spark_client, job_id)
+    
+    # TODO: stop spark job on node -- ssh in, stop ?
+    
     # stop batch task
-    pass
+    spark_client.batch_client.task.stop(job_id=recent_run_job_id, task_id=app_id)
+    

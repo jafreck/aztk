@@ -67,12 +67,10 @@ def __create_zip():
 
 def __upload(blob_client, cluster_id):
     logging.debug("Uploading node scripts...")
-    time_stamp = str(datetime.datetime.utcnow()).replace(' ', '_')
 
     return helpers.upload_file_to_container(
         container_name=cluster_id,
         application_name="aztk-node-scripts",
-        time_stamp=time_stamp,
         file_path=local_tmp_zipfile,
         blob_client=blob_client,
         use_full_path=False)

@@ -46,14 +46,19 @@ def __get_output_file_properties(batch_client, cluster_id: str, application_name
             else:
                 raise e
 
-def get_log(batch_client, cluster_id: str, application_name: str, tail=False, current_bytes: int = 0):
+
+def get_log_from_storage(blob_client, container_name, application_name):
+    blob_client.get_blob_to_text(container_name, application_name + '/' + constants.SPARK_SUBMIT_LOGS_FILE)
+
+
+def get_log(batch_client, blob_client, cluster_id: str, application_name: str, tail=False, current_bytes: int = 0):
     job_id = cluster_id
     task_id = application_name
 
     task = __wait_for_app_to_be_running(batch_client, cluster_id, application_name)
 
     if not __check_task_node_exist(batch_client, cluster_id, task):
-        raise error.AztkError("The node the app ran on doesn't exist anymore!")
+        get_log_from_storage(blob_client, cluster_id, application_name)
 
     file = __get_output_file_properties(batch_client, cluster_id, application_name)
     target_bytes = file.content_length
