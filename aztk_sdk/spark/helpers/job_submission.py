@@ -43,34 +43,43 @@ def generate_task(spark_client, job, application_tasks):
 
     return task
 
+def get(spark_client, job_id):
+    # get information about the AZTK job
+    return spark_client.batch_client.job_schedule.get(job_id)
+
 
 def list_jobs(spark_client):
+    return [job for job in spark_client.batch_client.job_schedule.list()]
+
+
+def list_applications(spark_client, job_id):
     pass
 
 
-def list_applications(spark_client, job):
+def submit(spark_client, job_id):
     pass
 
 
-def submit(spark_client, job):
+def stop(spark_client, job_id):
+    # complete any current running jobs from the job schedule
+    # complete the job_schedule
     pass
 
 
-def stop(spark_client, job):
+def delete(spark_client, job_id):
     pass
 
 
-def delete(spark_client, job):
+def get_app(spark_client, job_id, app_id):
+    # info about the app
     pass
 
 
-def get_app(spark_client, job, app):
+def get_app_logs(spark_client, job_id, app_id):
     pass
 
 
-def get_app_logs(spark_client, job):
-    pass
-
-
-def stop_app(spark_client, job, app):
+def stop_app(spark_client, job_id, app_id):
+    # stop spark job on node -- ssh in, stop
+    # stop batch task
     pass

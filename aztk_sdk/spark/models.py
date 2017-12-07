@@ -108,7 +108,7 @@ class AppModel:
         self.driver_cores = driver_cores
         self.executor_cores = executor_cores
 
-class Job:
+class JobConfiguration:
     def __init__(
             self,
             id,
@@ -134,6 +134,27 @@ class Job:
         self.do_not_run_until = do_not_run_until
         self.do_not_run_after = do_not_run_after
         self.start_window = start_window
+
+class Job():
+    def __init__(self, cloud_job_schedule: batch_models.CloudJobSchedule):
+        self.id = cloud_job_schedule.id
+        self.last_modified = cloud_job_schedule.last_modified
+        self.state = cloud_job_schedule.state
+        self.creation_time = cloud_job_schedule.creation_time
+        self.schedule = cloud_job_schedule.schedule
+        self.exection_info = cloud_job_schedule.execution_info
+        self.stats = cloud_job_schedule.stats
+    
+    def __str__(self):
+        return str(
+                    dict(id= self.id,
+                         last_modified= self.last_modified,
+                         state= self.state,
+                         creation_time= self.creation_time,
+                         schedule= self.schedule,
+                         exection_info= self.exection_info,
+                         stats= self.stats)
+                )
 
 
 class AppLogsModel():

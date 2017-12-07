@@ -132,10 +132,13 @@ class Client(BaseClient):
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
     
-    def submit_job(self, job):
+    '''
+        job submission
+    '''
+    def submit_job(self, job_configuration):
         try:
-            zip_resource_files = upload_node_scripts.zip_scripts(self.blob_client, job.id, job.custom_scripts, job.spark_configuration)
-            start_task = create_cluster_helper.generate_cluster_start_task(self, zip_resource_files, job.docker_repo) #TODO add job.gpu_enabled
+            zip_resource_files = upload_node_scripts.zip_scripts(self.blob_client, job_configuration.id, job_configuration.custom_scripts, job_configuration.spark_configuration)
+            start_task = create_cluster_helper.generate_cluster_start_task(self, zip_resource_files, job_configuration.docker_repo) #TODO add job.gpu_enabled
 
             # job.application.gpu_enabled = job.gpu_enabled
 
@@ -153,10 +156,10 @@ class Client(BaseClient):
             #           2c. schedule tasks (which already have their resource files uploaded)
              
             application_tasks = []
-            for application in job.applications:
-                application_tasks.append((application, submit_helper.generate_task(self, job.id, application)))
+            for application in job_configuration.applications:
+                application_tasks.append((application, submit_helper.generate_task(self, job_configuration.id, application)))
 
-            job_manager_task = job_submit_helper.generate_task(self, job, application_tasks)
+            job_manager_task = job_submit_helper.generate_task(self, job_configuration, application_tasks)
 
 
             software_metadata_key = "spark"
@@ -167,7 +170,7 @@ class Client(BaseClient):
                 sku='16.04')
             
             autoscale_formula = "maxNumberofVMs = {0}; targetNumberofVMs = {1}; $TargetDedicatedNodes=min(maxNumberofVMs, targetNumberofVMs)".format(
-                job.max_dedicated_nodes, job.max_dedicated_nodes)
+                job_configuration.max_dedicated_nodes, job.max_dedicated_nodes)
 
             job = self.__submit_job(
                 job=job,
@@ -186,35 +189,35 @@ class Client(BaseClient):
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
        
-    def list_applicaitons(self, job):
+    def list_applicaitons(self, job_id):
         try:
-            return job_submit_helper.list_applications(self, job)
+            return job_submit_helper.list_applications(self, job_id)
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
        
-    def get_job(self, job):
+    def get_job(self, job_id):
         try:
-            return job_submit_helper.get(self, job)
+            return models.Job(job_submit_helper.get(self, job_id))
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
     
-    def get_application(self, job, app_id):
+    def get_application(self, job_id, app_id):
         try:
-            return job_submit_helper.get_application(self, job, app_id)
+            return job_submit_helper.get_application(self, job_id, app_id)
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
 
-    def get_app_logs(self, job):
+    def get_app_logs(self, job_id):
         try:
             # time stamp ???
             log_file = aztk_sdk.utils.constants.SPARK_SUBMIT_LOGS_FILE
-            return self.blob_client.get_blob_to_text(job.application.name, log_file).content
+            return self.blob_client.get_blob_to_text(job_id.application.name, log_file).content
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
 
-    def stop_app(self, job, app):
+    def stop_app(self, job_id, app_id):
         try:
             # stop spark-submit ?, kill task
-            return job_submit_helper.stop_app(self, job, app)
+            return job_submit_helper.stop_app(self, job_id, app)
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))

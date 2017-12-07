@@ -160,10 +160,10 @@ class Client:
         result = self.batch_client.compute_node.get_remote_login_settings(pool_id, node_id)
         return models.RemoteLogin(ip_address=result.remote_login_ip_address, port=str(result.remote_login_port))
 
-    def __submit_job(self, job, start_task, job_manager_task, autoscale_formula, software_metadata_key: str, vm_image_model):
+    def __submit_job(self, job_configuration, start_task, job_manager_task, autoscale_formula, software_metadata_key: str, vm_image_model):
         """
             Job Submission
-            :param job -> aztk_sdk.spark.models.Job
+            :param job_configuration -> aztk_sdk.spark.models.JobConfiguration
             :param start_task -> batch_models.StartTask
             :param job_manager_task -> batch_models.TaskAddParameter
             :param autoscale forumula -> str
@@ -179,14 +179,14 @@ class Client:
         # set up a schedule for a recurring job
         auto_pool_specification = batch_models.AutoPoolSpecification(
             pool_lifetime_option=batch_models.PoolLifetimeOption.job_schedule,
-            auto_pool_id_prefix=job.id,
+            auto_pool_id_prefix=job_configuration.id,
             keep_alive=False,
             pool=batch_models.PoolSpecification(
-                display_name=job.id,
+                display_name=job_configuration.id,
                 virtual_machine_configuration=batch_models.VirtualMachineConfiguration(
                     image_reference=image_ref_to_use,
                     node_agent_sku_id=sku_to_use),
-                vm_size=job.vm_size,
+                vm_size=job_configuration.vm_size,
                 enable_auto_scale=True,
                 auto_scale_formula=autoscale_formula,
                 start_task=start_task,
@@ -202,26 +202,28 @@ class Client:
         # define job specification
         job_spec = batch_models.JobSpecification(
             pool_info=batch_models.PoolInformation(auto_pool_specification=auto_pool_specification),
-            display_name=job.id,
+            display_name=job_configuration.id,
             on_all_tasks_complete=batch_models.OnAllTasksComplete.terminate_job,
             job_manager_task=job_manager_task
         )
 
         # define schedule
         schedule = batch_models.Schedule(
-            do_not_run_until=job.do_not_run_until,
-            do_not_run_after=job.do_not_run_after,
-            start_window=job.start_window,
-            recurrence_interval=job.recurrence_interval
+            do_not_run_until=job_configuration.do_not_run_until,
+            do_not_run_after=job_configuration.do_not_run_after,
+            start_window=job_configuration.start_window,
+            recurrence_interval=job_configuration.recurrence_interval
         )
 
         # create job schedule and add task
         setup = batch_models.JobScheduleAddParameter(
-            id=job.id,
+            id=job_configuration.id,
             schedule=schedule,
             job_specification=job_spec)
         
         self.batch_client.job_schedule.add(setup)
+
+        return self.batch_client.job_schedule.get(id=job_configuration.id)
 
 
 
