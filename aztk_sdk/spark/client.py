@@ -194,6 +194,24 @@ class Client(BaseClient):
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
 
+    # def enable_job(self, job_id):
+    #     try:
+    #         return job_submit_helper.enable(self, job_id)
+    #     except batch_error.BatchErrorException as e:
+    #         raise error.AztkError(helpers.format_batch_exception(e))
+
+    # def disable_job(self, job_id):
+    #     try:
+    #         return job_submit_helper.disable(self, job_id)
+    #     except batch_error.BatchErrorException as e:
+    #         raise error.AztkError(helpers.format_batch_exception(e))
+
+    def delete_job(self, job_id):
+        try:
+            return job_submit_helper.delete(self, job_id)
+        except batch_error.BatchErrorException as e:
+            raise error.AztkError(helpers.format_batch_exception(e))
+
     def get_application(self, job_id, app_id):
         try:
             return models.Application(job_submit_helper.get_application(self, job_id, app_id))

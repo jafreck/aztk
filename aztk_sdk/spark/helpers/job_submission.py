@@ -46,6 +46,7 @@ def __get_recent_job(spark_client, job_id):
     job_schedule = spark_client.batch_client.job_schedule.get(job_id)
     return spark_client.batch_client.job.get(job_schedule.execution_info.recent_job.id)
 
+
 def list_applications(spark_client, job_id):
     job = spark_client.get_job(job_id)
 
@@ -53,45 +54,58 @@ def list_applications(spark_client, job_id):
     return [application.id for application in spark_client.batch_client.task.list(job.recent_run_id) if application.id != job_id]
 
 
-def submit(spark_client, job_id):
-    pass
+# def disable(spark_client, job_id):
+#     # disable the currently running job from the job schedule if exists
+#     recent_run_job = __get_recent_job(spark_client, job_id)
+#     if recent_run_job.id and recent_run_job.state == batch_models.JobState.active:
+#         spark_client.batch_client.job.disable(job_id=recent_run_job.id, disable_tasks=batch_models.DisableJobOption.requeue)
+   
+#     # disable the job_schedule
+#     spark_client.batch_client.job_schedule.disable(job_id)
+
+
+# def enable(spark_client, job_id):
+#     # disable the currently running job from the job schedule if exists
+#     recent_run_job = __get_recent_job(spark_client, job_id)
+#     if recent_run_job.id and recent_run_job.state == batch_models.JobState.active:
+#         spark_client.batch_client.job.enable(job_id=recent_run_job.id)
+   
+#     # disable the job_schedule
+#     spark_client.batch_client.job_schedule.enable(job_id)
 
 
 def stop(spark_client, job_id):
-    # disable the currently running job from the job schedule if exists
-    recent_run_job_id = __get_recent_job(spark_client, job_id)
-    if recent_run_job_id.state == batch_models.JobState.active:
-        spark_client.batch_client.job.disable(job_id=recent_run_job_id, disable_tasks=batch_models.DisableJobOption.requeue)
-
-    # disable the job_schedule
-    spark_client.batch_client.job_schedule.disable(job_id)
-
-
-def delete(spark_client, job_id):
     # terminate currently running job and tasks
-    recent_run_job_id = __get_recent_job(spark_client, job_id)
-    spark_client.batch_client.job.terminate(recent_run_job_id)
+    recent_run_job = __get_recent_job(spark_client, job_id)
+    spark_client.batch_client.job.terminate(recent_run_job.id)
     # terminate job_schedule
     spark_client.batch_client.job_schedule.terminate(job_id)
 
 
+def delete(spark_client, job_id):
+    recent_run_job = __get_recent_job(spark_client, job_id)
+    spark_client.batch_client.job.terminate(recent_run_job.id)
+
+    # delete job_schedule
+    spark_client.batch_client.job_schedule.delete(job_id)
+
+
 def get_app(spark_client, job_id, app_id):
     # info about the app
-    recent_run_job_id = __get_recent_job(spark_client, job_id)
-    return spark_client.batch_client.task.get(job_id=recent_run_job_id, task_id=app_id)
+    recent_run_job = __get_recent_job(spark_client, job_id)
+    return spark_client.batch_client.task.get(job_id=recent_run_job.id, task_id=app_id)
 
 
 def get_application_log(spark_client, job_id, app_id):
-    recent_run_job_id = __get_recent_job(spark_client, job_id)
+    recent_run_job = __get_recent_job(spark_client, job_id)
 
-    return spark_client.get_application_log(job_id=recent_run_job_id, app_id=app_id)
+    return spark_client.get_application_log(job_id=recent_run_job.id, app_id=app_id)
 
 
 def stop_app(spark_client, job_id, app_id):
-    recent_run_job_id = __get_recent_job(spark_client, job_id)
-    
+    recent_run_job = __get_recent_job(spark_client, job_id)
+
     # TODO: stop spark job on node -- ssh in, stop ?
-    
+
     # stop batch task
-    spark_client.batch_client.task.stop(job_id=recent_run_job_id, task_id=app_id)
-    
+    spark_client.batch_client.task.stop(job_id=recent_run_job.id, task_id=app_id)

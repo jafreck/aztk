@@ -223,7 +223,7 @@ class Client:
         
         self.batch_client.job_schedule.add(setup)
 
-        return self.batch_client.job_schedule.get(id=job_configuration.id)
+        return self.batch_client.job_schedule.get(job_schedule_id=job_configuration.id)
 
 
 
