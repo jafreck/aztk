@@ -137,6 +137,8 @@ class Client(BaseClient):
     '''
     def submit_job(self, job_configuration):
         try:
+            for application in job_configuration.applications:
+                print("submit_job:", job_configuration.id, ":", application.name, ":", application.application)
             zip_resource_files = upload_node_scripts.zip_scripts(self.blob_client, job_configuration.id, job_configuration.custom_scripts, job_configuration.spark_configuration)
             start_task = create_cluster_helper.generate_cluster_start_task(self, zip_resource_files, job_configuration.docker_repo) #TODO add job.gpu_enabled
 
@@ -230,3 +232,13 @@ class Client(BaseClient):
             return job_submit_helper.stop_app(self, job_id, app_id)
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
+
+    def wait_until_job_finished(self, job_id):
+        try:
+            job_submit_helper.wait_until_job_finished(self, job_id)
+        except batch_error.BatchErrorException as e:
+            raise error.AztkError(helpers.format_batch_exception(e))
+
+    def wait_until_all_jobs_finished(self, jobs):
+        for job in jobs:
+            self.wait_until_job_finished(job)

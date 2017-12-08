@@ -2,6 +2,7 @@ from typing import List
 import os
 import yaml
 import datetime
+import time
 import azure.batch.models as batch_models
 from aztk_sdk.utils import constants, helpers
 from aztk_sdk.utils.command_builder import CommandBuilder
@@ -109,3 +110,10 @@ def stop_app(spark_client, job_id, app_id):
 
     # stop batch task
     spark_client.batch_client.task.stop(job_id=recent_run_job.id, task_id=app_id)
+
+def wait_until_job_done(spark_client, job_id):
+    job_state = spark_client.batch_client.job_schedule.get(job_id).state
+
+    while job_state != batch_models.JobScheduleState.completed:
+        time.sleep(3)
+        job_state = spark_client.batch_client.job_schedule.get(job_id).state
