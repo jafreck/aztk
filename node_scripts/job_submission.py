@@ -10,8 +10,6 @@ from command_builder import CommandBuilder
 from core import config
 
 
-
-
 def schedule_tasks(tasks_path):
 
     '''
