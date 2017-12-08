@@ -91,16 +91,20 @@ def delete(spark_client, job_id):
     spark_client.batch_client.job_schedule.delete(job_id)
 
 
-def get_app(spark_client, job_id, app_id):
+def get_application(spark_client, job_id, app_id):
     # info about the app
     recent_run_job = __get_recent_job(spark_client, job_id)
     return spark_client.batch_client.task.get(job_id=recent_run_job.id, task_id=app_id)
 
 
 def get_application_log(spark_client, job_id, app_id):
-    recent_run_job = __get_recent_job(spark_client, job_id)
+    # TODO: change where the logs are uploaded so they aren't overwritten on scheduled runs
+    #           current: job_id, app_id/output.log
+    #           new: job_id, recent_run_job.id/app_id/output.log
 
-    return spark_client.get_application_log(job_id=recent_run_job.id, app_id=app_id)
+    # recent_run_job = __get_recent_job(spark_client, job_id)
+    # return spark_client.get_application_log(recent_run_job.id.replace(":", "-"), app_id)
+    return spark_client.get_application_log(job_id, app_id)
 
 
 def stop_app(spark_client, job_id, app_id):
@@ -111,7 +115,7 @@ def stop_app(spark_client, job_id, app_id):
     # stop batch task
     spark_client.batch_client.task.stop(job_id=recent_run_job.id, task_id=app_id)
 
-def wait_until_job_done(spark_client, job_id):
+def wait_until_job_finished(spark_client, job_id):
     job_state = spark_client.batch_client.job_schedule.get(job_id).state
 
     while job_state != batch_models.JobScheduleState.completed:

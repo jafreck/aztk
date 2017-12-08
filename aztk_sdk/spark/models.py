@@ -125,7 +125,7 @@ class Application:
         self._display_name=cloud_task.display_name
         self._exit_conditions=cloud_task.exit_conditions
         self._command_line=cloud_task.command_line
-        self._container_settings=cloud_task.container_settings
+        # self._container_settings=cloud_task.container_settings
         self._resource_files=cloud_task.resource_files
         self._output_files=cloud_task.output_files
         self._environment_settings=cloud_task.environment_settings

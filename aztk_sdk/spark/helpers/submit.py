@@ -77,7 +77,8 @@ def generate_task(spark_client, container_id, application):
     resource_files.append(application_definition_file)
 
     # create command to submit task
-    task_cmd = 'sudo docker exec -i -e AZ_BATCH_TASK_WORKING_DIR=$AZ_BATCH_TASK_WORKING_DIR spark /bin/bash >> output.log 2>&1 -c "python \$DOCKER_WORKING_DIR/submit.py"'
+    # TODO: convert to CommandBuliders
+    task_cmd = 'sudo docker exec -i -e AZ_BATCH_TASK_WORKING_DIR=$AZ_BATCH_TASK_WORKING_DIR -e STORAGE_LOGS_CONTAINER={} spark /bin/bash >> output.log 2>&1 -c "python \$DOCKER_WORKING_DIR/submit.py"'.format(container_id)
 
     # Create task
     task = batch_models.TaskAddParameter(

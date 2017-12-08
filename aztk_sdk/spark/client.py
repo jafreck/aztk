@@ -137,8 +137,6 @@ class Client(BaseClient):
     '''
     def submit_job(self, job_configuration):
         try:
-            for application in job_configuration.applications:
-                print("submit_job:", job_configuration.id, ":", application.name, ":", application.application)
             zip_resource_files = upload_node_scripts.zip_scripts(self.blob_client, job_configuration.id, job_configuration.custom_scripts, job_configuration.spark_configuration)
             start_task = create_cluster_helper.generate_cluster_start_task(self, zip_resource_files, job_configuration.docker_repo) #TODO add job.gpu_enabled
 

@@ -133,7 +133,7 @@ def upload_log(blob_client, application):
     '''
     log_file = os.path.join(os.environ['AZ_BATCH_TASK_WORKING_DIR'], os.environ['SPARK_SUBMIT_LOGS_FILE'])
     upload_file_to_container(
-        container_name=os.environ['AZ_BATCH_POOL_ID'],
+        container_name=os.environ['STORAGE_LOGS_CONTAINER'],
         application_name=application['name'],
         file_path=log_file,
         blob_client=blob_client,
