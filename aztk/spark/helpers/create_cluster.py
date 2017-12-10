@@ -89,6 +89,8 @@ def __cluster_install_cmd(zip_resource_file: batch_models.ResourceFile,
     default_docker_repo = constants.DEFAULT_DOCKER_REPO if not gpu_enabled else constants.DEFAULT_DOCKER_REPO_GPU
     docker_repo = docker_repo or default_docker_repo
 
+    helpers.validate_docker_repo(docker_repo)
+
     shares = []
 
     if file_mounts:

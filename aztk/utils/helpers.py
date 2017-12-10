@@ -3,6 +3,7 @@ import datetime
 import io
 import os
 import time
+import requests
 import re
 import azure.batch.batch_service_client as batch
 import azure.batch.batch_auth as batch_auth
@@ -26,6 +27,11 @@ def get_cluster(cluster_id, batch_client):
 
     return aztk.models.Cluster(pool, nodes)
 
+def validate_docker_repo(docker_repo):
+    repository, tag = docker_repo.split(":")
+    response = requests.get("https://index.docker.io/v1/repositories/{0}/tags/{1}".format(repository, tag))
+    if response.status_code == 404:
+        raise error.AztkError("Did not find Docker image: {0} \nPlease verify the specified Docker image exists.".format(docker_repo))
 
 def wait_for_tasks_to_complete(job_id, batch_client):
     """
