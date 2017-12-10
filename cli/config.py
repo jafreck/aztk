@@ -66,7 +66,7 @@ class SecretsConfig:
 
     def load(self):
         # read global ~/secrets.yaml
-        self._load_secrets_config(os.path.join(aztk.utils.constants.HOME_DIRECTORY_PATH, '.aztk', 'ssh.yaml'))
+        self._load_secrets_config(os.path.join(aztk.utils.constants.HOME_DIRECTORY_PATH, '.aztk', 'secrets.yaml'))
         # read current working directory secrets.yaml
         self._load_secrets_config()
 
