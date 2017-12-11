@@ -1,3 +1,5 @@
+import threading
+import sys
 import getpass
 import time
 from typing import List
@@ -219,3 +221,33 @@ def print_batch_exception(batch_exception):
             for mesg in batch_exception.error.values:
                 log.error("%s:\t%s", mesg.key, mesg.value)
     log.error("-------------------------------------------")
+
+
+class Spinner:
+    busy = False
+    delay = 0.1
+
+    @staticmethod
+    def spinning_cursor():
+        while 1: 
+            for cursor in '|/-\\': yield cursor
+
+    def __init__(self, delay=None):
+        self.spinner_generator = self.spinning_cursor()
+        if delay and float(delay): self.delay = delay
+
+    def spinner_task(self):
+        while self.busy:
+            sys.stdout.write(next(self.spinner_generator))
+            sys.stdout.flush()
+            time.sleep(self.delay)
+            sys.stdout.write('\b')
+            sys.stdout.flush()
+
+    def start(self):
+        self.busy = True
+        threading.Thread(target=self.spinner_task, daemon=True).start()
+
+    def stop(self):
+        self.busy = False
+        time.sleep(self.delay)
