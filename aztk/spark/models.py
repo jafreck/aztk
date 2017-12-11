@@ -1,0 +1,229 @@
+from Crypto.PublicKey import RSA
+from typing import List
+import aztk.models
+from aztk.utils import constants, helpers
+import azure.batch.models as batch_models
+
+
+class Cluster(aztk.models.Cluster):
+    def __init__(self, pool: batch_models.CloudPool, nodes: batch_models.ComputeNodePaged = None):
+        super().__init__(pool, nodes)
+        self.master_node_id = self.__get_master_node_id()
+        self.gpu_enabled = helpers.is_gpu_enabled(pool.vm_size)
+
+
+    def is_pool_running_spark(self, pool: batch_models.CloudPool):
+        if pool.metadata is None:
+            return False
+
+        for metadata in pool.metadata:
+            if metadata.name == constants.AZTK_SOFTWARE_METADATA_KEY:
+                return metadata.value == aztk.models.Software.spark
+
+        return False
+
+    def __get_master_node_id(self):
+        """
+            :returns: the id of the node that is the assigned master of this pool
+        """
+        if self.pool.metadata is None:
+            return None
+
+        for metadata in self.pool.metadata:
+            if metadata.name == constants.MASTER_NODE_METADATA_KEY:
+                return metadata.value
+
+        return None
+
+class RemoteLogin(aztk.models.RemoteLogin):
+    pass
+
+
+class SparkConfiguration():
+    def __init__(self, spark_defaults_conf: str = None, spark_env_sh: str = None, core_site_xml: str = None, jars: List[str]=None):
+        self.spark_defaults_conf = spark_defaults_conf
+        self.spark_env_sh = spark_env_sh
+        self.core_site_xml = core_site_xml
+        self.jars = jars
+        self.ssh_key_pair = self.__generate_ssh_key_pair()
+
+    def __generate_ssh_key_pair(self):
+        key = RSA.generate(2048)
+        priv_key = key.exportKey('PEM')
+        pub_key = key.publickey().exportKey('OpenSSH')
+        return {'pub_key': pub_key, 'priv_key': priv_key}
+
+
+class CustomScript(aztk.models.CustomScript):
+    pass
+
+
+class FileShare(aztk.models.FileShare):
+    pass
+
+
+class ClusterConfiguration(aztk.models.ClusterConfiguration):
+    def __init__(
+            self,
+            custom_scripts: List[CustomScript] = None,
+            file_shares: List[FileShare] = None,
+            cluster_id: str = None,
+            vm_count=None,
+            vm_low_pri_count=None,
+            vm_size=None,
+            docker_repo: str=None,
+            spark_configuration: SparkConfiguration = None):
+        super().__init__(custom_scripts=custom_scripts,
+              cluster_id=cluster_id,
+              vm_count=vm_count,
+              vm_low_pri_count=vm_low_pri_count,
+              vm_size=vm_size,
+              docker_repo=docker_repo,
+              file_shares=file_shares
+        )
+        self.spark_configuration = spark_configuration
+        self.gpu_enabled = helpers.is_gpu_enabled(vm_size)
+
+
+class SecretsConfiguration(aztk.models.SecretsConfiguration):
+    pass
+
+
+class VmImage(aztk.models.VmImage):
+    pass
+
+
+class ApplicationConfiguration:
+    def __init__(
+            self,
+            name=None,
+            application=None,
+            application_args=None,
+            main_class=None,
+            jars=[],
+            py_files=[],
+            files=[],
+            driver_java_options=None,
+            driver_library_path=None,
+            driver_class_path=None,
+            driver_memory=None,
+            executor_memory=None,
+            driver_cores=None,
+            executor_cores=None):
+        self.name = name
+        self.application = application
+        self.application_args = application_args
+        self.main_class = main_class
+        self.jars = jars
+        self.py_files = py_files
+        self.files = files
+        self.driver_java_options = driver_java_options
+        self.driver_library_path = driver_library_path
+        self.driver_class_path = driver_class_path
+        self.driver_memory = driver_memory
+        self.executor_memory = executor_memory
+        self.driver_cores = driver_cores
+        self.executor_cores = executor_cores
+
+class Application:
+    def __init__(self, cloud_task: batch_models.CloudTask):
+        self.name=cloud_task.id
+        self.last_modified=cloud_task.last_modified
+        self.creation_time=cloud_task.creation_time
+        self.state=cloud_task.state
+        self.state_transition_time=cloud_task.state_transition_time
+        self.previous_state=cloud_task.previous_state
+        self.previous_state_transition_time=cloud_task.previous_state_transition_time
+        self.execution_info=cloud_task.execution_info
+        self.node_info=cloud_task.node_info
+        self.multi_instance_settings=cloud_task.multi_instance_settings
+        self.stats=cloud_task.stats
+
+        self._display_name=cloud_task.display_name
+        self._exit_conditions=cloud_task.exit_conditions
+        self._command_line=cloud_task.command_line
+        # self._container_settings=cloud_task.container_settings
+        self._resource_files=cloud_task.resource_files
+        self._output_files=cloud_task.output_files
+        self._environment_settings=cloud_task.environment_settings
+        self._affinity_info=cloud_task.affinity_info
+        self._constraints=cloud_task.constraints
+        self._user_identity=cloud_task.user_identity
+        self._depends_on=cloud_task.depends_on
+        self._application_package_references=cloud_task.application_package_references
+        self._authentication_token_settings=cloud_task.authentication_token_settings
+        self._url=cloud_task.url
+        self._e_tag=cloud_task.e_tag
+
+class JobConfiguration:
+    def __init__(
+            self,
+            id,
+            applications=None,
+            custom_scripts=None,
+            spark_configuration=None,
+            vm_size=None,
+            docker_repo=None,
+            max_dedicated_nodes=None,
+            recurrence_interval=None,
+            do_not_run_until=None,
+            do_not_run_after=None,
+            start_window=None):
+        self.id = id
+        self.applications = applications
+        self.custom_scripts = custom_scripts
+        self.spark_configuration = spark_configuration
+        self.vm_size=vm_size
+        # self.gpu_enabled = helpers.is_gpu_enabled(vm_size)
+        self.docker_repo = docker_repo
+        self.max_dedicated_nodes = max_dedicated_nodes
+        self.recurrence_interval = recurrence_interval
+        self.do_not_run_until = do_not_run_until
+        self.do_not_run_after = do_not_run_after
+        self.start_window = start_window
+
+class JobState():
+    complete = 'completed'
+    active = "active"
+    completed = "completed"
+    disabled = "disabled"
+    terminating = "terminating"
+    deleting = "deleting"
+
+
+class Job():
+    def __init__(self, cloud_job_schedule: batch_models.CloudJobSchedule):
+        self.id = cloud_job_schedule.id
+        self.last_modified = cloud_job_schedule.last_modified
+        self.state = cloud_job_schedule.state
+        self.creation_time = cloud_job_schedule.creation_time
+        self.schedule = cloud_job_schedule.schedule
+        self.exection_info = cloud_job_schedule.execution_info
+        if self.state == 'completed':
+            self.next_run_time = cloud_job_schedule.execution_info.next_run_time
+        else:
+            self.next_run_time = None
+        self.recent_run_id = cloud_job_schedule.execution_info.recent_job.id
+        self.stats = cloud_job_schedule.stats
+    
+    def __str__(self):
+        return str(
+                    dict(id= self.id,
+                         last_modified= self.last_modified,
+                         state= self.state,
+                         creation_time= self.creation_time,
+                         schedule= self.schedule,
+                         exection_info= self.exection_info,
+                         next_run_time= self.next_run_time,
+                         recent_run_id= self.recent_run_id,
+                         stats= self.stats)
+                )
+
+
+class ApplicationLog():
+    def __init__(self, name: str, cluster_id: str, log: str, total_bytes: int, application_state: batch_models.TaskState):
+        self.name = name
+        self.cluster_id = cluster_id
+        self.log = log
+        self.total_bytes = total_bytes
+        self.application_state = application_state

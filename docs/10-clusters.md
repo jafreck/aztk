@@ -1,10 +1,10 @@
 # Clusters
-In the Azure Distributed Data Engineering Toolkit, a cluster is primarily designed to run Spark jobs. This document describes how to create a cluster to use for Spark jobs. Alternitavely for getting started and debugging you can also use the cluster in _interactive mode_ which will allow you to log into the master node, use Jupyter and view the Spark UI.
+In the Azure Distributed Data Engineering Toolkit, a cluster is primarily designed to run Spark jobs. This document describes how to create a cluster to use for Spark jobs. Alternitavely for getting started and debugging you can also use the cluster in _interactive mode_ which will allow you to log into the master node and interact with the cluster from there.
 
 ## Creating a Cluster
 Creating a Spark cluster only takes a few simple steps after which you will be able to SSH into the master node of the cluster and interact with Spark. You will be able to view the Spark Web UI, Spark Jobs UI, submit Spark jobs (with *spark-submit*), and even interact with Spark in a Jupyter notebook.
 
-For the advanced user, please note that the default cluster settings are preconfigured in the *.aztk/cluster.yaml* file that is generated when you run `aztk spark init`. More information on cluster config [here.](../13-configuration.md)
+For the advanced user, please note that the default cluster settings are preconfigured in the *.aztk/cluster.yaml* file that is generated when you run `aztk spark init`. More information on cluster config [here.](./13-configuration.md)
 
 ### Commands
 Create a Spark cluster:
@@ -115,12 +115,7 @@ cd $SPARK_HOME
 ```
 
 ### Interact with your Spark cluster
-By default, the `aztk spark cluster ssh` command port forwards the Spark Web UI to *localhost:8080*, Spark Jobs UI to *localhost:4040*, and Spark History Server to your *locahost:18080*. This can be [configured in *.aztb/ssh.yaml*](../docs/13-configuration.md##sshyaml).
-
-### Jupyter
-Once the appropriate ports have been forwarded, simply navigate to the local ports for viewing. In this case, if you used port 8888 (the default) for Jupyter then navigate to [http://localhost:8888.](http://localhost:8888)
-
-__The notebooks will only be persisted to the local cluster.__ Once the cluster is deleted, all notebooks will be deleted with them. We recommend saving the notebooks elsewhere if you do not want them deleted.
+By default, the `aztk spark cluster ssh` command port forwards the Spark Web UI to *localhost:8080*, Spark Jobs UI to *localhost:4040*, and Spark History Server to your *locahost:18080*. This can be [configured in *.aztk/ssh.yaml*](../docs/13-configuration.md##sshyaml).
 
 ## Next Steps
 - [Run a Spark job](./20-spark-submit.md)

@@ -2,12 +2,13 @@
 
 # Entry point for the start task. It will install all dependencies and start docker.
 # Usage:
-# setup_node.sh [container_name] [docker_repo] [docker_cmd]
+# setup_node.sh [container_name] [gpu_enabled] [docker_repo] [docker_cmd]
 
 
 container_name=$1
-repo_name=$2
-docker_run_cmd=$3
+gpu_enabled=$2
+repo_name=$3
+docker_run_cmd=$4
 
 apt-get -y install linux-image-extra-$(uname -r) linux-image-extra-virtual
 apt-get -y install apt-transport-https
@@ -21,6 +22,16 @@ add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(
 apt-get -y update
 apt-get -y install docker-ce
 
+if [ $gpu_enabled == "True" ]; then
+    echo "running nvidia install"
+    sudo apt-get -y install nvidia-384
+    sudo apt-get -y install nvidia-modprobe
+
+    wget -P /tmp https://github.com/NVIDIA/nvidia-docker/releases/download/v1.0.1/nvidia-docker_1.0.1-1_amd64.deb
+    sudo dpkg -i /tmp/nvidia-docker*.deb && rm /tmp/nvidia-docker*.deb
+    echo "nvidia install complete"
+fi
+
 if [ -z "$DOCKER_USERNAME" ]; then
     echo "No Credentials provided. No need to login to dockerhub $DOCKER_USERNAME $DOCKER_PASSWORD"
 else
@@ -30,10 +41,10 @@ fi
 
 if [ -z "$DOCKER_ENDPOINT" ]; then
     echo "Pulling $repo_name from dockerhub"
-    docker pull $repo_name
+    (time docker pull $repo_name) 2>&1
 else
     echo "Pulling $container_name from $DOCKER_ENDPOINT"
-    docker pull $DOCKER_ENDPOINT/$repo_name
+    (time docker pull $DOCKER_ENDPOINT/$repo_name) 2>&1
 fi
 
 # Unzip resource files and set permissions
