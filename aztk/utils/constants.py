@@ -10,6 +10,7 @@ DOCKER_SPARK_CONTAINER_NAME = "spark"
 # DOCKER SPARK
 DOCKER_SPARK_WEB_UI_PORT = 8080
 DOCKER_SPARK_WORKER_UI_PORT = 8081
+DOCKER_SPARK_RSTUDIO_SERVER_PORT = 8787
 DOCKER_SPARK_JUPYTER_PORT = 8888
 DOCKER_SPARK_JOB_UI_PORT = 4040
 DOCKER_SPARK_JOB_UI_HISTORY_PORT = 18080
@@ -36,6 +37,7 @@ DEFAULT_SECRETS_PATH = os.path.join(os.getcwd(), '.aztk/secrets.yaml')
 """
     Paths to the cluster configuration files
 """
+GLOBAL_CONFIG_PATH = os.path.join(HOME_DIRECTORY_PATH, '.aztk')
 DEFAULT_SSH_CONFIG_PATH = os.path.join(os.getcwd(), '.aztk/ssh.yaml')
 DEFAULT_CLUSTER_CONFIG_PATH = os.path.join(os.getcwd(), '.aztk/cluster.yaml')
 DEFAULT_SPARK_CONF_SOURCE = os.path.join(os.getcwd(), '.aztk')

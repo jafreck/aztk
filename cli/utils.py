@@ -13,13 +13,19 @@ def get_ssh_key_or_prompt(ssh_key, username, password, secrets_config):
     ssh_key = get_ssh_key.get_user_public_key(ssh_key, secrets_config)
 
     if username is not None and password is None and ssh_key is None:
-        password = getpass.getpass("Please input a password for user '{0}': ".format(username))
-        confirm_password = getpass.getpass("Please confirm your password for user '{0}': ".format(username))
-        if password != confirm_password:
-            raise error.AztkError("Password confirmation did not match, please try again.")
-        if not password:
-            raise error.AztkError(
-                "Password is empty, cannot add user to cluster. Provide a ssh public key in .aztk/secrets.yaml. Or provide an ssh-key or password with commnad line parameters (--ssh-key or --password).")
+        for i in range(3):
+            if i > 0:
+                log.error("Please try again.")
+            password = getpass.getpass("Please input a password for user '{0}': ".format(username))
+            confirm_password = getpass.getpass("Please confirm your password for user '{0}': ".format(username))
+            if password != confirm_password:
+                log.error("Password confirmation did not match.")
+            elif not password:
+                log.error("Password cannot be empty.")
+            else:
+                break
+        else:
+            raise error.AztkError("Failed to get valid password, cannot add user to cluster. It is recommended that you provide a ssh public key in .aztk/secrets.yaml. Or provide an ssh-key or password with commnad line parameters (--ssh-key or --password). You may also run the 'aztk spark cluster add-user' command to add a user to this cluster.")
     return ssh_key, password
 
 def print_cluster(client, cluster: aztk.spark.models.Cluster):
@@ -122,6 +128,7 @@ def ssh_in_master(
         jobhistoryui: str = None,
         jupyter: str = None,
         namenodeui: str = None,
+        rstudioserver: str = None,
         ports=None,
         host: bool = False,
         connect: bool = True):
@@ -131,7 +138,8 @@ def ssh_in_master(
         :param username: Username to use to ssh
         :param webui: Port for the spark master web ui (Local port)
         :param jobui: Port for the job web ui (Local port)
-        :param jupyter: Port for jupyter(Local port)
+        :param jupyter: Port for jupyter (Local port)
+        :param rstudioserver: Port for rstudio server (Local port)
         :param ports: an list of local and remote ports
         :type ports: [[<local-port>, <remote-port>]]
     """
@@ -150,6 +158,7 @@ def ssh_in_master(
 
     spark_web_ui_port = aztk.utils.constants.DOCKER_SPARK_WEB_UI_PORT
     spark_worker_ui_port = aztk.utils.constants.DOCKER_SPARK_WORKER_UI_PORT
+    spark_rstudio_server_port = aztk.utils.constants.DOCKER_SPARK_RSTUDIO_SERVER_PORT
     spark_jupyter_port = aztk.utils.constants.DOCKER_SPARK_JUPYTER_PORT
     spark_job_ui_port = aztk.utils.constants.DOCKER_SPARK_JOB_UI_PORT
     spark_job_history_ui_port = aztk.utils.constants.DOCKER_SPARK_JOB_UI_HISTORY_PORT
@@ -173,6 +182,8 @@ def ssh_in_master(
         jupyter, spark_jupyter_port), enable=bool(jupyter))
     ssh_command.add_option("-L", "{0}:localhost:{1}".format(
         namenodeui, spark_namenode_ui_port), enable=bool(namenodeui))
+    ssh_command.add_option("-L", "{0}:localhost:{1}".format(
+        rstudioserver, spark_rstudio_server_port), enable=bool(rstudioserver))
 
     if ports is not None:
         for port in ports:
