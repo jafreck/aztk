@@ -3,7 +3,7 @@ import argparse
 import typing
 import aztk.spark
 from cli import log
-from cli.config import ClusterConfig
+from cli.config import ClusterConfig, load_aztk_spark_config
 from cli.spark.aztklib import load_spark_client
 from cli import utils
 
@@ -79,9 +79,6 @@ def execute(args: typing.NamedTuple):
     else:
         file_shares = None
 
-
-    jars, spark_defaults_conf, spark_env_sh, core_site_xml = load_aztk_spark_config()
-
     # create spark cluster
     cluster = spark_client.create_cluster(
         aztk.spark.models.ClusterConfiguration(
@@ -92,12 +89,7 @@ def execute(args: typing.NamedTuple):
             custom_scripts=custom_scripts,
             file_shares=file_shares,
             docker_repo=cluster_conf.docker_repo,
-            spark_configuration=aztk.spark.models.SparkConfiguration(
-                spark_defaults_conf=spark_defaults_conf,
-                spark_env_sh=spark_env_sh,
-                core_site_xml=core_site_xml,
-                jars=jars
-            )
+            spark_configuration=load_aztk_spark_config()
         ),
         wait=cluster_conf.wait
     )
@@ -120,37 +112,6 @@ def execute(args: typing.NamedTuple):
     else:
         log.info("Cluster %s is being provisioned.", cluster.id)
 
-
-def load_aztk_spark_config():
-    # try load global
-    jars_src = os.path.join(aztk.utils.constants.GLOBAL_CONFIG_PATH, 'jars')
-    
-    jars = spark_defaults_conf = spark_env_sh = core_site_xml = None
-
-    try:
-        jars = [os.path.join(jars_src, jar) for jar in os.listdir(jars_src)]
-        if os.path.exists(os.path.join(aztk.utils.constants.GLOBAL_CONFIG_PATH, 'spark-defaults.conf')):
-            spark_defaults_conf = os.path.join(aztk.utils.constants.GLOBAL_CONFIG_PATH, 'spark-defaults.conf')
-        if os.path.exists(os.path.join(aztk.utils.constants.GLOBAL_CONFIG_PATH, 'spark-env.sh')):
-            spark_env_sh = os.path.join(aztk.utils.constants.GLOBAL_CONFIG_PATH, 'spark-env.sh')
-        if os.path.exists(os.path.join(aztk.utils.constants.GLOBAL_CONFIG_PATH, 'core-site.xml')):
-            core_site_xml = os.path.join(aztk.utils.constants.GLOBAL_CONFIG_PATH, 'core-site.xml')
-    except FileNotFoundError:
-        pass
-
-    # try load local, overwrite if found
-    try:
-        jars = [os.path.join(jars_src, jar) for jar in os.listdir(jars_src)]
-        if os.path.exists(os.path.join(aztk.utils.constants.DEFAULT_SPARK_CONF_SOURCE, 'spark-defaults.conf')):
-            spark_defaults_conf = os.path.join(aztk.utils.constants.DEFAULT_SPARK_CONF_SOURCE, 'spark-defaults.conf')
-        if os.path.exists( os.path.join(aztk.utils.constants.DEFAULT_SPARK_CONF_SOURCE, 'spark-env.sh')):
-            spark_env_sh = os.path.join(aztk.utils.constants.DEFAULT_SPARK_CONF_SOURCE, 'spark-env.sh')
-        if os.path.exists(os.path.join(aztk.utils.constants.DEFAULT_SPARK_CONF_SOURCE, 'core-site.xml')):
-            core_site_xml = os.path.join(aztk.utils.constants.DEFAULT_SPARK_CONF_SOURCE, 'core-site.xml')
-    except FileNotFoundError:
-        pass
-    
-    return jars, spark_defaults_conf, spark_env_sh, core_site_xml
 
 def print_cluster_conf(cluster_conf):
     log.info("-------------------------------------------")
