@@ -4,8 +4,8 @@ import yaml
 import datetime
 import time
 import azure.batch.models as batch_models
-from aztk_sdk.utils import constants, helpers
-from aztk_sdk.utils.command_builder import CommandBuilder
+from aztk.utils import constants, helpers
+from aztk.utils.command_builder import CommandBuilder
 
 '''
     Job Submission helper methods
