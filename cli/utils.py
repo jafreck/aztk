@@ -1,9 +1,9 @@
-import threading
-import sys
 import getpass
+import sys
+import threading
 import time
-from typing import List
 from subprocess import call
+from typing import List
 import azure.batch.models as batch_models
 import aztk.spark
 from aztk import error
