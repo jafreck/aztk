@@ -130,9 +130,9 @@ class Application:
         self.name=cloud_task.id
         self.last_modified=cloud_task.last_modified
         self.creation_time=cloud_task.creation_time
-        self.state=cloud_task.state
+        self.state=cloud_task.state._value_
         self.state_transition_time=cloud_task.state_transition_time
-        self.previous_state=cloud_task.previous_state
+        self.previous_state=cloud_task.previous_state._value_
         self.previous_state_transition_time=cloud_task.previous_state_transition_time
         self.execution_info=cloud_task.execution_info
         self.node_info=cloud_task.node_info
@@ -174,13 +174,13 @@ class JobConfiguration:
         self.custom_scripts = custom_scripts
         self.spark_configuration = spark_configuration
         self.vm_size=vm_size
-        # self.gpu_enabled = helpers.is_gpu_enabled(vm_size)
+        self.gpu_enabled = helpers.is_gpu_enabled(vm_size)
         self.docker_repo = docker_repo
         self.max_dedicated_nodes = max_dedicated_nodes
-        self.recurrence_interval = recurrence_interval
-        self.do_not_run_until = do_not_run_until
-        self.do_not_run_after = do_not_run_after
-        self.start_window = start_window
+        # self.recurrence_interval = recurrence_interval
+        # self.do_not_run_until = do_not_run_until
+        # self.do_not_run_after = do_not_run_after
+        # self.start_window = start_window
 
 class JobState():
     complete = 'completed'
@@ -192,10 +192,11 @@ class JobState():
 
 
 class Job():
-    def __init__(self, cloud_job_schedule: batch_models.CloudJobSchedule):
+    def __init__(self, cloud_job_schedule: batch_models.CloudJobSchedule, cloud_tasks: List[batch_models.CloudTask] = None):
         self.id = cloud_job_schedule.id
         self.last_modified = cloud_job_schedule.last_modified
-        self.state = cloud_job_schedule.state
+        self.state = cloud_job_schedule.state._value_
+        self.state_transition_time = cloud_job_schedule.state_transition_time
         self.creation_time = cloud_job_schedule.creation_time
         self.schedule = cloud_job_schedule.schedule
         self.exection_info = cloud_job_schedule.execution_info
@@ -204,8 +205,8 @@ class Job():
         else:
             self.next_run_time = None
         self.recent_run_id = cloud_job_schedule.execution_info.recent_job.id
-        self.stats = cloud_job_schedule.stats
-    
+        self.applications = [Application(task) for task in (cloud_tasks or [])] 
+
     def __str__(self):
         return str(
                     dict(id= self.id,

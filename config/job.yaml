@@ -1,0 +1,43 @@
+# Job Configuration
+
+job:
+  id: 
+  cluster_configuration:
+    vm_size: 
+    size: 
+    docker_repo: 
+    custom_scripts: 
+  spark_configuration:
+    spark_defaults_conf: 
+    spark_env_sh: 
+    core_site_xml: 
+  
+  applications:
+    - name: 
+      application: 
+      application_args: 
+      main_class: 
+      jars: 
+      py_files: 
+      files:
+      driver_java_options: 
+      driver_library_path: 
+      driver_class_path: 
+      driver_memory: 
+      executor_memory: 
+      driver_cores: 
+      executor_cores: 
+    - name: 
+      application: 
+      application_args: 
+      main_class: 
+      jars: 
+      py_files: 
+      files:
+      driver_java_options: 
+      driver_library_path: 
+      driver_class_path: 
+      driver_memory: 
+      executor_memory: 
+      driver_cores: 
+      executor_cores: 

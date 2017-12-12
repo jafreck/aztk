@@ -209,10 +209,10 @@ class Client:
 
         # define schedule
         schedule = batch_models.Schedule(
-            do_not_run_until=job_configuration.do_not_run_until,
-            do_not_run_after=job_configuration.do_not_run_after,
-            start_window=job_configuration.start_window,
-            recurrence_interval=job_configuration.recurrence_interval
+            do_not_run_until=None,
+            do_not_run_after=None,
+            start_window=None,
+            recurrence_interval=None
         )
 
         # create job schedule and add task

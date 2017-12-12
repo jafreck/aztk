@@ -3,6 +3,8 @@ import typing
 import time
 from cli.spark.aztklib import load_spark_client
 from cli import utils
+from cli import log
+
 
 def setup_parser(parser: argparse.ArgumentParser):
     parser.add_argument('--id',
@@ -18,4 +20,7 @@ def setup_parser(parser: argparse.ArgumentParser):
 def execute(args: typing.NamedTuple):
     spark_client = load_spark_client()
 
-    print(spark_client.stop_job_app(args.job_id, args.app_name))
+    if spark_client.stop_job_app(args.job_id, args.app_name):
+        log.info("Stopped app {0}".format(args.app_name))
+    else:
+        log.error("App with name {0} does not exist or was already deleted")

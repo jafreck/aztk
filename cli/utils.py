@@ -1,3 +1,4 @@
+import datetime
 import getpass
 import time
 from typing import List
@@ -219,3 +220,81 @@ def print_batch_exception(batch_exception):
             for mesg in batch_exception.error.values:
                 log.error("%s:\t%s", mesg.key, mesg.value)
     log.error("-------------------------------------------")
+
+
+'''
+    Job submission
+'''
+
+def print_jobs(jobs: List[aztk.spark.models.Job]):
+    print_format = '{:<34}| {:<10}| {:<20}'
+    print_format_underline = '{:-<34}|{:-<11}|{:-<21}'
+
+    log.info(print_format.format('Job', 'State', 'Creation Time'))
+    log.info(print_format_underline.format('', '', '', ''))
+    for job in jobs:
+
+        log.info(
+            print_format.format(
+                job.id,
+                job.state,
+                utc_to_local(job.creation_time)
+            )
+        )
+
+def utc_to_local(utc_dt):
+    return utc_dt.replace(tzinfo=datetime.timezone.utc).astimezone(tz=None).strftime("%H:%M%p %d/%m/%y")
+
+def print_job(job: aztk.spark.models.Job):
+    # node_count = __pretty_node_count(cluster)
+    print_format = '{:<36}| {:<15}'
+
+    log.info("")
+    log.info("Job             %s", job.id)
+    log.info("------------------------------------------")
+    log.info(print_format.format("State:", job.state))
+    log.info(print_format.format("Transition Time:", utc_to_local(job.state_transition_time)))
+    log.info("")
+
+    print_format = '{:<36}| {:<15}| {:<14}'
+    print_format_underline = '{:-<36}|{:-<16}|{:-<17}'
+    log.info(print_format.format("Applications", "State", "Transition Time"))
+    log.info(print_format_underline.format('', '', '', ''))
+
+    for application in job.applications:
+        log.info(
+            print_format.format(
+                application.name,
+                application.state,
+                utc_to_local(application.state_transition_time)
+            )
+        )
+
+    log.info('')
+
+def print_application(application: aztk.spark.models.Application):
+    # node_count = __pretty_node_count(cluster)
+
+    log.info("")
+    log.info("App         %s", application.name)
+    log.info("------------------------------------------")
+
+
+    print_format = '{:<30}| {:<15}'
+    print_format_underline = '{:-<30}|{:-<17}'
+    # log.info(print_format.format("Application", "State"))
+    # log.info(print_format_underline.format('', '', '', ''))
+
+    log.info(
+        print_format.format(
+            "State",
+            application.state
+        )
+    )
+    log.info(
+        print_format.format(
+            "State transition time",
+            utc_to_local(application.state_transition_time) 
+        )
+    )
+    log.info('')

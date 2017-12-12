@@ -184,7 +184,8 @@ class Client(BaseClient):
        
     def get_job(self, job_id):
         try:
-            return models.Job(self.batch_client.job_schedule.get(job_id))
+            job, apps = job_submit_helper.get_job(self, job_id)
+            return models.Job(job, apps)
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
     
@@ -226,7 +227,6 @@ class Client(BaseClient):
 
     def stop_job_app(self, job_id, app_id):
         try:
-            # stop spark-submit ?, kill task
             return job_submit_helper.stop_app(self, job_id, app_id)
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))

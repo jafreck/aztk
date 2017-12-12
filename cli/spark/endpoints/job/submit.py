@@ -3,19 +3,62 @@ import typing
 import time
 from cli.spark.aztklib import load_spark_client
 from cli import utils
+from cli import log
+import aztk.spark
+from cli.config import JobConfig
+
 
 def setup_parser(parser: argparse.ArgumentParser):
     parser.add_argument('--id',
                         dest='job_id',
                         required=True,
                         help='The unique id of your spark cluster')
-    parser.add_argument('--name',
-                        dest='app_name',
-                        required=True,
-                        help='The unique id of your job name')
+    # parser.add_argument('--configuration' '-c',
+    #                     dest='job_conf',
+    #                     required=True,
+    #                     help='Path to the job.yaml configuration file')
 
 
 def execute(args: typing.NamedTuple):
     spark_client = load_spark_client()
+    job_conf = JobConfig()
 
-    spark_client.get_application(args.job_id, args.app_name)
+    job_conf.merge()
+
+    aztk_applications = []
+    for application in job_conf.applications:
+        aztk_applications.append(
+            aztk.spark.models.ApplicationConfiguration(
+                name=application.get('name'),
+                application=application.get('application'),
+                application_args=application.get('application_args'),
+                main_class=application.get('main_class'),
+                jars=[],
+                py_files=[],
+                files=[],
+                driver_java_options=application.get('driver_java_options'),
+                driver_library_path=application.get('driver_library_path'),
+                driver_class_path=application.get('driver_class_path'),
+                driver_memory=application.get('driver_memory'),
+                executor_memory=application.get('executor_memory'),
+                driver_cores=application.get('driver_cores'),
+                executor_cores=application.get('executor_cores')
+            )
+        )
+    spark_configuration = aztk.spark.models.SparkConfiguration(
+        spark_defaults_conf=job_conf.spark_configuration.get('spark_defaults_conf'),
+        spark_env_sh=job_conf.spark_configuration.get('spark_env_sh'),
+        core_site_xml=job_conf.spark_configuration.get('core_site_xml')
+    )
+    job_configuration = aztk.spark.models.JobConfiguration(
+        id=job_conf.id,
+        applications=aztk_applications,
+        custom_scripts=job_conf.custom_scripts,
+        spark_configuration=spark_configuration,
+        vm_size=job_conf.vm_size,
+        docker_repo=job_conf.docker_repo,
+        max_dedicated_nodes=job_conf.max_dedicated_nodes,
+    )
+    print(vars(job_configuration))
+    # raise Error
+    spark_client.submit_job(job_configuration)

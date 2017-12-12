@@ -55,6 +55,13 @@ def list_applications(spark_client, job_id):
     return [application.id for application in spark_client.batch_client.task.list(job.recent_run_id) if application.id != job_id]
 
 
+def get_job(spark_client, job_id):
+    job = spark_client.batch_client.job_schedule.get(job_id)
+    job_apps = [app for app in spark_client.batch_client.task.list(job_id=job.execution_info.recent_job.id) if app.id != job_id]
+
+    return job, job_apps
+
+
 # def disable(spark_client, job_id):
 #     # disable the currently running job from the job schedule if exists
 #     recent_run_job = __get_recent_job(spark_client, job_id)
@@ -85,11 +92,21 @@ def stop(spark_client, job_id):
 
 def delete(spark_client, job_id):
     recent_run_job = __get_recent_job(spark_client, job_id)
-    spark_client.batch_client.job.terminate(recent_run_job.id)
-
+    deleted_job_or_job_schedule = False
+    # delete job
+    try:
+        spark_client.batch_client.job.delete(recent_run_job.id)
+        deleted_job_or_job_schedule = True
+    except batch_models.batch_error.BatchErrorException:
+        pass
     # delete job_schedule
-    spark_client.batch_client.job_schedule.delete(job_id)
+    try:
+        spark_client.batch_client.job_schedule.delete(job_id)
+        deleted_job_or_job_schedule = True
+    except batch_models.batch_error.BatchErrorException:
+        pass
 
+    return deleted_job_or_job_schedule
 
 def get_application(spark_client, job_id, app_id):
     # info about the app
@@ -110,10 +127,14 @@ def get_application_log(spark_client, job_id, app_id):
 def stop_app(spark_client, job_id, app_id):
     recent_run_job = __get_recent_job(spark_client, job_id)
 
-    # TODO: stop spark job on node -- ssh in, stop ?
+    # TODO: stop spark job on node 
 
     # stop batch task
-    spark_client.batch_client.task.stop(job_id=recent_run_job.id, task_id=app_id)
+    try:
+        spark_client.batch_client.task.terminate(job_id=recent_run_job.id, task_id=app_id)
+        return True
+    except batch_models.batch_error.BatchErrorException:
+        return False
 
 def wait_until_job_finished(spark_client, job_id):
     job_state = spark_client.batch_client.job_schedule.get(job_id).state
