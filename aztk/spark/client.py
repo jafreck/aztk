@@ -213,21 +213,21 @@ class Client(BaseClient):
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
 
-    def get_application(self, job_id, app_id):
+    def get_application(self, job_id, application_name):
         try:
-            return models.Application(job_submit_helper.get_application(self, job_id, app_id))
+            return models.Application(job_submit_helper.get_application(self, job_id, application_name))
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
 
-    def get_job_application_log(self, job_id, app_id):
+    def get_job_application_log(self, job_id, application_name):
         try:
-            return job_submit_helper.get_application_log(self, job_id, app_id)
+            return job_submit_helper.get_application_log(self, job_id, application_name)
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
 
-    def stop_job_app(self, job_id, app_id):
+    def stop_job_app(self, job_id, application_name):
         try:
-            return job_submit_helper.stop_app(self, job_id, app_id)
+            return job_submit_helper.stop_app(self, job_id, application_name)
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
 

@@ -108,30 +108,30 @@ def delete(spark_client, job_id):
 
     return deleted_job_or_job_schedule
 
-def get_application(spark_client, job_id, app_id):
+def get_application(spark_client, job_id, application_name):
     # info about the app
     recent_run_job = __get_recent_job(spark_client, job_id)
-    return spark_client.batch_client.task.get(job_id=recent_run_job.id, task_id=app_id)
+    return spark_client.batch_client.task.get(job_id=recent_run_job.id, task_id=application_name)
 
 
-def get_application_log(spark_client, job_id, app_id):
+def get_application_log(spark_client, job_id, application_name):
     # TODO: change where the logs are uploaded so they aren't overwritten on scheduled runs
-    #           current: job_id, app_id/output.log
-    #           new: job_id, recent_run_job.id/app_id/output.log
+    #           current: job_id, application_name/output.log
+    #           new: job_id, recent_run_job.id/application_name/output.log
 
     # recent_run_job = __get_recent_job(spark_client, job_id)
-    # return spark_client.get_application_log(recent_run_job.id.replace(":", "-"), app_id)
-    return spark_client.get_application_log(job_id, app_id)
+    # return spark_client.get_application_log(recent_run_job.id.replace(":", "-"), application_name)
+    return spark_client.get_application_log(job_id, application_name)
 
 
-def stop_app(spark_client, job_id, app_id):
+def stop_app(spark_client, job_id, application_name):
     recent_run_job = __get_recent_job(spark_client, job_id)
 
     # TODO: stop spark job on node 
 
     # stop batch task
     try:
-        spark_client.batch_client.task.terminate(job_id=recent_run_job.id, task_id=app_id)
+        spark_client.batch_client.task.terminate(job_id=recent_run_job.id, task_id=application_name)
         return True
     except batch_models.batch_error.BatchErrorException:
         return False

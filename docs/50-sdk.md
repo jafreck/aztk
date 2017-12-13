@@ -302,7 +302,7 @@ Find some samples and getting stated tutorial in the `examples/sdk/` directory o
         
         - bool
 
-- `get_application(self, job_id, app_id)`
+- `get_application(self, job_id, application_name)`
 
     Get information about an AZTK Spark Job's application
 
@@ -310,14 +310,14 @@ Find some samples and getting stated tutorial in the `examples/sdk/` directory o
 
         - job_id: str
             The id of the Job
-        - app_id: str
-            The id of the Application
+        - application_name: str
+            The name of the Application
     
     Returns:
         
         - aztk.spark.models.Application
 
-- `get_job_application_log(self, job_id, app_id)`
+- `get_job_application_log(self, job_id, application_name)`
 
     Get the log of an AZTK Spark Job's application
 
@@ -326,15 +326,15 @@ Find some samples and getting stated tutorial in the `examples/sdk/` directory o
 
         - job_id: str
             The id of the Job
-        - app_id: str
-            The id of the Application
+        - application_name: str
+            The name of the Application
     
     Returns:
         
         - aztk.spark.models.ApplicationLog
 
 
-- `stop_job_app(self, job_id, app_id)`
+- `stop_job_app(self, job_id, application_name)`
 
     Stop an Application running on an AZTK Spark Job
 
@@ -342,8 +342,8 @@ Find some samples and getting stated tutorial in the `examples/sdk/` directory o
 
         - job_id: str
             The id of the Job
-        - app_id: str
-            The id of the Application
+        - application_name: str
+            The name of the Application
     
     Returns:
         
@@ -358,8 +358,8 @@ Find some samples and getting stated tutorial in the `examples/sdk/` directory o
 
         - job_id: str
             The id of the Job
-        - app_id: str
-            The id of the Application
+        - application_name: str
+            The name of the Application
     
     Returns:
         

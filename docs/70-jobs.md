@@ -80,8 +80,10 @@ aztk spark job submit --id <your_job_id> --job-conf </path/to/job.yaml>
 
 NOTE: The Job id (`--id`) can only contain alphanumeric characters including hyphens and underscores, and cannot contain more than 64 characters. Each cluster **must** have a unique cluster id.
 
+
 #### Low priority nodes
 You can create your Job with [low-priority](https://docs.microsoft.com/en-us/azure/batch/batch-low-pri-vms) VMs at an 80% discount by using `--size-low-pri` instead of `--size`. Note that these are great for experimental use, but can be taken away at any time. We recommend against this option when doing long running jobs or for critical workloads.
+
 
 ### Listing Jobs
 You can list all Jobs currently running in your account by running
@@ -89,6 +91,7 @@ You can list all Jobs currently running in your account by running
 ```sh
 aztk spark job list
 ```
+
 
 ### Viewing a cluster
 To view details about a particular Job, run:
@@ -111,6 +114,7 @@ pipy100                             | completed      | 21:25PM 11/12/17
 pipy200                             | completed      | 21:24PM 11/12/17
 ```
 
+
 ### Deleting a Job
 To delete a Job run:
 
@@ -120,37 +124,35 @@ aztk spark job delete --id <your_job_id>
 
 __You are only charged for the job while it is active, Jobs handle provisioning and destorying infrastructure, so you are only charged for the time that your applications are running.__
 
-### Deleting a Job
-To delete a Job run:
-
-```sh
-aztk spark job delete --id <your_job_id>
-```
-
-### Getting a Job's Application's log
-To delete a Job run:
-
-```sh
-aztk spark job delete --id <your_job_id>
-```
-
-### Get information about a Job's Application
-To delete a Job run:
-
-```sh
-aztk spark job delete --id <your_job_id>
-```
 
 ### Stopping a Job
-To delete a Job run:
+To stop a Job run:
 
 ```sh
-aztk spark job delete --id <your_job_id>
+aztk spark job stop --id <your_job_id>
+```
+Stopping a Job will end any currently running Applications and will prevent any new Applications from running.
+
+
+### Get information about a Job's Application
+To get information about a Job's Application:
+
+```sh
+aztk spark job get-app --id <your_job_id> --name <your_application_name>
 ```
 
-### Stopping a Job's Application
-To delete a Job run:
+
+### Getting a Job's Application's log
+To get a job's application logs:
 
 ```sh
-aztk spark job delete --id <your_job_id>
+aztk spark job get-app-logs --id <your_job_id> --name <your_application_name>
+```
+
+
+### Stopping a Job's Application
+To stop an application that is running or going to run on a Job:
+
+```sh
+aztk spark job stop-app --id <your_job_id> --name <your_application_name>
 ```
