@@ -1,4 +1,4 @@
-# Clusters
+# Jobs
 In the Azure Distributed Data Engineering Toolkit, a Job is a serverless entity that runs applications and records application output. A Job will manage the full lifecycle of the infrastructure so you do not have to. This document describes how to create and use AZTK Jobs.
 
 ------------------------------------------------------
@@ -119,3 +119,38 @@ aztk spark job delete --id <your_job_id>
 ```
 
 __You are only charged for the job while it is active, Jobs handle provisioning and destorying infrastructure, so you are only charged for the time that your applications are running.__
+
+### Deleting a Job
+To delete a Job run:
+
+```sh
+aztk spark job delete --id <your_job_id>
+```
+
+### Getting a Job's Application's log
+To delete a Job run:
+
+```sh
+aztk spark job delete --id <your_job_id>
+```
+
+### Get information about a Job's Application
+To delete a Job run:
+
+```sh
+aztk spark job delete --id <your_job_id>
+```
+
+### Stopping a Job
+To delete a Job run:
+
+```sh
+aztk spark job delete --id <your_job_id>
+```
+
+### Stopping a Job's Application
+To delete a Job run:
+
+```sh
+aztk spark job delete --id <your_job_id>
+```
