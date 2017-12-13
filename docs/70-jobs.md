@@ -93,7 +93,7 @@ aztk spark job list
 ```
 
 
-### Viewing a cluster
+### Viewing a Job
 To view details about a particular Job, run:
 
 ```sh
