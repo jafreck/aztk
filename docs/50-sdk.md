@@ -50,6 +50,7 @@ Find some samples and getting stated tutorial in the `examples/sdk/` directory o
         - None
 
 - `get_cluster(self, cluster_id: str)`
+
     Retrieve detailed information about the cluster with the given ID
 
     Parameters:
@@ -223,9 +224,203 @@ Find some samples and getting stated tutorial in the `examples/sdk/` directory o
         - str
 
 
+- `submit_job(self, job_configuration)`
+
+    Submit an AZTK Spark Job
+
+    Parameters:
+
+        - job_configuration: aztk.spark.models.JobConfiguration
+            The configuration of the job to be submitted
+    
+    Returns:
+        
+        - None
+
+- `list_jobs(self)`
+
+    List all created AZTK Spark Jobs
+
+    Parameters:
+
+        - job_configuration: aztk.spark.models.JobConfiguration
+            The configuration of the job to be submitted
+    
+    Returns:
+        
+        - List[aztk.spark.models.Job]
+       
+- `list_applicaitons(self, job_id)`
+
+    List all applications created on the AZTK Spark Job with id job_id
+
+    Parameters:
+
+        - job_id: str
+            The id of the Job
+    
+    Returns:
+        
+        - List[aztk.spark.models.Application]
+       
+- `get_job(self, job_id)`
+
+    Get information about the AZTK Spark Job with id job_id
+
+    Parameters:
+
+        - job_id: str
+            The id of the Job
+    
+    Returns:
+        
+        - List[aztk.spark.models.Job]
+    
+- `stop_job(self, job_id)`
+
+    Stop the AZTK Spark Job with id job_id
+
+    Parameters:
+
+        - job_id: str
+            The id of the Job
+    
+    Returns:
+        
+        - None
+
+- `delete_job(self, job_id)`
+
+    Delete the AZTK Spark Job with id job_id
+
+    Parameters:
+
+        - job_id: str
+            The id of the Job
+    
+    Returns:
+        
+        - bool
+
+- `get_application(self, job_id, app_id)`
+
+    Get information about an AZTK Spark Job's application
+
+    Parameters:
+
+        - job_id: str
+            The id of the Job
+        - app_id: str
+            The id of the Application
+    
+    Returns:
+        
+        - aztk.spark.models.Application
+
+- `get_job_application_log(self, job_id, app_id)`
+
+    Get the log of an AZTK Spark Job's application
+
+
+    Parameters:
+
+        - job_id: str
+            The id of the Job
+        - app_id: str
+            The id of the Application
+    
+    Returns:
+        
+        - aztk.spark.models.ApplicationLog
+
+
+- `stop_job_app(self, job_id, app_id)`
+
+    Stop an Application running on an AZTK Spark Job
+
+    Parameters:
+
+        - job_id: str
+            The id of the Job
+        - app_id: str
+            The id of the Application
+    
+    Returns:
+        
+        - None
+
+
+- `wait_until_job_finished(self, job_id)`
+
+    Wait until the AZTK Spark Job with id job_id is complete
+
+    Parameters:
+
+        - job_id: str
+            The id of the Job
+        - app_id: str
+            The id of the Application
+    
+    Returns:
+        
+        - None
+
+
+- `wait_until_all_jobs_finished(self, jobs)`
+
+    Wait until all of the given AZTK Spark Jobs are complete
+
+    Parameters:
+
+        - jobs: List[str]
+            The ids of the Jobs to wait for
+    
+    Returns:
+        
+        - None
+
+
+
 ### Models
 
+
 - `Application`
+    
+    The definition of an AZTK Spark Application as it exists in the cloud. Please note that this object is not used to configure Applications, only to read information about existing Applications. Please see ApplicationConfiguration if you are trying to create an Application.
+
+    Fields:
+
+        - name: str
+        - last_modified: datetime
+        - creation_time: datetime
+        - state: str
+        - state_transition_time: datetime
+        - previous_state: str
+        - previous_state_transition_time: datetime
+
+    <!---
+    - _execution_info: azure.batch.models.TaskExecutionInformation
+    - _node_info
+    - _stats
+    - _multi_instance_settings
+    - _display_name
+    - _exit_conditions
+    - _command_line
+    - _resource_files
+    - _output_files
+    - _environment_settings
+    - _affinity_info
+    - _constraints
+    - _user_identity
+    - _depends_on
+    - _application_package_references
+    - _authentication_token_settings
+    - _url
+    - _e_tag
+    -->
+ 
+        
+- `ApplicationConfiguration`
     
     Define a Spark application to run on a cluster.
 
@@ -337,7 +532,8 @@ Find some samples and getting stated tutorial in the `examples/sdk/` directory o
             The desired number of low-priority nodes in the cluster.
 
 
-- `ClusterConfiguration`
+    - `ClusterConfiguration`
+
     Define a Spark cluster to be created.
 
     Fields:
@@ -365,6 +561,7 @@ Find some samples and getting stated tutorial in the `examples/sdk/` directory o
 
 
  - `Custom Script`
+ 
     A script that executed in the Docker container of specified nodes in the cluster.
 
         - name: str
@@ -380,6 +577,66 @@ Find some samples and getting stated tutorial in the `examples/sdk/` directory o
 
             Please note that by default, the Master node is also a worker node.
 
+- `JobConfiguration`
+
+    Define an AZTK Job.
+
+    Methods:
+
+    - `__init__(
+            self,
+            id,
+            applications=None,
+            custom_scripts=None,
+            spark_configuration=None,
+            vm_size=None,
+            docker_repo=None,
+            max_dedicated_nodes=None)`
+        
+
+    Fields:
+
+        - id: str
+        - applications: List[aztk.spark.models.ApplicationConfiguration]
+        - custom_scripts: str
+        - spark_configuration: aztk.spark.models.SparkConfiguration
+        - vm_size: int
+        - gpu_enabled: str
+        - docker_repo: str
+        - max_dedicated_nodes: str
+
+
+
+- `Job`
+    
+    Methods:
+    
+    `__init__(self, cloud_job_schedule: batch_models.CloudJobSchedule, cloud_tasks: List[batch_models.CloudTask] = None)`
+    
+    Fields:
+    
+    - id: str
+    - last_modified: datetime
+    - state: datetime
+    - state_transition_time: datetime
+    - applications: datetime
+
+    <!--
+    - creation_time: datetime
+    - schedule: datetime
+    - exection_info: datetime
+    - recent_run_id: datetime
+    -->
+
+<!--
+- `JobState`
+    complete = 'completed'
+    active = "active"
+    completed = "completed"
+    disabled = "disabled"
+    terminating = "terminating"
+    deleting = "deleting"
+-->
 
 - `SecretsConfiguration`
 
@@ -387,23 +644,24 @@ Find some samples and getting stated tutorial in the `examples/sdk/` directory o
 
     Fields:
 
-        batch_account_name: str 
-        batch_account_key: str
-        batch_service_url: str
+        - batch_account_name: str 
+        - batch_account_key: str
+        - batch_service_url: str
 
-        storage_account_name: str
-        storage_account_key: str 
-        storage_account_suffix: str
+        - storage_account_name: str
+        - storage_account_key: str 
+        - storage_account_suffix: str
 
-        docker_endpoint: str 
-        docker_username: str 
-        docker_password: str 
+        - docker_endpoint: str 
+        - docker_username: str 
+        - docker_password: str 
 
-        ssh_pub_key: str 
-        ssh_priv_key: str 
+        - ssh_pub_key: str 
+        - ssh_priv_key: str 
 
 
 - `SparkConfiguration`
+
     Define cluster-wide Spark specific parameters.
 
     Fields:

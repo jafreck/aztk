@@ -134,11 +134,11 @@ class Application:
         self.state_transition_time=cloud_task.state_transition_time
         self.previous_state=cloud_task.previous_state._value_
         self.previous_state_transition_time=cloud_task.previous_state_transition_time
-        self.execution_info=cloud_task.execution_info
-        self.node_info=cloud_task.node_info
-        self.multi_instance_settings=cloud_task.multi_instance_settings
-        self.stats=cloud_task.stats
-
+        
+        self._execution_info=cloud_task.execution_info
+        self._node_info=cloud_task.node_info
+        self._stats=cloud_task.stats
+        self._multi_instance_settings=cloud_task.multi_instance_settings
         self._display_name=cloud_task.display_name
         self._exit_conditions=cloud_task.exit_conditions
         self._command_line=cloud_task.command_line
@@ -164,11 +164,7 @@ class JobConfiguration:
             spark_configuration=None,
             vm_size=None,
             docker_repo=None,
-            max_dedicated_nodes=None,
-            recurrence_interval=None,
-            do_not_run_until=None,
-            do_not_run_after=None,
-            start_window=None):
+            max_dedicated_nodes=None):
         self.id = id
         self.applications = applications
         self.custom_scripts = custom_scripts
@@ -198,27 +194,15 @@ class Job():
         self.state = cloud_job_schedule.state._value_
         self.state_transition_time = cloud_job_schedule.state_transition_time
         self.creation_time = cloud_job_schedule.creation_time
-        self.schedule = cloud_job_schedule.schedule
-        self.exection_info = cloud_job_schedule.execution_info
-        if self.state == 'completed':
-            self.next_run_time = cloud_job_schedule.execution_info.next_run_time
-        else:
-            self.next_run_time = None
-        self.recent_run_id = cloud_job_schedule.execution_info.recent_job.id
         self.applications = [Application(task) for task in (cloud_tasks or [])] 
 
-    def __str__(self):
-        return str(
-                    dict(id= self.id,
-                         last_modified= self.last_modified,
-                         state= self.state,
-                         creation_time= self.creation_time,
-                         schedule= self.schedule,
-                         exection_info= self.exection_info,
-                         next_run_time= self.next_run_time,
-                         recent_run_id= self.recent_run_id,
-                         stats= self.stats)
-                )
+        # self.schedule = cloud_job_schedule.schedule
+        # self.exection_info = cloud_job_schedule.execution_info
+        # if self.state == 'completed':
+        #     self.next_run_time = cloud_job_schedule.execution_info.next_run_time
+        # else:
+        #     self.next_run_time = None
+        # self.recent_run_id = cloud_job_schedule.execution_info.recent_job.id
 
 
 class ApplicationLog():

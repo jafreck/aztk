@@ -1,5 +1,6 @@
 import time
 import azure.batch.models as batch_models
+import azure
 import azure.batch.models.batch_error as batch_error
 
 from aztk import error
@@ -48,7 +49,11 @@ def __get_output_file_properties(batch_client, cluster_id: str, application_name
 
 
 def get_log_from_storage(blob_client, container_name, application_name, task):
-    blob = blob_client.get_blob_to_text(container_name, application_name + '/' + constants.SPARK_SUBMIT_LOGS_FILE)
+    try:
+        blob = blob_client.get_blob_to_text(container_name, application_name + '/' + constants.SPARK_SUBMIT_LOGS_FILE)
+    except azure.common.AzureMissingResourceHttpError:
+        raise error.AztkError("Logs not found in your storage account. They were either deleted or never existed.")
+
     return models.ApplicationLog(
         name=application_name,
         cluster_id=container_name,
