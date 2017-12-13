@@ -159,12 +159,13 @@ class JobConfiguration:
     def __init__(
             self,
             id,
-            applications=None,
+            applications,
+            vm_size,
             custom_scripts=None,
             spark_configuration=None,
-            vm_size=None,
             docker_repo=None,
-            max_dedicated_nodes=None):
+            max_dedicated_nodes=None,
+            max_low_pri_nodes=None):
         self.id = id
         self.applications = applications
         self.custom_scripts = custom_scripts
@@ -173,6 +174,7 @@ class JobConfiguration:
         self.gpu_enabled = helpers.is_gpu_enabled(vm_size)
         self.docker_repo = docker_repo
         self.max_dedicated_nodes = max_dedicated_nodes
+        self.max_low_pri_nodes = max_low_pri_nodes
         # self.recurrence_interval = recurrence_interval
         # self.do_not_run_until = do_not_run_until
         # self.do_not_run_after = do_not_run_after

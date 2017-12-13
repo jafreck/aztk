@@ -137,10 +137,15 @@ class Client(BaseClient):
     '''
     def submit_job(self, job_configuration):
         try:
-            zip_resource_files = upload_node_scripts.zip_scripts(self.blob_client, job_configuration.id, job_configuration.custom_scripts, job_configuration.spark_configuration)
-            start_task = create_cluster_helper.generate_cluster_start_task(self, zip_resource_files, job_configuration.docker_repo) #TODO add job.gpu_enabled
-
-            # job.application.gpu_enabled = job.gpu_enabled
+            zip_resource_files = upload_node_scripts.zip_scripts(self.blob_client,
+                                                                 job_configuration.id,
+                                                                 job_configuration.custom_scripts,
+                                                                 job_configuration.spark_configuration)
+            
+            start_task = create_cluster_helper.generate_cluster_start_task(self,
+                                                                           zip_resource_files,
+                                                                           job_configuration.gpu_enabled,
+                                                                           job_configuration.docker_repo)
              
             application_tasks = []
             for application in job_configuration.applications:
@@ -156,9 +161,15 @@ class Client(BaseClient):
                 offer='UbuntuServer',
                 sku='16.04')
             
-            autoscale_formula = "maxNumberofVMs = {0}; targetNumberofVMs = {1}; $TargetDedicatedNodes=min(maxNumberofVMs, targetNumberofVMs)".format(
-                job_configuration.max_dedicated_nodes, job_configuration.max_dedicated_nodes)
-
+            if job_configuration.max_dedicated_nodes and not job_configuration.max_low_pri_nodes:
+                autoscale_formula = "maxNumberofVMs = {0}; targetNumberofVMs = {1}; $TargetDedicatedNodes=min(maxNumberofVMs, targetNumberofVMs)".format(
+                    job_configuration.max_dedicated_nodes, job_configuration.max_dedicated_nodes)
+            elif job_configuration.max_low_pri_nodes and not job_configuration.max_dedicated_nodes:
+                autoscale_formula = "maxNumberofVMs = {0}; targetNumberofVMs = {1}; $TargetLowPriorityNodes=min(maxNumberofVMs, targetNumberofVMs)".format(
+                    job_configuration.max_dedicated_nodes, job_configuration.max_dedicated_nodes)
+            else:
+                raise error.AztkError("Jobs do not support both dedicated and low priority nodes. max_dedicated_nodes and max_low_pri_nodes are mutually exclusive values.")
+            
             job = self.__submit_job(
                 job_configuration=job_configuration,
                 start_task=start_task,
