@@ -66,7 +66,6 @@ def upload_file_to_container(container_name,
 
 def __app_submit_cmd(
         name: str,
-        # gpu_enabled: bool,
         app: str,
         app_args: str,
         main_class: str,
@@ -113,7 +112,7 @@ def __app_submit_cmd(
         os.environ['AZ_BATCH_TASK_WORKING_DIR'] + '/' + app + ' ' +
         ' '.join(['\'' + app_arg + '\'' for app_arg in app_args if app_args]))
 
-    print("SPARK SUBMIT CMD: ", spark_submit_cmd.to_str())
+    # print("SPARK SUBMIT CMD: ", spark_submit_cmd.to_str())
 
     return spark_submit_cmd
 
@@ -151,7 +150,6 @@ def recieve_submit_request(application_file_path):
 
     cmd = __app_submit_cmd(
         name=application['name'],
-        # gpu_enabled=application['gpu_enabled'],
         app=os.path.basename(application['application']),
         app_args=application['application_args'],
         main_class=application['main_class'],

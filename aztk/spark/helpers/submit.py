@@ -97,8 +97,6 @@ def submit_application(spark_client, cluster_id, application, wait: bool = False
     """
     Submit a spark app
     """
-    # cluster = spark_client.get_cluster(cluster_id)
-    # application.gpu_enabled = cluster.gpu_enabled
     task = generate_task(spark_client, cluster_id, application)
 
     # Add task to batch job (which has the same name as cluster_id)

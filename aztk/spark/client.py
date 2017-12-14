@@ -25,7 +25,12 @@ class Client(BaseClient):
                                                                  cluster_conf.cluster_id,
                                                                  cluster_conf.custom_scripts,
                                                                  cluster_conf.spark_configuration)
-            start_task = create_cluster_helper.generate_cluster_start_task(self, zip_resource_files, cluster_conf.gpu_enabled, cluster_conf.docker_repo, cluster_conf.file_shares)
+            
+            start_task = create_cluster_helper.generate_cluster_start_task(self,
+                                                                           zip_resource_files,
+                                                                           cluster_conf.gpu_enabled,
+                                                                           cluster_conf.docker_repo,
+                                                                           cluster_conf.file_shares)
 
             software_metadata_key = "spark"
 
