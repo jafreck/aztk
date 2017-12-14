@@ -14,9 +14,9 @@ job:
         #       runOn: <master/worker/all-nodes>
 
     spark_configuration:
-        spark_defaults_conf: ~/dev/aztk/.aztk/spark-defaults.conf
-        spark_env_sh: ~/dev/aztk/.aztk/spark-env.sh
-        core_site_xml: ~/dev/aztk/.aztk/core-site.xml
+        spark_defaults_conf: .aztk/spark-defaults.conf
+        spark_env_sh: .aztk/spark-env.sh
+        core_site_xml: .aztk/core-site.xml
 
     # an application maps directly to a spark-submit command
     applications:
