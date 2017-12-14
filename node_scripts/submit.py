@@ -110,7 +110,7 @@ def __app_submit_cmd(
 
     spark_submit_cmd.add_argument(
         os.environ['AZ_BATCH_TASK_WORKING_DIR'] + '/' + app + ' ' +
-        ' '.join(['\'' + app_arg + '\'' for app_arg in app_args if app_args]))
+        ' '.join(['\'' + str(app_arg) + '\'' for app_arg in app_args if app_args]))
 
     # print("SPARK SUBMIT CMD: ", spark_submit_cmd.to_str())
 
