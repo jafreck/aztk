@@ -166,9 +166,10 @@ class Client(BaseClient):
                     job_configuration.max_dedicated_nodes, job_configuration.max_dedicated_nodes)
             elif job_configuration.max_low_pri_nodes and not job_configuration.max_dedicated_nodes:
                 autoscale_formula = "maxNumberofVMs = {0}; targetNumberofVMs = {1}; $TargetLowPriorityNodes=min(maxNumberofVMs, targetNumberofVMs)".format(
-                    job_configuration.max_dedicated_nodes, job_configuration.max_dedicated_nodes)
+                    job_configuration.max_low_pri_nodes, job_configuration.max_low_pri_nodes)
             else:
-                raise error.AztkError("Jobs do not support both dedicated and low priority nodes. max_dedicated_nodes and max_low_pri_nodes are mutually exclusive values.")
+                raise error.AztkError("Jobs do not support both dedicated and low priority nodes. JobConfiguration fields max_dedicated_nodes and max_low_pri_nodes are mutually exclusive values.")
+            
             
             job = self.__submit_job(
                 job_configuration=job_configuration,

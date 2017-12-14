@@ -284,6 +284,7 @@ class JobConfig():
         self.vm_size=None
         self.docker_repo = None
         self.max_dedicated_nodes = None
+        self.max_low_pri_nodes = None
 
     def _merge_dict(self, config):
         config = config.get('job')
@@ -296,20 +297,19 @@ class JobConfig():
             self.vm_size = cluster_configuration.get('vm_size')
             self.docker_repo = cluster_configuration.get('docker_repo')
             self.max_dedicated_nodes = cluster_configuration.get('size')
+            self.max_low_pri_nodes = cluster_configuration.get('size_low_pri')
             self.custom_scripts = cluster_configuration.get('custom_scripts')
        
         self.applications = config.get('applications')
-        print(config)
+
         self.spark_configuration = config.get('spark_configuration')
-
-
 
     
     def _read_config_file(self, path: str = aztk.utils.constants.DEFAULT_SPARK_JOB_CONFIG):
         """
             Reads the Job config file in the .aztk/ directory (.aztk/job.yaml)
         """
-        if not os.path.isfile(path):
+        if not path or not os.path.isfile(path):
             return
 
         with open(path, 'r') as stream:
@@ -324,10 +324,12 @@ class JobConfig():
 
             self._merge_dict(config)
 
-    def merge(self):
-        # self._read_config_file(aztk.utils.constants.GLOBAL_SPARK_JOB_CONFIG)
+    def merge(self, id, job_config_yaml=None):
+        self._read_config_file(aztk.utils.constants.GLOBAL_SPARK_JOB_CONFIG)
         self._read_config_file(aztk.utils.constants.DEFAULT_SPARK_JOB_CONFIG)
-        
+        self._read_config_file(job_config_yaml)
+        if id:
+            self.id = id
 
 
 def load_aztk_spark_config():
