@@ -1,52 +1,58 @@
 # Job Configuration
+#   An Aztk Job is a cluster and an array of Spark applications to run on that cluster
+#   AZTK Spark Jobs will automatically manage the lifecycle of the cluster
 
 job:
     id: 
     cluster_configuration:
-        vm_size: 
-        size: 
-        size_low_pri: 
-        docker_repo: 
-        custom_scripts: 
+        vm_size: standard_d2_v2
+        size: 2
+        size_low_pri: 0
+        docker_repo: # defaults to aztk/base:spark2.2.0
+        # custom_scripts:
+        #     - script: </path/to/script.sh or /path/to/script/directory/>
+        #       runOn: <master/worker/all-nodes>
 
     spark_configuration:
-        spark_defaults_conf: 
-        spark_env_sh: 
-        core_site_xml: 
-  
+        spark_defaults_conf: ~/dev/aztk/.aztk/spark-defaults.conf
+        spark_env_sh: ~/dev/aztk/.aztk/spark-env.sh
+        core_site_xml: ~/dev/aztk/.aztk/core-site.xml
+
+    # an application maps directly to a spark-submit command
     applications:
-    - name: 
-        application: 
-        application_args:
-            - 
+      - name: # unique ID
+        application: # /path/to/application
+        application_args: 
+          - 
         main_class: 
-        jars:
-            - 
-        py_files:
-            - 
+        jars: 
+          - 
+        py_files: 
+          - 
         files:
-            - 
-        driver_java_options:
-            - 
+          - 
+        driver_java_options: 
+          - 
         driver_library_path: 
         driver_class_path: 
         driver_memory: 
         executor_memory: 
         driver_cores: 
         executor_cores: 
-    - name: 
-        application: 
-        application_args:
-            - 
+      
+      - name: # unique ID
+        application: # /path/to/application
+        application_args: 
+          - 
         main_class: 
-        jars:
-            - 
-        py_files:
-            - 
+        jars: 
+          - 
+        py_files: 
+          - 
         files:
-            - 
-        driver_java_options:
-            - 
+          - 
+        driver_java_options: 
+          - 
         driver_library_path: 
         driver_class_path: 
         driver_memory: 

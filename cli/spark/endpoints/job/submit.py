@@ -46,9 +46,9 @@ def execute(args: typing.NamedTuple):
             )
         )
     spark_configuration = aztk.spark.models.SparkConfiguration(
-        spark_defaults_conf=job_conf.spark_configuration.get('spark_defaults_conf'),
-        spark_env_sh=job_conf.spark_configuration.get('spark_env_sh'),
-        core_site_xml=job_conf.spark_configuration.get('core_site_xml')
+        spark_defaults_conf=job_conf.spark_defaults_conf,
+        spark_env_sh=job_conf.spark_env_sh,
+        core_site_xml=job_conf.core_site_xml
     )
     job_configuration = aztk.spark.models.JobConfiguration(
         id=job_conf.id,

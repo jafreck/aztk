@@ -285,6 +285,9 @@ class JobConfig():
         self.docker_repo = None
         self.max_dedicated_nodes = None
         self.max_low_pri_nodes = None
+        self.spark_defaults_conf = None
+        self.spark_env_sh = None
+        self.core_site_xml = None
 
     def _merge_dict(self, config):
         config = config.get('job')
@@ -302,9 +305,19 @@ class JobConfig():
        
         self.applications = config.get('applications')
 
-        self.spark_configuration = config.get('spark_configuration')
+        spark_configuration = config.get('spark_configuration')
+        if spark_configuration:
+            self.spark_defaults_conf = self.__convert_to_path(spark_configuration.get('spark_defaults_conf'))
+            self.spark_env_sh = self.__convert_to_path(spark_configuration.get('spark_env_sh'))
+            self.core_site_xml = self.__convert_to_path(spark_configuration.get('core_site_xml'))
 
-    
+    def __convert_to_path(self, str_path):
+        if str_path:
+            abs_path = os.path.abspath(os.path.expanduser(str_path))
+            if not os.path.exists(abs_path):
+                raise aztk.error.AztkError("Could not find file: {0}\nCheck your configuration file".format(str_path))
+            return abs_path
+
     def _read_config_file(self, path: str = aztk.utils.constants.DEFAULT_SPARK_JOB_CONFIG):
         """
             Reads the Job config file in the .aztk/ directory (.aztk/job.yaml)

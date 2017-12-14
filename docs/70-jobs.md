@@ -111,7 +111,7 @@ aztk spark job list
 To view details about a particular Job, run:
 
 ```sh
-aztk spark Job get --id <your_job_id>
+aztk spark job get --id <your_job_id>
 ```
 
 For example here Job 'pipy' has 2 applications which have already completed.
