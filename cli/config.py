@@ -11,7 +11,6 @@ class SecretsConfig:
         self.batch_account_name = None
         self.batch_account_key = None
         self.batch_service_url = None
-        self.batch_resource_url = None
 
         self.storage_account_name = None
         self.storage_account_key = None
@@ -20,6 +19,8 @@ class SecretsConfig:
         self.service_principal_tenant_id = None
         self.service_principal_client_id = None
         self.service_principal_credential = None
+        self.batch_account_resource_id = None
+        self.storage_account_resource_id = None
 
         self.docker_endpoint = None
         self.docker_username = None
@@ -44,25 +45,39 @@ class SecretsConfig:
             self._merge_dict(secrets_config)
 
     def _merge_dict(self, secrets_config):
-        # Ensure all necessary fields are provided
+        shared_key = secrets_config.get('sharedKey')
         batch = secrets_config.get('batch')
+        storage = secrets_config.get('storage')
+
+        if shared_key and (batch or storage):
+            raise aztk.error.AztkError(
+                "Shared keys should be configured under sharedKey: or under batch: and storage:, not both.")
+
+        if shared_key:
+            self.batch_account_name = shared_key.get('batchaccountname')
+            self.batch_account_key = shared_key.get('batchaccountkey')
+            self.batch_service_url = shared_key.get('batchserviceurl')
+            self.storage_account_name = shared_key.get('storageaccountname')
+            self.storage_account_key = shared_key.get('storageaccountkey')
+            self.storage_account_suffix = shared_key.get('storageaccountsuffix')
+
         if batch:
             self.batch_account_name = batch.get('batchaccountname')
             self.batch_account_key = batch.get('batchaccountkey')
             self.batch_service_url = batch.get('batchserviceurl')
-            self.batch_resource_url = batch.get('resourceurl')
 
-        storage = secrets_config.get('storage')
         if storage:
             self.storage_account_name = storage.get('storageaccountname')
             self.storage_account_key = storage.get('storageaccountkey')
             self.storage_account_suffix = storage.get('storageaccountsuffix')
 
-        serviceprincipal = secrets_config.get('serviceprincipal')
-        if serviceprincipal:
-            self.service_principal_tenant_id = serviceprincipal.get('tenantid')
-            self.service_principal_client_id = serviceprincipal.get('clientid')
-            self.service_principal_credential = serviceprincipal.get('credential')
+        service_principal = secrets_config.get('servicePrincipal')
+        if service_principal:
+            self.service_principal_tenant_id = service_principal.get('tenantid')
+            self.service_principal_client_id = service_principal.get('clientid')
+            self.service_principal_credential = service_principal.get('credential')
+            self.batch_account_resource_id = service_principal.get('batchaccountresourceid')
+            self.storage_account_resource_id = service_principal.get('storageaccountresourceid')
 
         docker_config = secrets_config.get('docker')
         if docker_config:
@@ -211,7 +226,7 @@ class SshConfig:
         self.jupyter_port = '8888'
         self.name_node_ui_port = '50070'
         self.rstudio_server_port = '8787'
-        
+
     def _read_config_file(self, path: str = aztk.utils.constants.DEFAULT_SSH_CONFIG_PATH):
         """
             Reads the config file in the .aztk/ directory (.aztk/cluster.yaml)

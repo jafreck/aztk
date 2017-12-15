@@ -14,16 +14,22 @@ class Client:
         self.blob_config = azure_api.BlobConfig(
             account_key=self.secrets_config.storage_account_key,
             account_name=self.secrets_config.storage_account_name,
-            account_suffix=self.secrets_config.storage_account_suffix
+            account_suffix=self.secrets_config.storage_account_suffix,
+
+            tenant_id=self.secrets_config.service_principal_tenant_id,
+            client_id=self.secrets_config.service_principal_client_id,
+            credential=self.secrets_config.service_principal_credential,
+            resource_id=self.secrets_config.storage_account_resource_id
         )
         self.batch_config = azure_api.BatchConfig(
             service_url=self.secrets_config.batch_service_url,
             account_key=self.secrets_config.batch_account_key,
             account_name=self.secrets_config.batch_account_name,
-            resource_url=self.secrets_config.batch_resource_url,
+
             tenant_id=self.secrets_config.service_principal_tenant_id,
             client_id=self.secrets_config.service_principal_client_id,
-            credential=self.secrets_config.service_principal_credential
+            credential=self.secrets_config.service_principal_credential,
+            resource_id=self.secrets_config.batch_account_resource_id
         )
 
         self.batch_client = azure_api.make_batch_client(self.batch_config)

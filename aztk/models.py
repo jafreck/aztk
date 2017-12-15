@@ -53,13 +53,14 @@ class SecretsConfiguration:
             batch_account_name=None,
             batch_account_key=None,
             batch_service_url=None,
-            batch_resource_url=None,
             storage_account_name=None,
             storage_account_key=None,
             storage_account_suffix=None,
             service_principal_tenant_id=None,
             service_principal_client_id=None,
             service_principal_credential=None,
+            batch_account_resource_id=None,
+            storage_account_resource_id=None,
             docker_endpoint=None,
             docker_username=None,
             docker_password=None,
@@ -69,7 +70,6 @@ class SecretsConfiguration:
         self.batch_account_name = batch_account_name
         self.batch_account_key = batch_account_key
         self.batch_service_url = batch_service_url
-        self.batch_resource_url = batch_resource_url
 
         self.storage_account_name = storage_account_name
         self.storage_account_key = storage_account_key
@@ -78,6 +78,8 @@ class SecretsConfiguration:
         self.service_principal_tenant_id = service_principal_tenant_id
         self.service_principal_client_id = service_principal_client_id
         self.service_principal_credential = service_principal_credential
+        self.batch_account_resource_id = batch_account_resource_id
+        self.storage_account_resource_id = storage_account_resource_id
 
         self.docker_endpoint = docker_endpoint
         self.docker_username = docker_username
