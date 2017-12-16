@@ -11,7 +11,6 @@ from core import config
 
 
 def schedule_tasks(tasks_path):
-
     '''
         Handle the request to submit a task
     '''
@@ -28,8 +27,6 @@ def schedule_tasks(tasks_path):
         # schedule the task
         batch_client.task.add(job_id=os.environ['AZ_BATCH_JOB_ID'], task=task)
 
-
-    
 
 if __name__ == "__main__":
     tasks_path = []

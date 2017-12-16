@@ -244,11 +244,8 @@ def print_jobs(jobs: List[aztk.spark.models.Job]):
             )
         )
 
-def utc_to_local(utc_dt):
-    return utc_dt.replace(tzinfo=datetime.timezone.utc).astimezone(tz=None).strftime("%H:%M%p %d/%m/%y")
 
 def print_job(job: aztk.spark.models.Job):
-    # node_count = __pretty_node_count(cluster)
     print_format = '{:<36}| {:<15}'
 
     log.info("")
@@ -275,8 +272,6 @@ def print_job(job: aztk.spark.models.Job):
     log.info('')
 
 def print_application(application: aztk.spark.models.Application):
-    # node_count = __pretty_node_count(cluster)
-
     log.info("")
     log.info("App         %s", application.name)
     log.info("------------------------------------------")
@@ -284,8 +279,6 @@ def print_application(application: aztk.spark.models.Application):
 
     print_format = '{:<30}| {:<15}'
     print_format_underline = '{:-<30}|{:-<17}'
-    # log.info(print_format.format("Application", "State"))
-    # log.info(print_format_underline.format('', '', '', ''))
 
     log.info(
         print_format.format(
@@ -330,3 +323,7 @@ class Spinner:
     def stop(self):
         self.busy = False
         time.sleep(self.delay)
+
+
+def utc_to_local(utc_dt):
+    return utc_dt.replace(tzinfo=datetime.timezone.utc).astimezone(tz=None).strftime("%H:%M%p %d/%m/%y")

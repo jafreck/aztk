@@ -35,6 +35,8 @@ Each Job has one or more applications given as a List in Job.yaml. Applications 
 ```
 _Please note: the only required fields are name and application. All other fields may be removed or left blank._
 
+NOTE: The Applcaition name can only contain alphanumeric characters including hyphens and underscores, and cannot contain more than 64 characters. Each application **must** have a unique name.
+
 Jobs also require a definition of the cluster on which the Applications will run. The following properties define a cluster:
 ```yaml
   cluster_configuration:
@@ -92,8 +94,7 @@ Submit a Spark Job:
 aztk spark job submit --id <your_job_id> --job-conf </path/to/job.yaml>
 ```
 
-NOTE: The Job id (`--id`) can only contain alphanumeric characters including hyphens and underscores, and cannot contain more than 64 characters. Each cluster **must** have a unique cluster id.
-
+NOTE: The Job id (`--id`) can only contain alphanumeric characters including hyphens and underscores, and cannot contain more than 64 characters. Each Job **must** have a unique id.
 
 #### Low priority nodes
 You can create your Job with [low-priority](https://docs.microsoft.com/en-us/azure/batch/batch-low-pri-vms) VMs at an 80% discount by using `--size-low-pri` instead of `--size`. Note that these are great for experimental use, but can be taken away at any time. We recommend against this option when doing long running jobs or for critical workloads.

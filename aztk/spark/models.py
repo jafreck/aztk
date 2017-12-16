@@ -11,7 +11,6 @@ class Cluster(aztk.models.Cluster):
         self.master_node_id = self.__get_master_node_id()
         self.gpu_enabled = helpers.is_gpu_enabled(pool.vm_size)
 
-
     def is_pool_running_spark(self, pool: batch_models.CloudPool):
         if pool.metadata is None:
             return False
@@ -34,6 +33,7 @@ class Cluster(aztk.models.Cluster):
                 return metadata.value
 
         return None
+
 
 class RemoteLogin(aztk.models.RemoteLogin):
     pass
@@ -74,13 +74,13 @@ class ClusterConfiguration(aztk.models.ClusterConfiguration):
             docker_repo: str=None,
             spark_configuration: SparkConfiguration = None):
         super().__init__(custom_scripts=custom_scripts,
-              cluster_id=cluster_id,
-              vm_count=vm_count,
-              vm_low_pri_count=vm_low_pri_count,
-              vm_size=vm_size,
-              docker_repo=docker_repo,
-              file_shares=file_shares
-        )
+                         cluster_id=cluster_id,
+                         vm_count=vm_count,
+                         vm_low_pri_count=vm_low_pri_count,
+                         vm_size=vm_size,
+                         docker_repo=docker_repo,
+                         file_shares=file_shares
+                         )
         self.spark_configuration = spark_configuration
         self.gpu_enabled = helpers.is_gpu_enabled(vm_size)
 
@@ -125,35 +125,36 @@ class ApplicationConfiguration:
         self.driver_cores = driver_cores
         self.executor_cores = executor_cores
 
+
 class Application:
     def __init__(self, cloud_task: batch_models.CloudTask):
-        self.name=cloud_task.id
-        self.last_modified=cloud_task.last_modified
-        self.creation_time=cloud_task.creation_time
-        self.state=cloud_task.state._value_
-        self.state_transition_time=cloud_task.state_transition_time
-        self.previous_state=cloud_task.previous_state._value_
-        self.previous_state_transition_time=cloud_task.previous_state_transition_time
-        
-        self._execution_info=cloud_task.execution_info
-        self._node_info=cloud_task.node_info
-        self._stats=cloud_task.stats
-        self._multi_instance_settings=cloud_task.multi_instance_settings
-        self._display_name=cloud_task.display_name
-        self._exit_conditions=cloud_task.exit_conditions
-        self._command_line=cloud_task.command_line
-        # self._container_settings=cloud_task.container_settings
-        self._resource_files=cloud_task.resource_files
-        self._output_files=cloud_task.output_files
-        self._environment_settings=cloud_task.environment_settings
-        self._affinity_info=cloud_task.affinity_info
-        self._constraints=cloud_task.constraints
-        self._user_identity=cloud_task.user_identity
-        self._depends_on=cloud_task.depends_on
-        self._application_package_references=cloud_task.application_package_references
-        self._authentication_token_settings=cloud_task.authentication_token_settings
-        self._url=cloud_task.url
-        self._e_tag=cloud_task.e_tag
+        self.name = cloud_task.id
+        self.last_modified = cloud_task.last_modified
+        self.creation_time = cloud_task.creation_time
+        self.state = cloud_task.state._value_
+        self.state_transition_time = cloud_task.state_transition_time
+        self.previous_state = cloud_task.previous_state._value_
+        self.previous_state_transition_time = cloud_task.previous_state_transition_time
+
+        self._execution_info = cloud_task.execution_info
+        self._node_info = cloud_task.node_info
+        self._stats = cloud_task.stats
+        self._multi_instance_settings = cloud_task.multi_instance_settings
+        self._display_name = cloud_task.display_name
+        self._exit_conditions = cloud_task.exit_conditions
+        self._command_line = cloud_task.command_line
+        self._resource_files = cloud_task.resource_files
+        self._output_files = cloud_task.output_files
+        self._environment_settings = cloud_task.environment_settings
+        self._affinity_info = cloud_task.affinity_info
+        self._constraints = cloud_task.constraints
+        self._user_identity = cloud_task.user_identity
+        self._depends_on = cloud_task.depends_on
+        self._application_package_references = cloud_task.application_package_references
+        self._authentication_token_settings = cloud_task.authentication_token_settings
+        self._url = cloud_task.url
+        self._e_tag = cloud_task.e_tag
+
 
 class JobConfiguration:
     def __init__(
@@ -170,15 +171,12 @@ class JobConfiguration:
         self.applications = applications
         self.custom_scripts = custom_scripts
         self.spark_configuration = spark_configuration
-        self.vm_size=vm_size
+        self.vm_size = vm_size
         self.gpu_enabled = helpers.is_gpu_enabled(vm_size)
         self.docker_repo = docker_repo
         self.max_dedicated_nodes = max_dedicated_nodes
         self.max_low_pri_nodes = max_low_pri_nodes
-        # self.recurrence_interval = recurrence_interval
-        # self.do_not_run_until = do_not_run_until
-        # self.do_not_run_after = do_not_run_after
-        # self.start_window = start_window
+
 
 class JobState():
     complete = 'completed'
@@ -196,21 +194,13 @@ class Job():
         self.state = cloud_job_schedule.state._value_
         self.state_transition_time = cloud_job_schedule.state_transition_time
         self.creation_time = cloud_job_schedule.creation_time
-        self.applications = [Application(task) for task in (cloud_tasks or [])] 
-
-        # self.schedule = cloud_job_schedule.schedule
-        # self.exection_info = cloud_job_schedule.execution_info
-        # if self.state == 'completed':
-        #     self.next_run_time = cloud_job_schedule.execution_info.next_run_time
-        # else:
-        #     self.next_run_time = None
-        # self.recent_run_id = cloud_job_schedule.execution_info.recent_job.id
+        self.applications = [Application(task) for task in (cloud_tasks or [])]
 
 
 class ApplicationLog():
     def __init__(self, name: str, cluster_id: str, log: str, total_bytes: int, application_state: batch_models.TaskState):
         self.name = name
-        self.cluster_id = cluster_id #TODO: change to something cluster/job agnostic
+        self.cluster_id = cluster_id  # TODO: change to something cluster/job agnostic
         self.log = log
         self.total_bytes = total_bytes
         self.application_state = application_state

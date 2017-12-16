@@ -25,7 +25,7 @@ class Client(BaseClient):
                                                                  cluster_conf.cluster_id,
                                                                  cluster_conf.custom_scripts,
                                                                  cluster_conf.spark_configuration)
-            
+
             start_task = create_cluster_helper.generate_cluster_start_task(self,
                                                                            zip_resource_files,
                                                                            cluster_conf.gpu_enabled,
@@ -126,7 +126,8 @@ class Client(BaseClient):
 
     def get_application_log(self, cluster_id: str, application_name: str, tail=False, current_bytes: int = 0):
         try:
-            return get_log_helper.get_log(self.batch_client, self.blob_client, cluster_id, application_name, tail, current_bytes)
+            return get_log_helper.get_log(self.batch_client, self.blob_client,
+                                          cluster_id, application_name, tail, current_bytes)
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
 
@@ -146,15 +147,17 @@ class Client(BaseClient):
                                                                  job_configuration.id,
                                                                  job_configuration.custom_scripts,
                                                                  job_configuration.spark_configuration)
-            
+
             start_task = create_cluster_helper.generate_cluster_start_task(self,
                                                                            zip_resource_files,
                                                                            job_configuration.gpu_enabled,
                                                                            job_configuration.docker_repo)
-             
+
             application_tasks = []
             for application in job_configuration.applications:
-                application_tasks.append((application, submit_helper.generate_task(self, job_configuration.id, application)))
+                application_tasks.append(
+                    (application, submit_helper.generate_task(self, job_configuration.id, application))
+                )
 
             job_manager_task = job_submit_helper.generate_task(self, job_configuration, application_tasks)
 
@@ -165,17 +168,20 @@ class Client(BaseClient):
                 publisher='Canonical',
                 offer='UbuntuServer',
                 sku='16.04')
-            
+
             if job_configuration.max_dedicated_nodes and not job_configuration.max_low_pri_nodes:
-                autoscale_formula = "maxNumberofVMs = {0}; targetNumberofVMs = {1}; $TargetDedicatedNodes=min(maxNumberofVMs, targetNumberofVMs)".format(
-                    job_configuration.max_dedicated_nodes, job_configuration.max_dedicated_nodes)
+                autoscale_formula = "maxNumberofVMs = {0}; targetNumberofVMs = {1};" \
+                                    " $TargetDedicatedNodes=min(maxNumberofVMs, targetNumberofVMs)".format(
+                                        job_configuration.max_dedicated_nodes, job_configuration.max_dedicated_nodes)
             elif job_configuration.max_low_pri_nodes and not job_configuration.max_dedicated_nodes:
-                autoscale_formula = "maxNumberofVMs = {0}; targetNumberofVMs = {1}; $TargetLowPriorityNodes=min(maxNumberofVMs, targetNumberofVMs)".format(
-                    job_configuration.max_low_pri_nodes, job_configuration.max_low_pri_nodes)
+                autoscale_formula = "maxNumberofVMs = {0}; targetNumberofVMs = {1};" \
+                                    " $TargetLowPriorityNodes=min(maxNumberofVMs, targetNumberofVMs)".format(
+                                        job_configuration.max_low_pri_nodes, job_configuration.max_low_pri_nodes)
             else:
-                raise error.AztkError("Jobs do not support both dedicated and low priority nodes. JobConfiguration fields max_dedicated_nodes and max_low_pri_nodes are mutually exclusive values.")
-            
-            
+                raise error.AztkError("Jobs do not support both dedicated and low priority nodes." \
+                                      " JobConfiguration fields max_dedicated_nodes and max_low_pri_nodes are mutually exclusive values.")
+
+
             job = self.__submit_job(
                 job_configuration=job_configuration,
                 start_task=start_task,
@@ -183,46 +189,36 @@ class Client(BaseClient):
                 autoscale_formula=autoscale_formula,
                 software_metadata_key=software_metadata_key,
                 vm_image_model=vm_image)
-        
+
+            return models.Job(job)
+
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
 
     def list_jobs(self):
         try:
-            return [models.Job(cloud_job_schedule) for cloud_job_schedule in self.batch_client.job_schedule.list()]
+            return [models.Job(cloud_job_schedule) for cloud_job_schedule in job_submit_helper.list_jobs(self)]
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
-       
+
     def list_applicaitons(self, job_id):
         try:
             return job_submit_helper.list_applications(self, job_id)
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
-       
+
     def get_job(self, job_id):
         try:
             job, apps = job_submit_helper.get_job(self, job_id)
             return models.Job(job, apps)
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
-    
+
     def stop_job(self, job_id):
         try:
             return job_submit_helper.stop(self, job_id)
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
-
-    # def enable_job(self, job_id):
-    #     try:
-    #         return job_submit_helper.enable(self, job_id)
-    #     except batch_error.BatchErrorException as e:
-    #         raise error.AztkError(helpers.format_batch_exception(e))
-
-    # def disable_job(self, job_id):
-    #     try:
-    #         return job_submit_helper.disable(self, job_id)
-    #     except batch_error.BatchErrorException as e:
-    #         raise error.AztkError(helpers.format_batch_exception(e))
 
     def delete_job(self, job_id):
         try:

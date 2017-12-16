@@ -32,7 +32,6 @@ job:
         files:
           - 
         driver_java_options: 
-          - 
         driver_library_path: 
         driver_class_path: 
         driver_memory: 
@@ -52,7 +51,6 @@ job:
         files:
           - 
         driver_java_options: 
-          - 
         driver_library_path: 
         driver_class_path: 
         driver_memory: 

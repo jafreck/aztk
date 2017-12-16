@@ -112,8 +112,6 @@ def __app_submit_cmd(
         os.environ['AZ_BATCH_TASK_WORKING_DIR'] + '/' + app + ' ' +
         ' '.join(['\'' + str(app_arg) + '\'' for app_arg in app_args if app_args]))
 
-    # print("SPARK SUBMIT CMD: ", spark_submit_cmd.to_str())
-
     return spark_submit_cmd
 
 
@@ -163,8 +161,11 @@ def recieve_submit_request(application_file_path):
         executor_memory=application['executor_memory'],
         driver_cores=application['driver_cores'],
         executor_cores=application['executor_cores'])
-    
-    subprocess.call(cmd.to_str(), shell=True)
+
+    try:
+        subprocess.call(cmd.to_str(), shell=True)
+    except subprocess.CalledProcessError as e:
+        print(e)
 
     upload_log(blob_client, application)
 

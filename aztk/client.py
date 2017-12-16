@@ -160,14 +160,20 @@ class Client:
         result = self.batch_client.compute_node.get_remote_login_settings(pool_id, node_id)
         return models.RemoteLogin(ip_address=result.remote_login_ip_address, port=str(result.remote_login_port))
 
-    def __submit_job(self, job_configuration, start_task, job_manager_task, autoscale_formula, software_metadata_key: str, vm_image_model):
+    def __submit_job(self,
+                     job_configuration,
+                     start_task,
+                     job_manager_task,
+                     autoscale_formula,
+                     software_metadata_key: str,
+                     vm_image_model):
         """
             Job Submission
             :param job_configuration -> aztk_sdk.spark.models.JobConfiguration
             :param start_task -> batch_models.StartTask
             :param job_manager_task -> batch_models.TaskAddParameter
             :param autoscale forumula -> str
-            :param software_metadata_key: str
+            :param software_metadata_key -> str
             :param vm_image_model -> aztk_sdk.models.VmImage
             :returns None
         """
@@ -220,7 +226,7 @@ class Client:
             id=job_configuration.id,
             schedule=schedule,
             job_specification=job_spec)
-        
+
         self.batch_client.job_schedule.add(setup)
 
         return self.batch_client.job_schedule.get(job_schedule_id=job_configuration.id)
@@ -233,7 +239,7 @@ class Client:
 
     def create_cluster(self, cluster_conf, wait: bool = False):
         raise NotImplementedError()
-    
+
     def create_clusters_in_parallel(self, cluster_confs):
         raise NotImplementedError()
 

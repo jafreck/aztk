@@ -235,7 +235,7 @@ Find some samples and getting stated tutorial in the `examples/sdk/` directory o
     
     Returns:
         
-        - None
+        - aztk.spark.models.Job
 
 - `list_jobs(self)`
 
