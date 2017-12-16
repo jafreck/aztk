@@ -30,16 +30,17 @@ def __docker_run_cmd(docker_repo: str = None, gpu_enabled: bool = False, file_mo
             cmd.add_option('-v', '{0}:{0}'.format(mount.mount_path))
 
     cmd.add_option('-e', 'DOCKER_WORKING_DIR=/batch/startup/wd')
-    cmd.add_option('-e', 'BATCH_SERVICE_URL=$BATCH_SERVICE_URL')
     cmd.add_option('-e', 'AZ_BATCH_ACCOUNT_NAME=$AZ_BATCH_ACCOUNT_NAME')
     cmd.add_option('-e', 'BATCH_ACCOUNT_KEY=$BATCH_ACCOUNT_KEY')
-    cmd.add_option('-e', 'BATCH_TENANT_ID=$BATCH_TENANT_ID')
-    cmd.add_option('-e', 'BATCH_CLIENT_ID=$BATCH_CLIENT_ID')
-    cmd.add_option('-e', 'BATCH_CREDENTIAL=$BATCH_CREDENTIAL')
-    cmd.add_option('-e', 'BATCH_RESOURCE_URL=$BATCH_RESOURCE_URL')
+    cmd.add_option('-e', 'BATCH_SERVICE_URL=$BATCH_SERVICE_URL')
     cmd.add_option('-e', 'STORAGE_ACCOUNT_NAME=$STORAGE_ACCOUNT_NAME')
     cmd.add_option('-e', 'STORAGE_ACCOUNT_KEY=$STORAGE_ACCOUNT_KEY')
     cmd.add_option('-e', 'STORAGE_ACCOUNT_SUFFIX=$STORAGE_ACCOUNT_SUFFIX')
+    cmd.add_option('-e', 'SP_TENANT_ID=$SP_TENANT_ID')
+    cmd.add_option('-e', 'SP_CLIENT_ID=$SP_CLIENT_ID')
+    cmd.add_option('-e', 'SP_CREDENTIAL=$SP_CREDENTIAL')
+    cmd.add_option('-e', 'SP_BATCH_RESOURCE_ID=$SP_BATCH_RESOURCE_ID')
+    cmd.add_option('-e', 'SP_STORAGE_RESOURCE_ID=$SP_STORAGE_RESOURCE_ID')
     cmd.add_option('-e', 'AZ_BATCH_POOL_ID=$AZ_BATCH_POOL_ID')
     cmd.add_option('-e', 'AZ_BATCH_NODE_ID=$AZ_BATCH_NODE_ID')
     cmd.add_option(
@@ -64,7 +65,7 @@ def __docker_run_cmd(docker_repo: str = None, gpu_enabled: bool = False, file_mo
     cmd.add_option('-p', '50090:50090')     # Secondary NameNode http address
     cmd.add_option('-d', docker_repo)
     cmd.add_argument('/bin/bash /batch/startup/wd/docker_main.sh')
-    
+
     return cmd.to_str()
 
 def __get_docker_credentials(spark_client):
@@ -152,13 +153,15 @@ def generate_cluster_start_task(
         batch_models.EnvironmentSetting(
             name="BATCH_ACCOUNT_KEY", value=spark_client.batch_config.account_key),
         batch_models.EnvironmentSetting(
-            name="BATCH_TENANT_ID", value=spark_client.batch_config.tenant_id),
+            name="SP_TENANT_ID", value=spark_client.batch_config.tenant_id),
         batch_models.EnvironmentSetting(
-            name="BATCH_CLIENT_ID", value=spark_client.batch_config.client_id),
+            name="SP_CLIENT_ID", value=spark_client.batch_config.client_id),
         batch_models.EnvironmentSetting(
-            name="BATCH_CREDENTIAL", value=spark_client.batch_config.credential),
+            name="SP_CREDENTIAL", value=spark_client.batch_config.credential),
         batch_models.EnvironmentSetting(
-            name="BATCH_RESOURCE_URL", value=spark_client.batch_config.resource_url),
+            name="SP_BATCH_RESOURCE_ID", value=spark_client.batch_config.resource_id),
+        batch_models.EnvironmentSetting(
+            name="SP_STORAGE_RESOURCE_ID", value=spark_client.blob_config.resource_id),
         batch_models.EnvironmentSetting(
             name="STORAGE_ACCOUNT_NAME", value=spark_client.blob_config.account_name),
         batch_models.EnvironmentSetting(
