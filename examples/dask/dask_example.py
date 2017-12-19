@@ -1,16 +1,11 @@
-from dask import delayed
-
-data = [1, 2, 3, 4, 5, 6, 7, 8]
-results = []
-
-def inc(x):
-    return x+1
+from distributed import Client
 
 
-for x in data:
-    y = delayed(inc)(x)
-    results.append(y)
+with open('/master') as f:
+    master_ip = f.read().rstrip()
 
-total = delayed(sum)(results)
+client = Client('{0}:8786'.format(master_ip))
 
-print(total.compute())
+futures = client.map(lambda x: x+1, range(10000))
+total = client.submit(sum, futures)
+print(total.result())
