@@ -10,6 +10,7 @@ import azure.batch.models.batch_error as batch_error
 import aztk
 from cli import logger, log, utils, constants
 from cli.spark.endpoints import spark
+from cli.dask.endpoints.cluster import dask
 
 
 def main():
@@ -22,8 +23,11 @@ def main():
     subparsers.required = True
     spark_parser = subparsers.add_parser(
         "spark", help="Commands to run spark jobs")
+    dask_parser = subparsers.add_parser(
+        "dask", help="Commands to run dask jobs")
 
     spark.setup_parser(spark_parser)
+    dask.setup_parser(dask_parser)
     args = parser.parse_args()
 
     parse_common_args(args)
@@ -54,6 +58,7 @@ def parse_common_args(args: NamedTuple):
 def run_software(args: NamedTuple):
     softwares = {}
     softwares[aztk.models.Software.spark] = spark.execute
+    softwares[aztk.models.Software.dask] = dask.execute
 
     func = softwares[args.software]
     func(args)

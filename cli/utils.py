@@ -124,6 +124,7 @@ def stream_logs(client, cluster_id, application_name):
 def ssh_in_master(
         client,
         cluster_id: str,
+        container_name: str,
         username: str = None,
         webui: str = None,
         jobui: str = None,
@@ -137,6 +138,7 @@ def ssh_in_master(
     """
         SSH into head node of spark-app
         :param cluster_id: Id of the cluster to ssh in
+        :param container_name: Id of the container
         :param username: Username to use to ssh
         :param webui: Port for the spark master web ui (Local port)
         :param jobui: Port for the job web ui (Local port)
@@ -197,7 +199,7 @@ def ssh_in_master(
         "{0}@{1} -p {2}".format(user, master_node_ip, master_node_port))
 
     if host is False:
-        ssh_command.add_argument("\'sudo docker exec -it spark /bin/bash\'")
+        ssh_command.add_argument("\'sudo docker exec -it {0} /bin/bash\'".format(container_name))
 
     command = ssh_command.to_str()
 

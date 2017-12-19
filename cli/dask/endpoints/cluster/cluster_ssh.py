@@ -3,20 +3,20 @@ import typing
 from cli import log
 from cli import utils
 from cli.config import SshConfig
-from cli.spark.aztklib import load_spark_client
+from cli.dask.aztklib import load_dask_client
 import aztk
 import azure.batch.models.batch_error as batch_error
 
 
 def setup_parser(parser: argparse.ArgumentParser):
     parser.add_argument('--id', dest="cluster_id",
-                        help='The unique id of your spark cluster')
+                        help='The unique id of your dask cluster')
     parser.add_argument('--webui',
-                        help='Local port to port spark\'s master UI to')
+                        help='Local port to port dask\'s master UI to')
     parser.add_argument('--jobui',
-                        help='Local port to port spark\'s job UI to')
+                        help='Local port to port dask\'s job UI to')
     parser.add_argument('--jobhistoryui',
-                        help='Local port to port spark\'s job history UI to')
+                        help='Local port to port dask\'s job history UI to')
     parser.add_argument('--jupyter',
                         help='Local port to port jupyter to')
     parser.add_argument('--namenodeui',
@@ -24,10 +24,10 @@ def setup_parser(parser: argparse.ArgumentParser):
     parser.add_argument('--rstudioserver',
                         help='Local port to port rstudio server to')
     parser.add_argument('-u', '--username',
-                        help='Username to spark cluster')
+                        help='Username to dask cluster')
     parser.add_argument('--host', dest="host",
                         action='store_true',
-                        help='Connect to the host of the Spark container')
+                        help='Connect to the host of the dask container')
     parser.add_argument('--no-connect', dest="connect",
                         action='store_false',
                         help='Do not create the ssh session. Only print out \
@@ -37,7 +37,7 @@ def setup_parser(parser: argparse.ArgumentParser):
 
 
 def execute(args: typing.NamedTuple):
-    spark_client = load_spark_client()
+    dask_client = load_dask_client()
     ssh_conf = SshConfig()
 
     ssh_conf.merge(
@@ -55,7 +55,7 @@ def execute(args: typing.NamedTuple):
 
     http_prefix = 'http://localhost:'
     log.info("-------------------------------------------")
-    log.info("spark cluster id:    %s", ssh_conf.cluster_id)
+    log.info("dask cluster id:    %s", ssh_conf.cluster_id)
     log.info("open webui:          %s%s", http_prefix, ssh_conf.web_ui_port)
     log.info("open jobui:          %s%s", http_prefix, ssh_conf.job_ui_port)
     log.info("open jobhistoryui:   %s%s", http_prefix, ssh_conf.job_history_ui_port)
@@ -69,9 +69,9 @@ def execute(args: typing.NamedTuple):
     # get ssh command
     try:
         ssh_cmd = utils.ssh_in_master(
-            client=spark_client,
+            client=dask_client,
             cluster_id=ssh_conf.cluster_id,
-            container_name=aztk.utils.constants.DOCKER_SPARK_CONTAINER_NAME,
+            container_name=aztk.utils.constants.DOCKER_DASK_CONTAINER_NAME,
             webui=ssh_conf.web_ui_port,
             jobui=ssh_conf.job_ui_port,
             jobhistoryui=ssh_conf.job_history_ui_port,
@@ -84,7 +84,7 @@ def execute(args: typing.NamedTuple):
 
         if not ssh_conf.connect:
             log.info("")
-            log.info("Use the following command to connect to your spark head node:")
+            log.info("Use the following command to connect to your dask head node:")
             log.info("\t%s", ssh_cmd)
 
     except batch_error.BatchErrorException as e:

@@ -1,17 +1,17 @@
 import cli.config as config
-import aztk.spark
+import aztk.dask
 
 '''
     Creates a client based on the user's local environment
     Reads the configuration file from .aztk/secrets.yaml
 '''
 
-def load_spark_client():
+def load_dask_client():
     secrets_config = config.SecretsConfig()
     secrets_config.load()
 
-    return aztk.spark.Client(
-        aztk.spark.models.SecretsConfiguration(
+    return aztk.dask.Client(
+        aztk.dask.models.SecretsConfiguration(
             batch_account_name=secrets_config.batch_account_name,
             batch_account_key=secrets_config.batch_account_key,
             batch_service_url=secrets_config.batch_service_url,

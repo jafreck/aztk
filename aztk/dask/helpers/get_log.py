@@ -69,14 +69,14 @@ def get_log(batch_client, cluster_id: str, application_name: str, tail=False, cu
             job_id, task_id, output_file, batch_models.FileGetFromTaskOptions(ocp_range=ocp_range))
         content = helpers.read_stream_as_string(stream)
 
-        return models.AppLogsModel(
+        return models.ProgramLog(
             name=application_name,
             cluster_id=cluster_id,
             application_state=task.state._value_,
             log=content,
             total_bytes=target_bytes)
     else:
-        return models.AppLogsModel(
+        return models.ProgramLog(
             name=application_name,
             cluster_id=cluster_id,
             application_state=task.state._value_,
