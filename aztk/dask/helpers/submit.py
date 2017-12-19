@@ -29,16 +29,6 @@ def __app_submit_cmd(
     files_path = 'mnt/batch/tasks/workitems/{0}/{1}/{2}/wd/'.format(cluster_id, "job-1", name)
     files = [files_path + f for f in files]
 
-    # 2>&1 redirect stdout and stderr to be in the same file
-    # dask_submit_cmd = CommandBuilder('dask-submit')
-    # dask_submit_cmd.add_option('{0}:7077'.format(master_ip), enable=True)
-    # dask_submit_cmd.add_argument(app)
-
-    # app_args = ' '.join(['\'' + app_arg + '\'' for app_arg in (app_args if app_args else [])])
-    # dask_submit_cmd.add_argument(
-    #     'mnt/batch/tasks/workitems/{0}/{1}/{2}/wd/'.format(cluster_id, "job-1", name) +
-    #     app + ' ' + app_args)
-    
     app_args = ' '.join(['\'' + app_arg + '\'' for app_arg in (app_args if app_args else [])])
     dask_submit_cmd = CommandBuilder('python')
     dask_submit_cmd.add_argument(app + ' ' + app_args)
