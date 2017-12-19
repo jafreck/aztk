@@ -143,7 +143,6 @@ def generate_cluster_start_task(
 
     # start task command
     command = __cluster_install_cmd(zip_resource_file, gpu_enabled, docker_repo)
-    print(helpers.wrap_commands_in_shell(command))
 
     return batch_models.StartTask(
         command_line=helpers.wrap_commands_in_shell(command),
