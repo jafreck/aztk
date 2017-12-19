@@ -26,7 +26,7 @@ def __app_submit_cmd(
 
 
     # set file paths to correct path on container
-    files_path = 'mnt/batch/tasks/workitems/{0}/{1}/{2}/wd/'.format(cluster_id, "job-1", name)
+    files_path = '/mnt/batch/tasks/workitems/{0}/{1}/{2}/wd/'.format(cluster_id, "job-1", name)
     files = [files_path + f for f in files]
 
     app_args = ' '.join(['\'' + app_arg + '\'' for app_arg in (app_args if app_args else [])])
