@@ -1,14 +1,14 @@
 from typing import List
 import azure.batch.models.batch_error as batch_error
-import aztk_sdk
-from aztk_sdk import error
-from aztk_sdk.client import Client as BaseClient
-from aztk_sdk.dask import models
-from aztk_sdk.utils import helpers
-from aztk_sdk.dask.helpers import create_cluster as create_cluster_helper
-from aztk_sdk.dask.helpers import submit as submit_helper
-from aztk_sdk.dask.helpers import get_log as get_log_helper
-from aztk_sdk.dask.utils import upload_node_scripts, util
+import aztk
+from aztk import error
+from aztk.client import Client as BaseClient
+from aztk.dask import models
+from aztk.utils import helpers
+from aztk.dask.helpers import create_cluster as create_cluster_helper
+from aztk.dask.helpers import submit as submit_helper
+from aztk.dask.helpers import get_log as get_log_helper
+from aztk.dask.utils import upload_node_scripts, util
 
 
 class Client(BaseClient):
@@ -21,7 +21,7 @@ class Client(BaseClient):
     def create_cluster(self, cluster_conf: models.ClusterConfiguration, wait: bool = False):
         try:
             zip_resource_files = upload_node_scripts.zip_scripts(self.blob_client, cluster_conf.custom_scripts, cluster_conf.dask_configuration)
-            start_task = create_cluster_helper.generate_cluster_start_task(self, zip_resource_files, cluster_conf.docker_repo)
+            start_task = create_cluster_helper.generate_cluster_start_task(self, zip_resource_files, cluster_conf.gpu_enabled, cluster_conf.docker_repo, cluster_conf.file_shares)
 
             software_metadata_key = "dask"
 
@@ -62,7 +62,7 @@ class Client(BaseClient):
     
     def list_clusters(self):
         try:
-            return [models.Cluster(pool) for pool in self.__list_clusters(aztk_sdk.models.Software.dask)]
+            return [models.Cluster(pool) for pool in self.__list_clusters(aztk.models.Software.dask)]
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
 

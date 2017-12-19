@@ -5,8 +5,8 @@ import logging
 import zipfile
 import yaml
 from pathlib import Path
-from aztk_sdk.utils import constants
-from aztk_sdk.utils import helpers
+from aztk.utils import constants
+from aztk.utils import helpers
 
 root = constants.ROOT_PATH
 
@@ -93,12 +93,22 @@ def __add_file_to_zip(zipf, file_path, zip_file_path, binary):
     return zipf
 
 
+def __add_str_to_zip(zipf, payload, zipf_file_path=None):
+    if not payload:
+        return zipf
+    zipf.writestr(zipf_file_path, payload)
+    return zipf
+
+
 def zip_scripts(blob_client, custom_scripts, dask_conf):
     zipf = __create_zip()
     if custom_scripts:
         zipf = __add_custom_scripts(zipf, custom_scripts)
 
     if dask_conf:
+        # add ssh keys for passwordless ssh
+        zipf = __add_str_to_zip(zipf, dask_conf.ssh_key_pair['pub_key'], 'id_rsa.pub')
+        zipf = __add_str_to_zip(zipf, dask_conf.ssh_key_pair['priv_key'], 'id_rsa')
         if dask_conf.jars:
             for jar in dask_conf.jars:
                 zipf = __add_file_to_zip(zipf, jar, 'jars', binary=True)

@@ -1,10 +1,11 @@
+from Crypto.PublicKey import RSA
 from typing import List
-import aztk_sdk.models
-from aztk_sdk.utils import constants
+import aztk.models
+from aztk.utils import constants, helpers
 import azure.batch.models as batch_models
 
 
-class Cluster(aztk_sdk.models.Cluster):
+class Cluster(aztk.models.Cluster):
     def __init__(self, pool: batch_models.CloudPool, nodes: batch_models.ComputeNodePaged = None):
         super().__init__(pool, nodes)
         self.master_node_id = self.__get_master_node_id()
@@ -15,7 +16,7 @@ class Cluster(aztk_sdk.models.Cluster):
 
         for metadata in pool.metadata:
             if metadata.name == constants.AZTK_SOFTWARE_METADATA_KEY:
-                return metadata.value == aztk_sdk.models.Software.dask
+                return metadata.value == aztk.models.Software.dask
 
         return False
 
@@ -32,18 +33,25 @@ class Cluster(aztk_sdk.models.Cluster):
 
         return None
 
-class RemoteLogin(aztk_sdk.models.RemoteLogin):
+class RemoteLogin(aztk.models.RemoteLogin):
     pass
 
 class DaskConfiguration():
     def __init__(self, jars: List[str]=None):
         self.jars = jars
+        self.ssh_key_pair = self.__generate_ssh_key_pair()
+    
+    def __generate_ssh_key_pair(self):
+        key = RSA.generate(2048)
+        priv_key = key.exportKey('PEM')
+        pub_key = key.publickey().exportKey('OpenSSH')
+        return {'pub_key': pub_key, 'priv_key': priv_key}
 
-class CustomScript(aztk_sdk.models.CustomScript):
+class CustomScript(aztk.models.CustomScript):
     pass
 
 
-class ClusterConfiguration(aztk_sdk.models.ClusterConfiguration):
+class ClusterConfiguration(aztk.models.ClusterConfiguration):
     def __init__(
             self,
             custom_scripts: List[CustomScript] = None,
@@ -60,14 +68,15 @@ class ClusterConfiguration(aztk_sdk.models.ClusterConfiguration):
               vm_size=vm_size,
               docker_repo=docker_repo
         )
+        self.gpu_enabled = helpers.is_gpu_enabled(vm_size)
         self.dask_configuration = dask_configuration
 
 
-class SecretsConfiguration(aztk_sdk.models.SecretsConfiguration):
+class SecretsConfiguration(aztk.models.SecretsConfiguration):
     pass
 
 
-class VmImage(aztk_sdk.models.VmImage):
+class VmImage(aztk.models.VmImage):
     pass
 
 

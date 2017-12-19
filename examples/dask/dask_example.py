@@ -13,4 +13,4 @@ for x in data:
 
 total = delayed(sum)(results)
 
-total.compute()
+print(total.compute())

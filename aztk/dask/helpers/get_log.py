@@ -2,10 +2,10 @@ import time
 import azure.batch.models as batch_models
 import azure.batch.models.batch_error as batch_error
 
-from aztk_sdk import error
-from aztk_sdk.utils import helpers
-from aztk_sdk.utils import constants
-from aztk_sdk.dask import models
+from aztk import error
+from aztk.utils import helpers
+from aztk.utils import constants
+from aztk.dask import models
 
 
 output_file = constants.TASK_WORKING_DIR + \

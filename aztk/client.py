@@ -114,6 +114,7 @@ class Client:
             return models.Cluster(pool)
 
         nodes = self.batch_client.compute_node.list(pool_id=cluster_id)
+
         return pool, nodes
 
     def __list_clusters(self, software_metadata_key):

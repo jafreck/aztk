@@ -1,8 +1,8 @@
 from typing import List
 
 import azure.batch.models as batch_models
-from aztk_sdk.utils import constants, helpers
-from aztk_sdk.utils.command_builder import CommandBuilder
+from aztk.utils import constants, helpers
+from aztk.utils.command_builder import CommandBuilder
 
 '''
 Submit helper methods

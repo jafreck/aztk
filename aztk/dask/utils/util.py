@@ -7,10 +7,10 @@ import azure.batch.batch_service_client as batch
 import azure.batch.batch_auth as batch_auth
 import azure.batch.models as batch_models
 import azure.storage.blob as blob
-from aztk_sdk.version import __version__
-from aztk_sdk.utils import constants
-from aztk_sdk import error
-import aztk_sdk.models
+from aztk.version import __version__
+from aztk.utils import constants
+from aztk import error
+import aztk.models
 
 
 class MasterInvalidStateError(Exception):
