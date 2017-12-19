@@ -9,6 +9,8 @@ def setup_node():
 
     is_master = pick_master.find_master(client)
 
+    dask.setup_connection()
+
     if is_master:
         setup_as_master()
         scripts.run_custom_scripts(is_master = True)

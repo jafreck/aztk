@@ -51,10 +51,20 @@ def wait_for_master():
             print("{0} Still waiting on master", datetime.datetime.now())
             time.sleep(10)
 
+def setup_connection():
+    master_node_id = pick_master.get_master_node_id(
+        batch_client.pool.get(config.pool_id))
+    master_node = get_node(master_node_id)
+
+    master_config_file = os.path.join(os.path.expanduser('~'), "master")
+    with open(master_config_file, 'w') as master_file:
+        print("Adding master node ip {0} to config file '{1}'".format(
+            master_node.ip_address, master_config_file))
+        master_file.write("{0}\n".format(master_node.ip_address))
+
 
 def start_dask_task_scheduler():
     call(["dask-scheduler"])
-    # call(["dask-remote", "--port",  "8788"])
 
 
 def start_dask_worker():
