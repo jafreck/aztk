@@ -45,13 +45,21 @@ class SecretsConfig:
             self._merge_dict(secrets_config)
 
     def _merge_dict(self, secrets_config):
+        service_principal = secrets_config.get('servicePrincipal')
+        if service_principal:
+            self.service_principal_tenant_id = service_principal.get('tenantid')
+            self.service_principal_client_id = service_principal.get('clientid')
+            self.service_principal_credential = service_principal.get('credential')
+            self.batch_account_resource_id = service_principal.get('batchaccountresourceid')
+            self.storage_account_resource_id = service_principal.get('storageaccountresourceid')
+
         shared_key = secrets_config.get('sharedKey')
         batch = secrets_config.get('batch')
         storage = secrets_config.get('storage')
 
         if shared_key and (batch or storage):
             raise aztk.error.AztkError(
-                "Shared keys should be configured under sharedKey: or under batch: and storage:, not both.")
+                "Shared keys must be configured either under 'sharedKey:' or under 'batch:' and 'storage:', not both.")
 
         if shared_key:
             self.batch_account_name = shared_key.get('batchaccountname')
@@ -71,13 +79,14 @@ class SecretsConfig:
             self.storage_account_key = storage.get('storageaccountkey')
             self.storage_account_suffix = storage.get('storageaccountsuffix')
 
-        service_principal = secrets_config.get('servicePrincipal')
-        if service_principal:
-            self.service_principal_tenant_id = service_principal.get('tenantid')
-            self.service_principal_client_id = service_principal.get('clientid')
-            self.service_principal_credential = service_principal.get('credential')
-            self.batch_account_resource_id = service_principal.get('batchaccountresourceid')
-            self.storage_account_resource_id = service_principal.get('storageaccountresourceid')
+        if self.batch_account_resource_id and (
+                self.batch_account_name or self.batch_account_key or self.batch_service_url):
+            raise aztk.error.AztkError(
+                "Batch account configured with both servicePrincipal and sharedKey auth, must use only one")
+        if self.storage_account_resource_id and (
+                self.storage_account_name or self.storage_account_key or self.storage_account_suffix):
+            raise aztk.error.AztkError(
+                "Storage account configured with both servicePrincipal and sharedKey auth, must use only one")
 
         docker_config = secrets_config.get('docker')
         if docker_config:
