@@ -180,34 +180,37 @@ class Client:
 
 
     async def async_create_user(self, pool_id: str, node_id: str, username: str, password: str = None, ssh_key: str = None) -> str:
-        await self.__create_user(pool_id, node_id, username, password, ssh_key)
+        self.__create_user(pool_id, node_id, username, password, ssh_key)
 
     async def async_delete_user(self, pool_id, node_id, username) -> str:
-        await self.__delete_user(pool_id, node_id, username)
+        self.__delete_user(pool_id, node_id, username)
 
     async def create_aztk_user_on_node(self, pool, node):
+        print("starting", node.id)
         try:
             ssh_key = RSA.generate(2048)
             await self.async_create_user(pool.id, node.id, 'aztk', "password")
         except batch_error.BatchErrorException:
-            await self.async_delete_user(pool.id, node.id, 'aztk')
-            await self.async_create_user(pool.id, node.id, 'aztk', "password")
+            try:
+                self.async_delete_user(pool.id, node.id, 'aztk')
+                self.async_create_user(pool.id, node.id, 'aztk', "password")
+            except batch_error.BatchErrorException:
+                pass
+        print("ending", node.id)
+        return "done"
 
     async def create_aztk_user_on_pool(self, pool, nodes):
         futures = [self.create_aztk_user_on_node(pool, node) for node in nodes]
-        # for future in futures:
-        #     result = await future.set_result("done")
-
-        await asyncio.wait(futures)
+        done, pending = await asyncio.wait(futures)
 
 
 
     def __cluster_run(self, cluster_id, command):
         pool, nodes = self.__get_pool_details(cluster_id)
-        futures = [self.create_aztk_user_on_node(pool, node) for node in nodes]
-        
+        nodes = [node for node in nodes]
+
         try:
-            asyncio.get_event_loop().run_until_complete(asyncio.wait(futures))
+            asyncio.get_event_loop().run_until_complete(self.create_aztk_user_on_pool(pool, nodes))
         except (OSError, asyncssh.Error) as exc:
             raise exc
 
