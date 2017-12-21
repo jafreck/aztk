@@ -183,7 +183,10 @@ class Client:
         self.__create_user(pool_id, node_id, username, password, ssh_key)
 
     async def async_delete_user(self, pool_id, node_id, username) -> str:
+        print("deleting user on node", node_id)
         self.__delete_user(pool_id, node_id, username)
+        print("finished deleting user on node", node_id)
+
 
     async def create_aztk_user_on_node(self, pool, node):
         print("starting", node.id)
@@ -192,18 +195,14 @@ class Client:
             await self.async_create_user(pool.id, node.id, 'aztk', "password")
         except batch_error.BatchErrorException:
             try:
-                self.async_delete_user(pool.id, node.id, 'aztk')
-                self.async_create_user(pool.id, node.id, 'aztk', "password")
+                await self.async_delete_user(pool.id, node.id, 'aztk')
+                await self.async_create_user(pool.id, node.id, 'aztk', "password")
             except batch_error.BatchErrorException:
                 pass
         print("ending", node.id)
-        return "done"
 
     async def create_aztk_user_on_pool(self, pool, nodes):
-        futures = [self.create_aztk_user_on_node(pool, node) for node in nodes]
-        done, pending = await asyncio.wait(futures)
-
-
+        await asyncio.wait([self.create_aztk_user_on_node(pool, node) for node in nodes])
 
     def __cluster_run(self, cluster_id, command):
         pool, nodes = self.__get_pool_details(cluster_id)
@@ -227,8 +226,7 @@ class Client:
         except (OSError, asyncssh.Error) as exc:
             raise exc
 
-        for node in nodes:
-            self.__delete_user(pool.id, node.id, 'aztk')
+        asyncio.get_event_loop().run_until_complete(asyncio.wait([self.async_delete_user(pool.id, node.id, 'aztk') for node in nodes]))
         
         #TODO: return result somehow
 
