@@ -9,6 +9,7 @@ from . import cluster_ssh
 from . import cluster_app_logs
 from . import cluster_submit
 from . import cluster_run
+from . import cluster_scp
 
 
 class ClusterAction:
@@ -21,6 +22,7 @@ class ClusterAction:
     app_logs = "app-logs"
     submit = "submit"
     run = "run"
+    scp = "scp"
 
 
 def setup_parser(parser: argparse.ArgumentParser):
@@ -46,6 +48,8 @@ def setup_parser(parser: argparse.ArgumentParser):
         "submit", help="Submit a new spark job to a cluster")
     run_parser = subparsers.add_parser(
         "run", help="Run a command on all nodes in your spark cluster")
+    scp_parser = subparsers.add_parser(
+        "scp", help="Copy files to all nodes in your spark cluster")
 
     cluster_create.setup_parser(create_parser)
     cluster_add_user.setup_parser(add_user_parser)
@@ -56,6 +60,7 @@ def setup_parser(parser: argparse.ArgumentParser):
     cluster_submit.setup_parser(submit_parser)
     cluster_app_logs.setup_parser(app_logs_parser)
     cluster_run.setup_parser(run_parser)
+    cluster_scp.setup_parser(scp_parser)
 
 
 def execute(args: typing.NamedTuple):
@@ -70,6 +75,7 @@ def execute(args: typing.NamedTuple):
     actions[ClusterAction.submit] = cluster_submit.execute
     actions[ClusterAction.app_logs] = cluster_app_logs.execute
     actions[ClusterAction.run] = cluster_run.execute
+    actions[ClusterAction.scp] = cluster_scp.execute
 
     func = actions[args.cluster_action]
     func(args)

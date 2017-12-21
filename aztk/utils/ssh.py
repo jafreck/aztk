@@ -1,15 +1,18 @@
 import asyncio
-import asyncssh
-from azure.batch.models import batch_error
-from Crypto.PublicKey import RSA
 import sys
+from concurrent.futures import ThreadPoolExecutor
+
+from azure.batch.models import batch_error
+
+import asyncssh
+from Crypto.PublicKey import RSA
 
 
 async def get_ssh_connection(node_ip, node_port, username, ssh_key=None, password=None):
-    conn = await asyncssh.connect(host=node_ip, port=node_port, client_keys=ssh_key, username=username, password=password)
+    conn = await asyncssh.connect(host=node_ip, port=node_port, client_keys=ssh_key, username=username, password=password, known_hosts=None)
     return conn
 
-async def get_cluster_ssh_connection(nodes, username, ssh_key, passowrd):
+async def get_cluster_ssh_connection(nodes, username, ssh_key, password):
     asyncio.get_event_loop().run_until_complete(
         asyncio.wait(
             [get_ssh_connection(node_ip=node.ip_address, node_port=node.port, username=username, ssh_key=ssh_key, password=password) for node in nodes]
@@ -53,14 +56,15 @@ def node_run(command, username, node_ip, node_port, ports=None, ssh_key=None, pa
 
 
 
-async def run_scp_client(ssh_connection, source_path, destination_path, preserve=False, recurse=False):
+async def run_scp_client(node, source_path, destination_path, username, ssh_key = None, password = None, preserve=False, recurse=False):
+    conn = await get_ssh_connection(node.ip_address, node.port, username, ssh_key, password)
     await asyncssh.scp(
-        ('localhost', source_path),
-        (ssh_connection, destination_path),
+        source_path,
+        (conn, destination_path),
         preserve=preserve,
         recurse=recurse
     )
 
 
-async def cluster_scp(username, nodes, source_path, ssh_key=None, password=None):
-    pass
+async def cluster_scp(username, nodes, source_path, destination_path, ssh_key=None, password=None, preserve=False, recurse=False):
+    await asyncio.gather(*[run_scp_client(node, source_path, destination_path, username, ssh_key, password, preserve, recurse) for node in nodes])

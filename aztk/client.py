@@ -228,14 +228,28 @@ class Client:
                                                                             password="password"))
         except (OSError, asyncssh.Error) as exc:
             raise exc
-
-        asyncio.get_event_loop().run_until_complete(self.delete_aztk_user_on_pool(pool, nodes))
+        
+        try:
+            asyncio.get_event_loop().run_until_complete(self.delete_aztk_user_on_pool(pool, nodes))
+        except (OSError, asyncssh.Error) as exc:
+            raise exc
         
         #TODO: return result somehow
 
-    def __cluster_scp(self, source_path, cluster_id, recursive=False, preserve=False):
+    def __cluster_scp(self, cluster_id, source_path, destination_path, recursive=False, preserve=False):
         pool, nodes = self.__get_pool_details(cluster_id)
         nodes = [node for node in nodes]
+
+        try:
+            asyncio.get_event_loop().run_until_complete(self.create_aztk_user_on_pool(pool, nodes))
+            asyncio.get_event_loop().run_until_complete(ssh_lib.cluster_scp(username='aztk',
+                                                                            nodes=[self.__get_remote_login_settings(pool.id, node.id) for node in nodes],
+                                                                            source_path=source_path,
+                                                                            destination_path=destination_path,
+                                                                            password="password"))
+            asyncio.get_event_loop().run_until_complete(self.delete_aztk_user_on_pool(pool, nodes))
+        except (OSError, asyncssh.Error, batch_error.BatchErrorException) as exc:
+            raise exc
 
     '''
     Define Public Interface

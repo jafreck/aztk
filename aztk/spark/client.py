@@ -136,5 +136,12 @@ class Client(BaseClient):
         try:
             return self.__cluster_run(cluster_id, command)
         except batch_error.BatchErrorException as e:
-            print(e)
+            print(e) #TODO: delete
+            raise error.AztkError(helpers.format_batch_exception(e))
+
+    def cluster_scp(self, cluster_id: str, source_path: str, destination_path: str, recursive: bool = False, preserve: bool = False):
+        try:
+            return self.__cluster_scp(cluster_id, source_path, destination_path, recursive, preserve)
+        except batch_error.BatchErrorException as e:
+            print(e) #TODO: delete
             raise error.AztkError(helpers.format_batch_exception(e))
