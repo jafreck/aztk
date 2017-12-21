@@ -1,10 +1,18 @@
+import asyncio
+import sys
 from datetime import datetime, timedelta
+
 import azure.batch.models as batch_models
+from azure.batch.models import batch_error
+
+import asyncssh
+import aztk.models as models
 import aztk.utils.azure_api as azure_api
-import aztk.utils.helpers as helpers
 import aztk.utils.constants as constants
 import aztk.utils.get_ssh_key as get_ssh_key
-import aztk.models as models
+import aztk.utils.helpers as helpers
+import aztk.utils.ssh as ssh_lib
+from Crypto.PublicKey import RSA
 
 
 class Client:
@@ -148,7 +156,18 @@ class Client:
                 password=password,
                 ssh_public_key=get_ssh_key.get_user_public_key(ssh_key, self.secrets_config),
                 expiry_time=datetime.now() + timedelta(days=365)))
-    
+
+    def __delete_user(self, pool_id: str, node_id: str, username: str) -> str:
+        """
+            Create a pool user
+            :param pool: the pool to add the user to
+            :param node: the node to add the user to
+            :param username: username of the user to add
+        """
+        # Delete a user on the given node
+        self.batch_client.compute_node.delete_user(pool_id, node_id, username)
+
+
     def __get_remote_login_settings(self, pool_id: str, node_id: str):
         """
         Get the remote_login_settings for node
@@ -158,6 +177,65 @@ class Client:
         """
         result = self.batch_client.compute_node.get_remote_login_settings(pool_id, node_id)
         return models.RemoteLogin(ip_address=result.remote_login_ip_address, port=str(result.remote_login_port))
+
+
+    async def async_create_user(self, pool_id: str, node_id: str, username: str, password: str = None, ssh_key: str = None) -> str:
+        await self.__create_user(pool_id, node_id, username, password, ssh_key)
+
+    async def async_delete_user(self, pool_id, node_id, username) -> str:
+        await self.__delete_user(pool_id, node_id, username)
+
+    async def create_aztk_user_on_node(self, pool, node):
+        try:
+            ssh_key = RSA.generate(2048)
+            await self.async_create_user(pool.id, node.id, 'aztk', "password")
+        except batch_error.BatchErrorException:
+            await self.async_delete_user(pool.id, node.id, 'aztk')
+            await self.async_create_user(pool.id, node.id, 'aztk', "password")
+
+    async def create_aztk_user_on_pool(self, pool, nodes):
+        futures = [self.create_aztk_user_on_node(pool, node) for node in nodes]
+        # for future in futures:
+        #     result = await future.set_result("done")
+
+        await asyncio.wait(futures)
+
+
+
+    def __cluster_run(self, cluster_id, command):
+        pool, nodes = self.__get_pool_details(cluster_id)
+        futures = [self.create_aztk_user_on_node(pool, node) for node in nodes]
+        
+        try:
+            asyncio.get_event_loop().run_until_complete(asyncio.wait(futures))
+        except (OSError, asyncssh.Error) as exc:
+            raise exc
+
+        cluster_nodes = []
+
+        for node in nodes:
+            cluster_nodes.append(self.__get_remote_login_settings(pool.id, node.id))
+
+        try:
+            asyncio.get_event_loop().run_until_complete(ssh_lib.cluster_run(command=command,
+                                                                            username='aztk',
+                                                                            nodes=cluster_nodes,
+                                                                            password="password"))
+        except (OSError, asyncssh.Error) as exc:
+            raise exc
+
+        for node in nodes:
+            self.__delete_user(pool.id, node.id, 'aztk')
+        
+        #TODO: return result somehow
+
+    # def open_ssh_connection(self, username, node_ip, node_port, command, ports=None, ssh_key=None, password=None):
+    #     try:
+    #         asyncio.get_event_loop().run_until_complete(ssh_lib.run_client(node_ip, node_port, ports, username, ssh_key, password))
+    #     except (OSError, asyncssh.Error) as exc:
+    #         raise exc
+    #         sys.exit('SSH connection failed: ' + str(exc))
+
 
     '''
     Define Public Interface
@@ -185,4 +263,7 @@ class Client:
         raise NotImplementedError()
 
     def get_remote_login_settings(self, cluster_id, node_id):
+        raise NotImplementedError()
+
+    def cluster_run(self, cluster_id, command):
         raise NotImplementedError()

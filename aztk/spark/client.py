@@ -131,3 +131,10 @@ class Client(BaseClient):
             return task.state._value_
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
+
+    def cluster_run(self, cluster_id: str, command: str):
+        try:
+            return self.__cluster_run(cluster_id, command)
+        except batch_error.BatchErrorException as e:
+            print(e)
+            raise error.AztkError(helpers.format_batch_exception(e))
