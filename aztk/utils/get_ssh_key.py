@@ -21,6 +21,7 @@ def get_user_public_key(key_or_path: str = None, secrets_config=None):
     else:
         key = key_or_path
 
+    print(key)
     return key
 
 

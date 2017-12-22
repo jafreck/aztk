@@ -158,6 +158,12 @@ class Client:
                 ssh_public_key=get_ssh_key.get_user_public_key(ssh_key, self.secrets_config),
                 expiry_time=datetime.now(timezone.utc) + timedelta(days=365)))
 
+        print("name", username)
+        print("is_admin", True)
+        print("password", password)
+        print("ssh_public_key", get_ssh_key.get_user_public_key(ssh_key, self.secrets_config))
+        print("expiry_time", datetime.now(timezone.utc) + timedelta(days=365))
+
     def __delete_user(self, pool_id: str, node_id: str, username: str) -> str:
         """
             Create a pool user
@@ -179,21 +185,28 @@ class Client:
         result = self.batch_client.compute_node.get_remote_login_settings(pool_id, node_id)
         return models.RemoteLogin(ip_address=result.remote_login_ip_address, port=str(result.remote_login_port))
 
-    def sync_create_aztk_user_on_node(self, pool_id, node_id):
+    def sync_create_aztk_user_on_node(self, pool_id, node_id, ssh_key):
         try:
-            ssh_key = RSA.generate(2048)
-            self.__create_user(pool_id, node_id, 'aztk', "password")
+            # self.__create_user(pool_id, node_id, 'aztk', ssh_key=ssh_key.publickey().exportKey('OpenSSH'))
+            self.__create_user(pool_id, node_id, 'aztk', ssh_key=str(ssh_key.export_public_key()))
         except batch_error.BatchErrorException:
             try:
+                print("deleting user")
                 self.__delete_user(pool_id, node_id, 'aztk')
-                self.__create_user(pool_id, node_id, 'aztk', "password")
+                # self.__create_user(pool_id, node_id, 'aztk', ssh_key=ssh_key.publickey().exportKey('OpenSSH'))
+                self.__create_user(pool_id, node_id, 'aztk', ssh_key=str(ssh_key.export_public_key()))
             except batch_error.BatchErrorException:
                 pass
+        
+        return ssh_key
 
     async def create_aztk_user_on_pool(self, pool, nodes):
+        # ssh_key = RSA.generate(2048)
+        ssh_key = asyncssh.generate_private_key('ssh-rsa')
         loop = asyncio.get_event_loop()
-        blocking_tasks = [loop.run_in_executor(ThreadPoolExecutor(), self.sync_create_aztk_user_on_node, pool.id, node.id) for node in nodes]
+        blocking_tasks = [loop.run_in_executor(ThreadPoolExecutor(), self.sync_create_aztk_user_on_node, pool.id, node.id, ssh_key) for node in nodes]
         await asyncio.wait(blocking_tasks)
+        return ssh_key
     
     def sync_delete_aztk_user_on_node(self, pool_id, node_id):
         try:
@@ -212,7 +225,7 @@ class Client:
         nodes = [node for node in nodes]
 
         try:
-            asyncio.get_event_loop().run_until_complete(self.create_aztk_user_on_pool(pool, nodes))
+            ssh_key = asyncio.get_event_loop().run_until_complete(self.create_aztk_user_on_pool(pool, nodes))
         except (OSError, asyncssh.Error) as exc:
             raise exc
 
@@ -222,10 +235,12 @@ class Client:
             cluster_nodes.append(self.__get_remote_login_settings(pool.id, node.id))
 
         try:
+            # ssh_key_obj = asyncssh.import_private_key(ssh_key.exportKey(format='DER'))
             asyncio.get_event_loop().run_until_complete(ssh_lib.cluster_run(command=command,
                                                                             username='aztk',
                                                                             nodes=cluster_nodes,
-                                                                            password="password"))
+                                                                            ssh_key=ssh_key
+                                                                            ))
         except (OSError, asyncssh.Error) as exc:
             raise exc
         
