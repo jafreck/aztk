@@ -9,6 +9,7 @@ from aztk.spark.helpers import create_cluster as create_cluster_helper
 from aztk.spark.helpers import submit as submit_helper
 from aztk.spark.helpers import get_log as get_log_helper
 from aztk.spark.utils import upload_node_scripts, util
+import yaml
 
 
 class Client(BaseClient):
@@ -20,7 +21,12 @@ class Client(BaseClient):
     '''
     def create_cluster(self, cluster_conf: models.ClusterConfiguration, wait: bool = False):
         try:
-            zip_resource_files = upload_node_scripts.zip_scripts(self.blob_client, cluster_conf.custom_scripts, cluster_conf.spark_configuration)
+            if cluster_conf.user_configuration:
+                user_conf = yaml.dump({'username': cluster_conf.user_configuration.username,
+                                       'password': cluster_conf.user_configuration.password,
+                                       'ssh-key': cluster_conf.user_configuration.ssh_key,
+                                       'cluster_id': cluster_conf.cluster_id})
+            zip_resource_files = upload_node_scripts.zip_scripts(self.blob_client, cluster_conf.custom_scripts, cluster_conf.spark_configuration, user_conf)
             start_task = create_cluster_helper.generate_cluster_start_task(self,
                                                                            zip_resource_files,
                                                                            cluster_conf.gpu_enabled,

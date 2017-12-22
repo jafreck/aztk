@@ -98,7 +98,7 @@ def __add_str_to_zip(zipf, payload, zipf_file_path=None):
     zipf.writestr(zipf_file_path, payload)
     return zipf
 
-def zip_scripts(blob_client, custom_scripts, spark_conf):
+def zip_scripts(blob_client, custom_scripts, spark_conf, user_conf = None):
     zipf = __create_zip()
     if custom_scripts:
         zipf = __add_custom_scripts(zipf, custom_scripts)
@@ -114,5 +114,9 @@ def zip_scripts(blob_client, custom_scripts, spark_conf):
             for jar in spark_conf.jars:
                 zipf = __add_file_to_zip(zipf, jar, 'jars', binary=True)
 
+    if user_conf:
+        zipf = __add_str_to_zip(zipf, user_conf, 'user.yaml')
+
     zipf.close()
+    raise
     return __upload(blob_client)

@@ -94,7 +94,12 @@ def execute(args: typing.NamedTuple):
             custom_scripts=custom_scripts,
             file_shares=file_shares,
             docker_repo=cluster_conf.docker_repo,
-            spark_configuration=load_aztk_spark_config()
+            spark_configuration=load_aztk_spark_config(),
+            user_configuration=aztk.spark.models.UserConfiguration(
+                username=cluster_conf.username,
+                password=cluster_conf.password,
+                ssh_key=utils.get_ssh_key_or_prompt(spark_client.secrets_config.ssh_pub_key, cluster_conf.username, cluster_conf.password, spark_client.secrets_config)
+            )
         ),
         wait=cluster_conf.wait
     )

@@ -19,6 +19,13 @@ class CustomScript:
         self.run_on = run_on
 
 
+class UserConfiguration:
+    def __init__(self, username: str, ssh_key: str = None, password: str = None):
+        self.username = username
+        self.ssh_key = ssh_key
+        self.password = password
+
+
 class ClusterConfiguration:
     def __init__(
             self,
@@ -28,7 +35,8 @@ class ClusterConfiguration:
             vm_count=None,
             vm_low_pri_count=None,
             vm_size=None,
-            docker_repo: str=None):
+            docker_repo: str=None,
+            user_configuration: UserConfiguration = None):
 
         self.custom_scripts = custom_scripts
         self.file_shares = file_shares
@@ -37,6 +45,7 @@ class ClusterConfiguration:
         self.vm_size = vm_size
         self.vm_low_pri_count = vm_low_pri_count
         self.docker_repo = docker_repo
+        self.user_configuration = user_configuration
 
 
 class RemoteLogin:
