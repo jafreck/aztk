@@ -79,6 +79,19 @@ class SecretsConfig:
             self.storage_account_key = storage.get('storageaccountkey')
             self.storage_account_suffix = storage.get('storageaccountsuffix')
 
+        if self.batch_account_resource_id or self.storage_account_resource_id:
+            if not self.service_principal_tenant_id:
+                raise aztk.error.AztkError("Service principal auth missing tenant_id")
+            if not self.service_principal_client_id:
+                raise aztk.error.AztkError("Service principal auth missing client_id")
+            if not self.service_principal_credential:
+                raise aztk.error.AztkError("Service principal auth missing credential")
+        else:
+            if self.service_principal_tenant_id or self.service_principal_client_id or \
+               self.service_principal_credential:
+                raise aztk.error.AztkError(
+                    "Service principal auth incomplete: must have tenantid, clientid, credential "
+                    "and at least one of batchaccountresourceid and storageaccountresourceid.")
         if self.batch_account_resource_id and (
                 self.batch_account_name or self.batch_account_key or self.batch_service_url):
             raise aztk.error.AztkError(
