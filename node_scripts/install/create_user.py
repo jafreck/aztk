@@ -16,16 +16,6 @@ def create_user(batch_client):
 
     with open(path) as file:
         user_conf = yaml.load(file.read())
-    
-    user = batch_models.ComputeNodeUser(
-                name=user_conf['username'],
-                is_admin=True,
-                password=user_conf['password'],
-                ssh_public_key=user_conf['ssh-key'])
-
-    print({'pool_id': os.environ['AZ_BATCH_POOL_ID'],
-            'node_id': os.environ['AZ_BATCH_NODE_ID'],
-            'user': [user.name, user.is_admin, user.password, user.ssh_public_key]})
 
     try:
         batch_client.compute_node.add_user(
