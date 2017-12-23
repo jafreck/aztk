@@ -104,18 +104,18 @@ def execute(args: typing.NamedTuple):
         wait=cluster_conf.wait
     )
 
-    if cluster_conf.username:
-        ssh_key = spark_client.secrets_config.ssh_pub_key
+    # if cluster_conf.username:
+    #     ssh_key = spark_client.secrets_config.ssh_pub_key
 
-        ssh_key, password = utils.get_ssh_key_or_prompt(
-            ssh_key, cluster_conf.username, cluster_conf.password, spark_client.secrets_config)
+    #     ssh_key, password = utils.get_ssh_key_or_prompt(
+    #         ssh_key, cluster_conf.username, cluster_conf.password, spark_client.secrets_config)
 
-        spark_client.create_user(
-            cluster_id=cluster_conf.uid,
-            username=cluster_conf.username,
-            password=password,
-            ssh_key=ssh_key
-        )
+    #     spark_client.create_user(
+    #         cluster_id=cluster_conf.uid,
+    #         username=cluster_conf.username,
+    #         password=password,
+    #         ssh_key=ssh_key
+    #     )
 
     spinner.stop()
 

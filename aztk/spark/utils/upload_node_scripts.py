@@ -118,5 +118,5 @@ def zip_scripts(blob_client, custom_scripts, spark_conf, user_conf = None):
         zipf = __add_str_to_zip(zipf, user_conf, 'user.yaml')
 
     zipf.close()
-    raise
+
     return __upload(blob_client)
