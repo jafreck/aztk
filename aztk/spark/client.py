@@ -28,7 +28,11 @@ class Client(BaseClient):
                                        'cluster_id': cluster_conf.cluster_id})
             else:
                 user_conf = None
-            zip_resource_files = upload_node_scripts.zip_scripts(self.blob_client, cluster_conf.custom_scripts, cluster_conf.spark_configuration, user_conf)
+            zip_resource_files = upload_node_scripts.zip_scripts(self.blob_client,
+                                                                 cluster_conf.custom_scripts,
+                                                                 cluster_conf.spark_configuration,
+                                                                 user_conf)
+
             start_task = create_cluster_helper.generate_cluster_start_task(self,
                                                                            zip_resource_files,
                                                                            cluster_conf.gpu_enabled,
