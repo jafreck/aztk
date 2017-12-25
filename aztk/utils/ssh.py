@@ -34,19 +34,20 @@ async def run_client(node_ip, node_port, ports, username, ssh_key=None, password
 
 
 async def execute_command(command, username, node_ip, node_port, ports=None, ssh_key=None, password=None):
-    print(ssh_key)
-    print(
-        [node_ip,
-         node_port,
-         [ssh_key.export_private_key('pkcs1-der')],
-         username,
-         password]
-    )
+    # print(ssh_key)
+    # print(
+    #     [node_ip,
+    #      node_port,
+    #      [ssh_key.export_private_key('pkcs1-der')],
+    #      username,
+    #      password]
+    # )
     import os
     with open(os.path.expanduser("~/.ssh/test_key"), 'wb') as file:
         file.write(ssh_key.export_private_key())
     with open(os.path.expanduser("~/.ssh/test_key.pub"), 'wb') as file:
         file.write(ssh_key.export_public_key())
+
     async with asyncssh.connect(host=node_ip, port=node_port, client_keys=[ssh_key], username=username, password=password, known_hosts=None) as conn:
         result = await conn.run(command=command)
         if result.stdout:
@@ -97,7 +98,9 @@ async def cluster_scp(username, nodes, source_path, destination_path, ssh_key=No
 
 import asyncio
 import paramiko
-import SocketServer
+import select
+import socketserver as SocketServer
+
 
 
 async def connect(hostname,

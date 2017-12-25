@@ -67,7 +67,7 @@ class Client:
         """
             Create a pool and job
             :param cluster_conf: the configuration object used to create the cluster
-            :type cluster_conf: aztk.models.ClusterConfiguration 
+            :type cluster_conf: aztk.models.ClusterConfiguration
             :parm software_metadata_key: the id of the software being used on the cluster
             :param start_task: the start task for the cluster
             :param VmImageModel: the type of image to provision for the cluster
@@ -109,9 +109,9 @@ class Client:
 
         # Add job to batch
         self.batch_client.job.add(job)
-        
+
         return helpers.get_cluster(cluster_conf.cluster_id, self.batch_client)
-    
+
     def __get_pool_details(self, cluster_id: str):
         """
             Print the information for the given cluster
@@ -131,13 +131,13 @@ class Client:
         """
         pools = self.batch_client.pool.list()
         software_metadata = (constants.AZTK_SOFTWARE_METADATA_KEY, software_metadata_key)
-        
+
         aztk_pools = []
         for pool in [pool for pool in pools if pool.metadata]:
             if software_metadata in [(metadata.name, metadata.value) for metadata in pool.metadata]:
                 aztk_pools.append(pool)
         return aztk_pools
-    
+
     def __create_user(self, pool_id: str, node_id: str, username: str, password: str = None, ssh_key: str = None) -> str:
         """
             Create a pool user
@@ -148,6 +148,7 @@ class Client:
             :param ssh_key: ssh_key of the user to add
         """
         # Create new ssh user for the master node
+        print ("ssh keys match", ssh_key == get_ssh_key.get_user_public_key(ssh_key, self.secrets_config))
         self.batch_client.compute_node.add_user(
             pool_id,
             node_id,
@@ -157,12 +158,13 @@ class Client:
                 password=password,
                 ssh_public_key=get_ssh_key.get_user_public_key(ssh_key, self.secrets_config),
                 expiry_time=datetime.now(timezone.utc) + timedelta(days=365)))
-
-        print("name", username)
-        print("is_admin", True)
-        print("password", password)
-        print("ssh_public_key", get_ssh_key.get_user_public_key(ssh_key, self.secrets_config))
-        print("expiry_time", datetime.now(timezone.utc) + timedelta(days=365))
+        # print("pool_id", pool_id)
+        # print("node_id", node_id)
+        # print("name", username)
+        # print("is_admin", True)
+        # print("password", password)
+        # # print("ssh_public_key", get_ssh_key.get_user_public_key(ssh_key, self.secrets_config))
+        # print("expiry_time", datetime.now(timezone.utc) + timedelta(days=365))
 
     def __delete_user(self, pool_id: str, node_id: str, username: str) -> str:
         """
@@ -186,18 +188,20 @@ class Client:
         return models.RemoteLogin(ip_address=result.remote_login_ip_address, port=str(result.remote_login_port))
 
     def sync_create_aztk_user_on_node(self, pool_id, node_id, ssh_key):
+        public_key = ssh_key.export_public_key()
         try:
             # self.__create_user(pool_id, node_id, 'aztk', ssh_key=ssh_key.publickey().exportKey('OpenSSH'))
-            self.__create_user(pool_id, node_id, 'aztk', ssh_key=str(ssh_key.export_public_key()))
-        except batch_error.BatchErrorException:
+            self.__create_user(pool_id, node_id, 'aztk', ssh_key=public_key)
+        except batch_error.BatchErrorException as error:
+            print("outer error:", error)
             try:
                 print("deleting user")
                 self.__delete_user(pool_id, node_id, 'aztk')
                 # self.__create_user(pool_id, node_id, 'aztk', ssh_key=ssh_key.publickey().exportKey('OpenSSH'))
-                self.__create_user(pool_id, node_id, 'aztk', ssh_key=str(ssh_key.export_public_key()))
-            except batch_error.BatchErrorException:
-                pass
-        
+                self.__create_user(pool_id, node_id, 'aztk', ssh_key=public_key)
+            except batch_error.BatchErrorException as error:
+                print("nested error", error)
+
         return ssh_key
 
     async def create_aztk_user_on_pool(self, pool, nodes):
@@ -205,9 +209,12 @@ class Client:
         ssh_key = asyncssh.generate_private_key('ssh-rsa')
         loop = asyncio.get_event_loop()
         blocking_tasks = [loop.run_in_executor(ThreadPoolExecutor(), self.sync_create_aztk_user_on_node, pool.id, node.id, ssh_key) for node in nodes]
-        await asyncio.wait(blocking_tasks)
+        results = await asyncio.gather(*blocking_tasks)
+        for result in results:
+            print("result:", result)
+            print("result matches original ssh_key", ssh_key == result)
         return ssh_key
-    
+
     def sync_delete_aztk_user_on_node(self, pool_id, node_id):
         try:
             self.__delete_user(pool_id, node_id, 'aztk')
@@ -243,13 +250,29 @@ class Client:
                                                                             ))
         except (OSError, asyncssh.Error) as exc:
             raise exc
-        
+
         try:
             asyncio.get_event_loop().run_until_complete(self.delete_aztk_user_on_pool(pool, nodes))
         except (OSError, asyncssh.Error) as exc:
             raise exc
-        
+
         #TODO: return result somehow
+
+    def __paramiko_cluster_run(self, cluster_id, command):
+        pool, nodes = self.__get_pool_details(cluster_id)
+        nodes = [node for node in nodes]
+        try:
+            ssh_key = asyncio.get_event_loop().run_until_complete(self.create_aztk_user_on_pool(pool, nodes))
+        except (OSError, asyncssh.Error) as exc:
+            raise exc
+
+        cluster_nodes = []
+
+        for node in nodes:
+            cluster_nodes.append(self.__get_remote_login_settings(pool.id, node.id))
+
+        # try:
+            # asyncio.get_event_loop().run_until_complete(ssh_lib.clus_exec_command(command, 'aztk', )
 
     def __cluster_scp(self, cluster_id, source_path, destination_path, recursive=False, preserve=False):
         pool, nodes = self.__get_pool_details(cluster_id)
@@ -272,7 +295,7 @@ class Client:
 
     def create_cluster(self, cluster_conf, wait: bool = False):
         raise NotImplementedError()
-    
+
     def create_clusters_in_parallel(self, cluster_confs):
         raise NotImplementedError()
 
@@ -281,13 +304,13 @@ class Client:
 
     def get_cluster(self, cluster_id: str):
         raise NotImplementedError()
-    
+
     def list_clusters(self):
         raise NotImplementedError()
 
     def wait_until_cluster_is_ready(self, cluster_id):
         raise NotImplementedError()
-    
+
     def create_user(self, cluster_id: str, username: str, password: str = None, ssh_key: str = None) -> str:
         raise NotImplementedError()
 
