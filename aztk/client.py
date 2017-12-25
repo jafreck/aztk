@@ -1,4 +1,6 @@
 import asyncio
+import concurrent.futures
+from concurrent.futures import ThreadPoolExecutor
 import sys
 from datetime import datetime, timedelta, timezone
 
@@ -6,7 +8,6 @@ import azure.batch.models as batch_models
 from azure.batch.models import batch_error
 
 import asyncssh
-from concurrent.futures import ThreadPoolExecutor
 import aztk.models as models
 import aztk.utils.azure_api as azure_api
 import aztk.utils.constants as constants
@@ -148,7 +149,6 @@ class Client:
             :param ssh_key: ssh_key of the user to add
         """
         # Create new ssh user for the master node
-        print ("ssh keys match", ssh_key == get_ssh_key.get_user_public_key(ssh_key, self.secrets_config))
         self.batch_client.compute_node.add_user(
             pool_id,
             node_id,
@@ -158,13 +158,6 @@ class Client:
                 password=password,
                 ssh_public_key=get_ssh_key.get_user_public_key(ssh_key, self.secrets_config),
                 expiry_time=datetime.now(timezone.utc) + timedelta(days=365)))
-        # print("pool_id", pool_id)
-        # print("node_id", node_id)
-        # print("name", username)
-        # print("is_admin", True)
-        # print("password", password)
-        # # print("ssh_public_key", get_ssh_key.get_user_public_key(ssh_key, self.secrets_config))
-        # print("expiry_time", datetime.now(timezone.utc) + timedelta(days=365))
 
     def __delete_user(self, pool_id: str, node_id: str, username: str) -> str:
         """
@@ -190,29 +183,13 @@ class Client:
     def sync_create_aztk_user_on_node(self, pool_id, node_id, ssh_key):
         public_key = ssh_key.export_public_key()
         try:
-            # self.__create_user(pool_id, node_id, 'aztk', ssh_key=ssh_key.publickey().exportKey('OpenSSH'))
-            self.__create_user(pool_id, node_id, 'aztk', ssh_key=public_key)
+            self.__create_user(pool_id=pool_id, node_id=node_id, username='aztk', ssh_key=public_key.decode('utf-8'))
         except batch_error.BatchErrorException as error:
-            print("outer error:", error)
             try:
-                print("deleting user")
                 self.__delete_user(pool_id, node_id, 'aztk')
-                # self.__create_user(pool_id, node_id, 'aztk', ssh_key=ssh_key.publickey().exportKey('OpenSSH'))
-                self.__create_user(pool_id, node_id, 'aztk', ssh_key=public_key)
+                self.__create_user(pool_id=pool_id, node_id=node_id, username='aztk', ssh_key=public_key.decode('utf-8'))
             except batch_error.BatchErrorException as error:
-                print("nested error", error)
-
-        return ssh_key
-
-    async def create_aztk_user_on_pool(self, pool, nodes):
-        # ssh_key = RSA.generate(2048)
-        ssh_key = asyncssh.generate_private_key('ssh-rsa')
-        loop = asyncio.get_event_loop()
-        blocking_tasks = [loop.run_in_executor(ThreadPoolExecutor(), self.sync_create_aztk_user_on_node, pool.id, node.id, ssh_key) for node in nodes]
-        results = await asyncio.gather(*blocking_tasks)
-        for result in results:
-            print("result:", result)
-            print("result matches original ssh_key", ssh_key == result)
+                raise error
         return ssh_key
 
     def sync_delete_aztk_user_on_node(self, pool_id, node_id):
@@ -221,18 +198,24 @@ class Client:
         except batch_error.BatchErrorException:
             pass
 
-    async def delete_aztk_user_on_pool(self, pool, nodes):
-        loop = asyncio.get_event_loop()
-        blocking_tasks = [loop.run_in_executor(ThreadPoolExecutor(), self.sync_delete_aztk_user_on_node, pool.id, node.id) for node in nodes]
-        await asyncio.wait(blocking_tasks)
+    def create_user_on_pool(self, username, pool_id, nodes):
+        ssh_key = asyncssh.generate_private_key('ssh-rsa')
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            futures = {executor.submit(self.sync_create_aztk_user_on_node, pool_id, node.id, ssh_key): node for node in nodes}
+            concurrent.futures.wait(futures)
+        return ssh_key
 
+    def delete_user_on_pool(self, username, pool_id, nodes):
+        with concurrent.futures.ThreadPoolExecutor() as exector:
+            futures = [exector.submit(self.__delete_user, pool_id, node.id, username) for node in nodes]
+            concurrent.futures.wait(futures)
 
     def __cluster_run(self, cluster_id, command):
         pool, nodes = self.__get_pool_details(cluster_id)
         nodes = [node for node in nodes]
 
         try:
-            ssh_key = asyncio.get_event_loop().run_until_complete(self.create_aztk_user_on_pool(pool, nodes))
+            ssh_key = self.create_user_on_pool('aztk', pool.id, nodes)
         except (OSError, asyncssh.Error) as exc:
             raise exc
 
@@ -252,7 +235,7 @@ class Client:
             raise exc
 
         try:
-            asyncio.get_event_loop().run_until_complete(self.delete_aztk_user_on_pool(pool, nodes))
+            self.delete_user_on_pool('aztk', pool, nodes)
         except (OSError, asyncssh.Error) as exc:
             raise exc
 
