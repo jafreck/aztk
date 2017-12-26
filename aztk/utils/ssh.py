@@ -125,6 +125,8 @@ async def connect(hostname,
 
     client = paramiko.SSHClient()
 
+    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+
     client.connect(
         hostname,
         port=port,
@@ -149,17 +151,27 @@ async def connect(hostname,
 
     return client
 
+
 async def node_exec_command(command, username, hostname, port, ssh_key=None, password=None):
     client = await connect(hostname, port, username, password=password, pkey=ssh_key)
     stdin, stdout, stderr = client.exec_command(command)
 
-    print(stdout)
-
+    print(stdout) #TODO: fix
 
 
 async def clus_exec_command(command, username, nodes, ports=None, ssh_key=None, password=None):
     await asyncio.wait([node_exec_command(command, username, node.ip_address, node.port, ssh_key, password) for node in nodes])
 
+
+async def node_copy(source_path, destination_path, username, hostname, port, ssh_key=None, password=None):
+    client = await connect(hostname, port, username, password=password, pkey=ssh_key)
+    sftp_client = client.open_sftp()
+    sftp_client.put(source_path, destination_path)
+
+    #TODO: progress bar
+
+async def clus_copy(username, nodes, source_path, destination_path, ssh_key=None, password=None):
+    asyncio.wait([node_copy(source_path, destination_path, username, node.ip_address, node.port, ssh_key, password) for node in nodes])
 
 async def shell(username, hostname, port, port_forward_list=[], password=None, ssh_key=None):
     client = await connect(hostname, port, username, password=password, pkey=ssh_key)

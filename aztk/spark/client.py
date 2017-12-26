@@ -134,7 +134,7 @@ class Client(BaseClient):
 
     def cluster_run(self, cluster_id: str, command: str):
         try:
-            return self.__cluster_run(cluster_id, command)
+            return self.__paramiko_cluster_run(cluster_id, command)
         except batch_error.BatchErrorException as e:
             print(e) #TODO: delete
             raise error.AztkError(helpers.format_batch_exception(e))

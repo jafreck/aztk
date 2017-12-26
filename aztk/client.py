@@ -199,7 +199,9 @@ class Client:
             pass
 
     def create_user_on_pool(self, username, pool_id, nodes):
+        import paramiko
         ssh_key = asyncssh.generate_private_key('ssh-rsa')
+        ssh_key = paramiko.RSAKey.generate(2048)
         with concurrent.futures.ThreadPoolExecutor() as executor:
             futures = {executor.submit(self.sync_create_aztk_user_on_node, pool_id, node.id, ssh_key): node for node in nodes}
             concurrent.futures.wait(futures)
@@ -225,12 +227,10 @@ class Client:
             cluster_nodes.append(self.__get_remote_login_settings(pool.id, node.id))
 
         try:
-            # ssh_key_obj = asyncssh.import_private_key(ssh_key.exportKey(format='DER'))
             asyncio.get_event_loop().run_until_complete(ssh_lib.cluster_run(command=command,
                                                                             username='aztk',
                                                                             nodes=cluster_nodes,
-                                                                            ssh_key=ssh_key
-                                                                            ))
+                                                                            ssh_key=ssh_key))
         except (OSError, asyncssh.Error) as exc:
             raise exc
 
@@ -239,35 +239,31 @@ class Client:
         except (OSError, asyncssh.Error) as exc:
             raise exc
 
-        #TODO: return result somehow
-
     def __paramiko_cluster_run(self, cluster_id, command):
         pool, nodes = self.__get_pool_details(cluster_id)
         nodes = [node for node in nodes]
+        cluster_nodes = [self.__get_remote_login_settings(pool.id, node.id) for node in nodes]
         try:
-            ssh_key = asyncio.get_event_loop().run_until_complete(self.create_aztk_user_on_pool(pool, nodes))
+            ssh_key = self.create_user_on_pool('aztk', pool, nodes)
+            asyncio.get_event_loop().run_until_complete(ssh_lib.clus_exec_command(command,
+                                                                                  'aztk',
+                                                                                  cluster_nodes,
+                                                                                  ssh_key=ssh_key))
+            self.delete_user_on_pool('aztk', pool.id, nodes)
         except (OSError, asyncssh.Error) as exc:
             raise exc
-
-        cluster_nodes = []
-
-        for node in nodes:
-            cluster_nodes.append(self.__get_remote_login_settings(pool.id, node.id))
-
-        # try:
-            # asyncio.get_event_loop().run_until_complete(ssh_lib.clus_exec_command(command, 'aztk', )
 
     def __cluster_scp(self, cluster_id, source_path, destination_path, recursive=False, preserve=False):
         pool, nodes = self.__get_pool_details(cluster_id)
         nodes = [node for node in nodes]
 
         try:
-            asyncio.get_event_loop().run_until_complete(self.create_aztk_user_on_pool(pool, nodes))
-            asyncio.get_event_loop().run_until_complete(ssh_lib.cluster_scp(username='aztk',
+            ssh_key = self.create_user_on_pool('aztk', pool, nodes)
+            asyncio.get_event_loop().run_until_complete(ssh_lib.clus_copy(username='aztk',
                                                                             nodes=[self.__get_remote_login_settings(pool.id, node.id) for node in nodes],
                                                                             source_path=source_path,
                                                                             destination_path=destination_path,
-                                                                            password="password"))
+                                                                            password=ssh_key))
             asyncio.get_event_loop().run_until_complete(self.delete_aztk_user_on_pool(pool, nodes))
         except (OSError, asyncssh.Error, batch_error.BatchErrorException) as exc:
             raise exc
