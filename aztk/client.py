@@ -1,11 +1,8 @@
 import asyncio
 import concurrent.futures
-from concurrent.futures import ThreadPoolExecutor
 import sys
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta, timezone
-
-import azure.batch.models as batch_models
-from azure.batch.models import batch_error
 
 import asyncssh
 import aztk.models as models
@@ -14,6 +11,8 @@ import aztk.utils.constants as constants
 import aztk.utils.get_ssh_key as get_ssh_key
 import aztk.utils.helpers as helpers
 import aztk.utils.ssh as ssh_lib
+import azure.batch.models as batch_models
+from azure.batch.models import batch_error
 from Crypto.PublicKey import RSA
 
 
