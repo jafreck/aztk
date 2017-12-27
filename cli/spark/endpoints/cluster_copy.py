@@ -11,24 +11,18 @@ def setup_parser(parser: argparse.ArgumentParser):
                         help='The unique id of your spark cluster')
 
     parser.add_argument('--source-path', required=True,
-                        help='a name for your application')
+                        help='the local file you wish to copy to the cluster')
 
     parser.add_argument('--dest-path', required=True,
-                        help='a name for your application')
-
-    parser.add_argument('--recursive', '-r', dest='recursive', action='store_true',
-                        help='Wait for app to complete')
-
-    parser.add_argument('--preserve', '-p', dest='preserve', action='store_true',
-                        help='Wait for app to complete')
+                        help='the path the file will be copied to on each node in the cluster.'\
+                             'Note that this must include the file name.')
 
 
 def execute(args: typing.NamedTuple):
     spark_client = load_spark_client()
 
-    spark_client.cluster_scp(
+    spark_client.cluster_copy(
         cluster_id=args.cluster_id,
         source_path=args.source_path,
-        destination_path=args.dest_path,
-        recursive=args.recursive
+        destination_path=args.dest_path
     )
