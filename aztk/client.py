@@ -205,13 +205,14 @@ class Client:
             concurrent.futures.wait(futures)
 
 
-    def __cluster_run(self, cluster_id, command):
+    def __cluster_run(self, cluster_id, container_name, command):
         pool, nodes = self.__get_pool_details(cluster_id)
         nodes = [node for node in nodes]
         cluster_nodes = [self.__get_remote_login_settings(pool.id, node.id) for node in nodes]
         try:
             ssh_key = self.create_user_on_pool('aztk', pool.id, nodes)
             asyncio.get_event_loop().run_until_complete(ssh_lib.clus_exec_command(command,
+                                                                                  container_name,
                                                                                   'aztk',
                                                                                   cluster_nodes,
                                                                                   ssh_key=ssh_key.exportKey().decode('utf-8')))
@@ -219,18 +220,20 @@ class Client:
         except (OSError, asyncssh.Error) as exc:
             raise exc
 
-    def __cluster_scp(self, cluster_id, source_path, destination_path):
+    def __cluster_scp(self, cluster_id, container_name, source_path, destination_path):
         pool, nodes = self.__get_pool_details(cluster_id)
         nodes = [node for node in nodes]
         cluster_nodes = [self.__get_remote_login_settings(pool.id, node.id) for node in nodes]
         try:
             ssh_key = self.create_user_on_pool('aztk', pool.id, nodes)
-            asyncio.get_event_loop().run_until_complete(ssh_lib.clus_copy(username='aztk',
+            results = asyncio.get_event_loop().run_until_complete(ssh_lib.clus_copy(container_name=container_name,
+                                                                          username='aztk',
                                                                           nodes=cluster_nodes,
                                                                           source_path=source_path,
                                                                           destination_path=destination_path,
                                                                           ssh_key=ssh_key.exportKey().decode('utf-8')))
             self.delete_user_on_pool('aztk', pool.id, nodes)
+            return results
         except (OSError, asyncssh.Error, batch_error.BatchErrorException) as exc:
             raise exc
 

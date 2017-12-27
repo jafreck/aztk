@@ -134,14 +134,14 @@ class Client(BaseClient):
 
     def cluster_run(self, cluster_id: str, command: str):
         try:
-            return self.__cluster_run(cluster_id, command)
+            return self.__cluster_run(cluster_id, 'spark', command)
         except batch_error.BatchErrorException as e:
             print(e) #TODO: delete
             raise error.AztkError(helpers.format_batch_exception(e))
 
     def cluster_scp(self, cluster_id: str, source_path: str, destination_path: str, recursive: bool = False, preserve: bool = False):
         try:
-            return self.__cluster_scp(cluster_id, source_path, destination_path)
+            return self.__cluster_scp(cluster_id, 'spark', source_path, destination_path)
         except batch_error.BatchErrorException as e:
             print(e) #TODO: delete
             raise error.AztkError(helpers.format_batch_exception(e))
