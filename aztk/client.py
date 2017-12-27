@@ -205,7 +205,7 @@ class Client:
             concurrent.futures.wait(futures)
 
 
-    def __paramiko_cluster_run(self, cluster_id, command):
+    def __cluster_run(self, cluster_id, command):
         pool, nodes = self.__get_pool_details(cluster_id)
         nodes = [node for node in nodes]
         cluster_nodes = [self.__get_remote_login_settings(pool.id, node.id) for node in nodes]

@@ -1,14 +1,15 @@
 '''
-    paramiko implementation
+    SSH utils
 '''
 
 
 import asyncio
-import paramiko
+import io
 import select
 import socketserver as SocketServer
-import io
 import sys
+
+import paramiko
 
 
 async def connect(hostname,
