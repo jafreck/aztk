@@ -4,7 +4,6 @@ import sys
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta, timezone
 
-import asyncssh
 import aztk.models as models
 import aztk.utils.azure_api as azure_api
 import aztk.utils.constants as constants
