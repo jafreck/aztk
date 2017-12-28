@@ -215,7 +215,7 @@ class Client:
                                                                                   cluster_nodes,
                                                                                   ssh_key=ssh_key.exportKey().decode('utf-8')))
             self.delete_user_on_pool('aztk', pool.id, nodes)
-        except (OSError, asyncssh.Error) as exc:
+        except OSError as exc:
             raise exc
 
     def __cluster_copy(self, cluster_id, container_name, source_path, destination_path):
@@ -231,7 +231,7 @@ class Client:
                                                                           destination_path=destination_path,
                                                                           ssh_key=ssh_key.exportKey().decode('utf-8')))
             self.delete_user_on_pool('aztk', pool.id, nodes)
-        except (OSError, asyncssh.Error, batch_error.BatchErrorException) as exc:
+        except (OSError, batch_error.BatchErrorException) as exc:
             raise exc
 
     '''
