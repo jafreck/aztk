@@ -8,6 +8,7 @@ from . import cluster_list
 from . import cluster_ssh
 from . import cluster_app_logs
 from . import cluster_submit
+from . import cluster_resize
 
 
 class ClusterAction:
@@ -19,6 +20,7 @@ class ClusterAction:
     ssh = "ssh"
     app_logs = "app-logs"
     submit = "submit"
+    resize = "resize"
 
 
 def setup_parser(parser: argparse.ArgumentParser):
@@ -42,7 +44,8 @@ def setup_parser(parser: argparse.ArgumentParser):
         ClusterAction.ssh, help="SSH into the master node of a cluster")
     submit_parser = subparsers.add_parser(
         "submit", help="Submit a new spark job to a cluster")
-
+    resize_parser = subparsers.add_parser(
+        ClusterAction.resize, help="Resize your spark cluster.")
 
     cluster_create.setup_parser(create_parser)
     cluster_add_user.setup_parser(add_user_parser)
@@ -52,6 +55,7 @@ def setup_parser(parser: argparse.ArgumentParser):
     cluster_ssh.setup_parser(ssh_parser)
     cluster_submit.setup_parser(submit_parser)
     cluster_app_logs.setup_parser(app_logs_parser)
+    cluster_resize.setup_parser(resize_parser)
 
 
 def execute(args: typing.NamedTuple):
@@ -65,6 +69,7 @@ def execute(args: typing.NamedTuple):
     actions[ClusterAction.ssh] = cluster_ssh.execute
     actions[ClusterAction.submit] = cluster_submit.execute
     actions[ClusterAction.app_logs] = cluster_app_logs.execute
+    actions[ClusterAction.resize] = cluster_resize.execute
 
     func = actions[args.cluster_action]
     func(args)

@@ -159,6 +159,14 @@ class Client:
         result = self.batch_client.compute_node.get_remote_login_settings(pool_id, node_id)
         return models.RemoteLogin(ip_address=result.remote_login_ip_address, port=str(result.remote_login_port))
 
+    def __resize_cluster(self, pool_id: str, target_dedicated_nodes: int = 0, target_low_priority_nodes: int = 0):
+        auto_scale_formula = "$TargetDedicatedNodes={0}; $TargetLowPriorityNodes={1}".format(
+            target_dedicated_nodes, target_low_priority_nodes)
+        self.batch_client.pool.enable_auto_scale(pool_id=pool_id,
+                                                 auto_scale_formula=auto_scale_formula,
+                                                 auto_scale_evaluation_interval=timedelta(minutes=5))
+
+
     '''
     Define Public Interface
     '''
@@ -185,4 +193,7 @@ class Client:
         raise NotImplementedError()
 
     def get_remote_login_settings(self, cluster_id, node_id):
+        raise NotImplementedError()
+
+    def resize_cluster(self, cluster_id: str, dedicated_nodes: int = 0, low_priority_nodes: int = 0):
         raise NotImplementedError()

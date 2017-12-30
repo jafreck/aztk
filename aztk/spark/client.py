@@ -131,3 +131,11 @@ class Client(BaseClient):
             return task.state._value_
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
+
+    def resize_cluster(self, cluster_id: str, dedicated_nodes: int = 0, low_priority_nodes: int = 0):
+        try:
+            self.__resize_cluster(pool_id=cluster_id,
+                                  target_dedicated_nodes=dedicated_nodes,
+                                  target_low_priority_nodes=low_priority_nodes)
+        except batch_error.BatchErrorException as e:
+            raise error.AztkError(helpers.format_batch_exception(e))
