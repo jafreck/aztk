@@ -3,6 +3,7 @@ from core import config
 from install import pick_master, spark, scripts
 import wait_until_master_selected
 
+
 def setup_node():
     client = config.batch_client
 
@@ -21,11 +22,11 @@ def setup_node():
 
     if is_master:
         setup_as_master()
-        scripts.run_custom_scripts(is_master = True)
+        scripts.run_custom_scripts(is_master=True, is_worker=True)
 
     else:
         setup_as_worker()
-        scripts.run_custom_scripts(is_master = False)
+        scripts.run_custom_scripts(is_master=False, is_worker=True)
 
 
 def setup_as_master():
