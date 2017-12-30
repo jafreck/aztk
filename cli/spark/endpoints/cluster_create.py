@@ -44,6 +44,7 @@ def execute(args: typing.NamedTuple):
     cluster_conf = ClusterConfig()
 
     cluster_conf.merge(
+        spark_client=spark_client,
         uid=args.cluster_id,
         size=args.size,
         size_low_pri=args.size_low_pri,

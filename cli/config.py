@@ -189,7 +189,7 @@ class ClusterConfig:
         if config.get('wait') is not None:
             self.wait = config['wait']
 
-    def merge(self, uid, username, size, size_low_pri, vm_size, subnet_id, password, wait, docker_repo):
+    def merge(self, spark_client, uid, username, size, size_low_pri, vm_size, subnet_id, password, wait, docker_repo):
         """
             Reads configuration file (cluster.yaml), merges with command line parameters,
             checks for errors with configuration
@@ -235,6 +235,14 @@ class ClusterConfig:
         if self.size > 0 and self.size_low_pri > 0:
             self.mixed_mode = True
 
+        if not self.subnet_id and self.mixed_mode:
+            raise aztk.error.AztkError(
+                "You must configure a VNET to use AZTK in mixed mode (dedicated and low priority nodes). Set the VNET's subnet_id in your cluster.yaml.")
+
+        # ensure spark_client is build with AAD if using mixed mode        
+        if not spark_client.secrets_config.service_principal_tenant_id and self.mixed_mode: 
+            raise aztk.error.AztkError(
+                "You must configure an AAD service principal to use AZTK in mixed mode (dedicated and low priority nodes).")
 
 class SshConfig:
 
