@@ -39,6 +39,7 @@ class ClusterConfiguration:
         self.vm_low_pri_count = vm_low_pri_count
         self.subnet_id = subnet_id
         self.docker_repo = docker_repo
+        self.mixed_mode = True if (self.vm_count > 0) and (self.vm_low_pri_count > 0) else False
 
 
 class RemoteLogin:

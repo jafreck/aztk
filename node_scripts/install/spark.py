@@ -67,7 +67,7 @@ def wait_for_master():
             break
         else:
             print("{0} Still waiting on master", datetime.datetime.now())
-            time.sleep(10)
+            time.sleep(1)
 
 
 def start_spark_master():

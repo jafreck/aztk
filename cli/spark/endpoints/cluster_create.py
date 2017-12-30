@@ -131,6 +131,7 @@ def print_cluster_conf(cluster_conf):
              cluster_conf.size + cluster_conf.size_low_pri)
     log.info(">        dedicated:      %s", cluster_conf.size)
     log.info(">     low priority:      %s", cluster_conf.size_low_pri)
+    log.info("mixed mode:              %s", cluster_conf.mixed_mode)
     log.info("spark cluster vm size:   %s", cluster_conf.vm_size)
     log.info("custom scripts:          %s", cluster_conf.custom_scripts)
     log.info("subnet ID:               %s", cluster_conf.subnet_id)

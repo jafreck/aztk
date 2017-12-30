@@ -134,6 +134,7 @@ class ClusterConfig:
         self.file_shares = None
         self.docker_repo = None
         self.wait = None
+        self.mixed_mode = False
 
     def _read_config_file(self, path: str = aztk.utils.constants.DEFAULT_CLUSTER_CONFIG_PATH):
         """
@@ -163,11 +164,9 @@ class ClusterConfig:
 
         if config.get('size') is not None:
             self.size = config['size']
-            self.size_low_pri = 0
 
         if config.get('size_low_pri') is not None:
             self.size_low_pri = config['size_low_pri']
-            self.size = 0
 
         if config.get('subnet_id') is not None:
             self.subnet_id = config['subnet_id']
@@ -232,6 +231,9 @@ class ClusterConfig:
         if self.username is not None and self.wait is False:
             raise aztk.error.AztkError(
                 "You cannot create a user '{0}' if wait is set to false. By default, we create a user in the cluster.yaml file. Please either the configure your cluster.yaml file or set the parameter (--wait)".format(self.username))
+
+        if self.size > 0 and self.size_low_pri > 0:
+            self.mixed_mode = True
 
 
 class SshConfig:
