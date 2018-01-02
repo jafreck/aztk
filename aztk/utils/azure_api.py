@@ -1,7 +1,6 @@
 import azure.batch.batch_service_client as batch
 import azure.batch.batch_auth as batch_auth
 import azure.storage.blob as blob
-import re
 from aztk import error
 from aztk.version import __version__
 from azure.common.credentials import ServicePrincipalCredentials
@@ -9,12 +8,9 @@ from azure.mgmt.batch import BatchManagementClient
 from azure.mgmt.storage import StorageManagementClient
 from azure.storage import CloudStorageAccount
 from typing import Optional
+from azure.mgmt.network import NetworkManagementClient
+from aztk.utils import constants
 
-
-RESOURCE_ID_PATTERN = re.compile('^/subscriptions/(?P<subscription>[^/]+)'
-                                 '/resourceGroups/(?P<resourcegroup>[^/]+)'
-                                 '/providers/[^/]+'
-                                 '/[^/]+Accounts/(?P<account>[^/]+)$')
 
 class BatchConfig:
     def __init__(self, service_url: Optional[str]=None, account_key: Optional[str]=None, account_name: Optional[str]=None,
@@ -44,12 +40,53 @@ class BlobConfig:
         self.resource_id = resource_id
 
 
+class NetworkConfig:
+    def __init__(self, tenant_id: str=None, client_id: str=None, credential: str=None,
+                 resource_id: str=None):
+        self.tenant_id = tenant_id
+        self.client_id = client_id
+        self.credential = credential
+        self.resource_id = resource_id
+
+def _validate_network_config(network_config: NetworkConfig):
+    if network_config.tenant_id is None:
+        raise error.AzureApiInitError("Please set the tenant_id for service principal.")
+    if network_config.client_id is None:
+        raise error.AzureApiInitError("Please set the client_id for service principal.")
+    if network_config.resource_id is None:
+        raise error.AzureApiInitError("Please set the resource_id for service principal.")
+
+    #TODO: validate resource ID
+
+
+def make_network_client(network_config: NetworkConfig):
+    """
+        Creates a network client object
+        :param NetworkConfig network_config: configuration for the client
+        :return NetworkConfig
+    """
+
+    # Validate configuration
+    _validate_network_config(network_config)
+
+    # Set up ServicePrincipalCredentials
+    credentials = ServicePrincipalCredentials(
+        client_id=network_config.client_id,
+        secret=network_config.credential,
+        tenant=network_config.tenant_id,
+        resource='https://management.core.windows.net/')
+
+    m = constants.RESOURCE_ID_PATTERN.match(network_config.resource_id)
+    subscription_id = m.group('subscription')
+    return NetworkManagementClient(credentials, subscription_id)
+
+
 def _validate_batch_config(batch_config: BatchConfig):
     if batch_config.resource_id is None:
         if batch_config.account_name is None or batch_config.account_key is None or batch_config.service_url is None:
             raise error.AzureApiInitError("Neither servicePrincipal nor sharedKey configured for Batch in secrets.yaml config")
     else:
-        if not RESOURCE_ID_PATTERN.match(batch_config.resource_id):
+        if not constants.RESOURCE_ID_PATTERN.match(batch_config.resource_id):
             raise error.AzureApiInitError("servicePrincipal.batchaccountresourceid is not in expected format")
         if batch_config.tenant_id is None:
             raise error.AzureApiInitError("Missing tenant_id in servicePrincipal auth for Batch in secrets.yaml config")
@@ -82,7 +119,7 @@ def make_batch_client(batch_config: BatchConfig):
             secret=batch_config.credential,
             tenant=batch_config.tenant_id,
             resource='https://management.core.windows.net/')
-        m = RESOURCE_ID_PATTERN.match(batch_config.resource_id)
+        m = constants.RESOURCE_ID_PATTERN.match(batch_config.resource_id)
         batch_client = BatchManagementClient(credentials, m.group('subscription'))
         account = batch_client.batch_account.get(m.group('resourcegroup'), m.group('account'))
         base_url = 'https://%s/' % account.account_endpoint
@@ -109,7 +146,7 @@ def _validate_blob_config(blob_config: BlobConfig):
         if blob_config.account_name is None or blob_config.account_key is None or blob_config.account_suffix is None:
             raise error.AzureApiInitError("Neither servicePrincipal nor sharedKey configured for Storage in secrets.yaml config")
     else:
-        if not RESOURCE_ID_PATTERN.match(blob_config.resource_id):
+        if not constants.RESOURCE_ID_PATTERN.match(blob_config.resource_id):
             raise error.AzureApiInitError("servicePrincipal.storageaccountresourceid is not in expected format")
         if blob_config.tenant_id is None:
             raise error.AzureApiInitError("Missing tenant_id in servicePrincipal auth for Storage in secrets.yaml config")
@@ -142,7 +179,7 @@ def make_blob_client(blob_config: BlobConfig):
             secret=blob_config.credential,
             tenant=blob_config.tenant_id,
             resource='https://management.core.windows.net/')
-        m = RESOURCE_ID_PATTERN.match(blob_config.resource_id)
+        m = constants.RESOURCE_ID_PATTERN.match(blob_config.resource_id)
         accountname = m.group('account')
         subscription = m.group('subscription')
         resourcegroup = m.group('resourcegroup')

@@ -1,4 +1,5 @@
 import os
+import re
 
 """
     DOCKER
@@ -70,3 +71,12 @@ AZTK_SOFTWARE_METADATA_KEY = "_aztk_software"
 
 TASK_WORKING_DIR = "wd"
 SPARK_SUBMIT_LOGS_FILE = "output.log"
+
+
+"""
+    Resource ID Pattern
+"""
+RESOURCE_ID_PATTERN = re.compile('^/subscriptions/(?P<subscription>[^/]+)'
+                                 '/resourceGroups/(?P<resourcegroup>[^/]+)'
+                                 '/providers/[^/]+'
+                                 '/[^/]+Accounts/(?P<account>[^/]+)$')

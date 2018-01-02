@@ -87,6 +87,15 @@ def execute(args: typing.NamedTuple):
             )
     else:
         file_shares = None
+    
+    from aztk.utils.create_vnet import create_vnet
+
+    create_vnet(
+        tenant_id=spark_client.secrets_config.service_principal_tenant_id,
+        client_id=spark_client.secrets_config.service_principal_client_id,
+        credential=spark_client.secrets_config.service_principal_credential,
+        resource_id=spark_client.secrets_config.batch_account_resource_id,
+    )
 
     # create spark cluster
     cluster = spark_client.create_cluster(
