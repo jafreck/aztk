@@ -2,7 +2,6 @@ import os
 import argparse
 import typing
 import aztk.spark
-from aztk.utils.create_vnet import create_vnet
 from cli import log
 from cli.config import ClusterConfig, load_aztk_spark_config
 from cli.spark.aztklib import load_spark_client
@@ -88,15 +87,6 @@ def execute(args: typing.NamedTuple):
             )
     else:
         file_shares = None
-    
-    if cluster_conf.mixed_mode and not cluster_conf.subnet_id:
-        cluster_conf.subnet_id = create_vnet(
-            pool_id=cluster_conf.uid,
-            tenant_id=spark_client.secrets_config.service_principal_tenant_id,
-            client_id=spark_client.secrets_config.service_principal_client_id,
-            credential=spark_client.secrets_config.service_principal_credential,
-            resource_id=spark_client.secrets_config.batch_account_resource_id,
-        )
 
     # create spark cluster
     cluster = spark_client.create_cluster(

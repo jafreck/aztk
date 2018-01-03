@@ -60,7 +60,10 @@ class Client:
             self.batch_client.job.delete(job_id)
 
         if pool_exists:
+            has_vnet = helpers.has_aztk_vnet(self, self.batch_client.pool.get(pool_id))
             self.batch_client.pool.delete(pool_id)
+            if has_vnet:
+                helpers.delete_aztk_vnet(self, self.batch_client.pool.get(pool_id))
 
         return job_exists or pool_exists
 

@@ -80,3 +80,9 @@ RESOURCE_ID_PATTERN = re.compile('^/subscriptions/(?P<subscription>[^/]+)'
                                  '/resourceGroups/(?P<resourcegroup>[^/]+)'
                                  '/providers/[^/]+'
                                  '/[^/]+Accounts/(?P<account>[^/]+)$')
+
+NETWORK_RESOURCE_ID_PATTERN = re.compile('^/subscriptions/(?P<subscription>[^/]+)'
+                                         '/resourceGroups/(?P<resourcegroup>[^/]+)'
+                                         '/providers/[^/]+'
+                                         '/virtualNetworks/(?P<vnet>[^/]+)'
+                                         '/subnets/(?P<subnet>[^/]+)$')

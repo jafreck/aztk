@@ -9,9 +9,10 @@ import azure.batch.batch_auth as batch_auth
 import azure.batch.models as batch_models
 import azure.storage.blob as blob
 from aztk.version import __version__
-from aztk.utils import constants
+from aztk.utils import constants, azure_api
 from aztk import error
 import aztk.models
+
 
 _STANDARD_OUT_FILE_NAME = 'stdout.txt'
 _STANDARD_ERROR_FILE_NAME = 'stderr.txt'
@@ -20,11 +21,43 @@ _STANDARD_ERROR_FILE_NAME = 'stderr.txt'
 def is_gpu_enabled(vm_size):
     return bool(re.search('nv|nc', vm_size))
 
+
 def get_cluster(cluster_id, batch_client):
     pool = batch_client.pool.get(cluster_id)
     nodes = batch_client.compute_node.list(pool_id=cluster_id)
 
     return aztk.models.Cluster(pool, nodes)
+
+
+def has_aztk_vnet(aztk_client, pool: batch_models.CloudPool):
+
+    subnet_resource_id = pool.network_configuration.subnet_id
+    match = constants.NETWORK_RESOURCE_ID_PATTERN.match(subnet_resource_id)
+    subnet_id = match.group('subnet')
+    vnet_id = match.group('vnet')
+    if pool.id == vnet_id == subnet_id:
+        return True
+    else:
+        return False
+
+def delete_aztk_vnet(aztk_client, pool: batch_models.CloudPool):
+    subnet_resource_id = pool.network_configuration.subnet_id
+    match = constants.NETWORK_RESOURCE_ID_PATTERN.match(subnet_resource_id)
+    subnet_id = match.group('subnet')
+    vnet_id = match.group('vnet')
+    network_client = azure_api.make_network_client(
+        azure_api.NetworkConfig(
+            tenant_id=aztk_client.secrets_config.service_principal_tenant_id,
+            client_id=aztk_client.secrets_config.service_principal_client_id,
+            credential=aztk_client.secrets_config.service_principal_credential,
+            resource_id=aztk_client.secrets_config.batch_account_resource_id,
+        )
+    )
+    #TODO: fix issue InUseSubnetCannotBeDeleted because pool is not yet deleted when this runs
+    network_client.virtual_networks.delete(
+        resource_group_name=match.group("resourcegroup"),
+        virtual_network_name=vnet_id
+    )
 
 
 def wait_for_tasks_to_complete(job_id, batch_client):

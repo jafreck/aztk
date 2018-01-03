@@ -5,6 +5,7 @@ from aztk import error
 from aztk.client import Client as BaseClient
 from aztk.spark import models
 from aztk.utils import helpers
+from aztk.utils.create_vnet import create_vnet
 from aztk.spark.helpers import create_cluster as create_cluster_helper
 from aztk.spark.helpers import submit as submit_helper
 from aztk.spark.helpers import get_log as get_log_helper
@@ -20,6 +21,14 @@ class Client(BaseClient):
     '''
     def create_cluster(self, cluster_conf: models.ClusterConfiguration, wait: bool = False):
         try:
+            if cluster_conf.mixed_mode and not cluster_conf.subnet_id:
+                cluster_conf.subnet_id = create_vnet(
+                    pool_id=cluster_conf.cluster_id,
+                    tenant_id=self.secrets_config.service_principal_tenant_id,
+                    client_id=self.secrets_config.service_principal_client_id,
+                    credential=self.secrets_config.service_principal_credential,
+                    resource_id=self.secrets_config.batch_account_resource_id,
+                )
             zip_resource_files = upload_node_scripts.zip_scripts(self.blob_client, cluster_conf.custom_scripts, cluster_conf.spark_configuration)
             start_task = create_cluster_helper.generate_cluster_start_task(self,
                                                                            zip_resource_files,
