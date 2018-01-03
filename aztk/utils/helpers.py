@@ -30,15 +30,18 @@ def get_cluster(cluster_id, batch_client):
 
 
 def has_aztk_vnet(aztk_client, pool: batch_models.CloudPool):
-
-    subnet_resource_id = pool.network_configuration.subnet_id
-    match = constants.NETWORK_RESOURCE_ID_PATTERN.match(subnet_resource_id)
-    subnet_id = match.group('subnet')
-    vnet_id = match.group('vnet')
-    if pool.id == vnet_id == subnet_id:
-        return True
-    else:
-        return False
+    try:
+        subnet_resource_id = pool.network_configuration.subnet_id
+        match = constants.NETWORK_RESOURCE_ID_PATTERN.match(subnet_resource_id)
+        subnet_id = match.group('subnet')
+        vnet_id = match.group('vnet')
+        if pool.id == vnet_id == subnet_id:
+            return True
+        else:
+            return False
+    except AttributeError as e:
+        print(e)
+        pass
 
 def delete_aztk_vnet(aztk_client, pool: batch_models.CloudPool):
     subnet_resource_id = pool.network_configuration.subnet_id
