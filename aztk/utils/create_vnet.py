@@ -7,7 +7,6 @@ from aztk.utils import constants
 
 
 def create_vnet(tenant_id, client_id, credential, resource_id, vnet_id="aztk-default", subnet_id="aztk-default"):
-    print(tenant_id, client_id, credential, resource_id, vnet_id, subnet_id)
     network_client = azure_api.make_network_client(
         azure_api.NetworkConfig(
             tenant_id=tenant_id,
