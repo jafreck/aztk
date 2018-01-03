@@ -91,6 +91,7 @@ def execute(args: typing.NamedTuple):
     
     if cluster_conf.mixed_mode and not cluster_conf.subnet_id:
         cluster_conf.subnet_id = create_vnet(
+            pool_id=cluster_conf.uid,
             tenant_id=spark_client.secrets_config.service_principal_tenant_id,
             client_id=spark_client.secrets_config.service_principal_client_id,
             credential=spark_client.secrets_config.service_principal_credential,
