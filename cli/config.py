@@ -236,8 +236,9 @@ class ClusterConfig:
             self.mixed_mode = True
 
         if not self.subnet_id and self.mixed_mode:
-            raise aztk.error.AztkError(
-                "You must configure a VNET to use AZTK in mixed mode (dedicated and low priority nodes). Set the VNET's subnet_id in your cluster.yaml.")
+            log.warn(
+                "No subnet_id specified in your cluster.yaml. Creating a VNET and subnet.")
+            #TODO: prompt for confirmation
 
         # ensure spark_client is build with AAD if using mixed mode        
         if not spark_client.secrets_config.service_principal_tenant_id and self.mixed_mode: 

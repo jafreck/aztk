@@ -41,3 +41,7 @@ def create_vnet(tenant_id, client_id, credential, resource_id, vnet_id="aztk-def
         virtual_network_name=vnet_id,
         subnet_name=subnet_id,
         subnet_parameters=network_models.Subnet(address_prefix='10.0.0.0/24'))
+    
+    return network_client.subnets.get(resource_group_name=match.group("resourcegroup"),
+                                      virtual_network_name=vnet_id,
+                                      subnet_name=subnet_id).id

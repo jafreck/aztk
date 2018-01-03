@@ -48,6 +48,7 @@ class NetworkConfig:
         self.credential = credential
         self.resource_id = resource_id
 
+
 def _validate_network_config(network_config: NetworkConfig):
     if network_config.tenant_id is None:
         raise error.AzureApiInitError("Please set the tenant_id for service principal.")
