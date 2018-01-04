@@ -178,7 +178,7 @@ class Client:
         result = self.batch_client.compute_node.get_remote_login_settings(pool_id, node_id)
         return models.RemoteLogin(ip_address=result.remote_login_ip_address, port=str(result.remote_login_port))
 
-    def create_user_on_node(self, username, pool_id, node_id, ssh_key):
+    def __create_user_on_node(self, username, pool_id, node_id, ssh_key):
         try:
             self.__create_user(pool_id=pool_id, node_id=node_id, username=username, ssh_key=ssh_key)
         except batch_error.BatchErrorException as error:
@@ -190,14 +190,14 @@ class Client:
                 raise error
         return ssh_key
 
-    def create_user_on_pool(self, username, pool_id, nodes):
+    def __create_user_on_pool(self, username, pool_id, nodes):
         ssh_key = RSA.generate(2048)
         with concurrent.futures.ThreadPoolExecutor() as executor:
-            futures = {executor.submit(self.create_user_on_node, username, pool_id, node.id, ssh_key.publickey().exportKey('OpenSSH').decode('utf-8')): node for node in nodes}
+            futures = {executor.submit(self.__create_user_on_node, username, pool_id, node.id, ssh_key.publickey().exportKey('OpenSSH').decode('utf-8')): node for node in nodes}
             concurrent.futures.wait(futures)
         return ssh_key
 
-    def delete_user_on_pool(self, username, pool_id, nodes):
+    def __delete_user_on_pool(self, username, pool_id, nodes):
         with concurrent.futures.ThreadPoolExecutor() as exector:
             futures = [exector.submit(self.__delete_user, pool_id, node.id, username) for node in nodes]
             concurrent.futures.wait(futures)
@@ -208,13 +208,13 @@ class Client:
         nodes = [node for node in nodes]
         cluster_nodes = [self.__get_remote_login_settings(pool.id, node.id) for node in nodes]
         try:
-            ssh_key = self.create_user_on_pool('aztk', pool.id, nodes)
+            ssh_key = self.__create_user_on_pool('aztk', pool.id, nodes)
             asyncio.get_event_loop().run_until_complete(ssh_lib.clus_exec_command(command,
                                                                                   container_name,
                                                                                   'aztk',
                                                                                   cluster_nodes,
                                                                                   ssh_key=ssh_key.exportKey().decode('utf-8')))
-            self.delete_user_on_pool('aztk', pool.id, nodes)
+            self.__delete_user_on_pool('aztk', pool.id, nodes)
         except OSError as exc:
             raise exc
 
@@ -223,14 +223,14 @@ class Client:
         nodes = [node for node in nodes]
         cluster_nodes = [self.__get_remote_login_settings(pool.id, node.id) for node in nodes]
         try:
-            ssh_key = self.create_user_on_pool('aztk', pool.id, nodes)
+            ssh_key = self.__create_user_on_pool('aztk', pool.id, nodes)
             asyncio.get_event_loop().run_until_complete(ssh_lib.clus_copy(container_name=container_name,
                                                                           username='aztk',
                                                                           nodes=cluster_nodes,
                                                                           source_path=source_path,
                                                                           destination_path=destination_path,
                                                                           ssh_key=ssh_key.exportKey().decode('utf-8')))
-            self.delete_user_on_pool('aztk', pool.id, nodes)
+            self.__delete_user_on_pool('aztk', pool.id, nodes)
         except (OSError, batch_error.BatchErrorException) as exc:
             raise exc
 
