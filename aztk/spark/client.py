@@ -6,7 +6,7 @@ from aztk.client import Client as BaseClient
 from aztk.spark import models
 from aztk.utils import helpers
 from aztk.spark.helpers import create_cluster as create_cluster_helper
-from aztk.spark.helpers import submit as submit_helper
+from aztk.spark.helpers import submit as cluster_submit_helper
 from aztk.spark.helpers import job_submission as job_submit_helper
 from aztk.spark.helpers import get_log as get_log_helper
 from aztk.spark.utils import upload_node_scripts, util
@@ -83,7 +83,7 @@ class Client(BaseClient):
 
     def submit(self, cluster_id: str, application: models.ApplicationConfiguration, wait: bool = False):
         try:
-            submit_helper.submit_application(self, cluster_id, application, wait)
+            cluster_submit_helper.submit_application(self, cluster_id, application, wait)
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
 
@@ -156,7 +156,7 @@ class Client(BaseClient):
             application_tasks = []
             for application in job_configuration.applications:
                 application_tasks.append(
-                    (application, submit_helper.generate_task(self, job_configuration.id, application))
+                    (application, cluster_submit_helper.generate_task(self, job_configuration.id, application))
                 )
 
             job_manager_task = job_submit_helper.generate_task(self, job_configuration, application_tasks)
