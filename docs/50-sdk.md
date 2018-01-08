@@ -277,7 +277,7 @@ Find some samples and getting stated tutorial in the `examples/sdk/` directory o
 
 - `ApplicationLog`
     
-    Holds the logged data from a spark application and metadataq about the application and log.
+    Holds the logged data from a spark application and metadata about the application and log.
 
     Fields:
         
@@ -286,6 +286,7 @@ Find some samples and getting stated tutorial in the `examples/sdk/` directory o
         - log: str
         - total_bytes: int 
         - application_state: str 
+        - exit_code: str 
 
 
 - `Cluster`

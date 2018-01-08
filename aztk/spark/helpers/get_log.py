@@ -74,11 +74,13 @@ def get_log(batch_client, cluster_id: str, application_name: str, tail=False, cu
             cluster_id=cluster_id,
             application_state=task.state._value_,
             log=content,
-            total_bytes=target_bytes)
+            total_bytes=target_bytes,
+            exit_code=task.execution_info.exit_code)
     else:
         return models.ApplicationLog(
             name=application_name,
             cluster_id=cluster_id,
             application_state=task.state._value_,
             log='',
-            total_bytes=target_bytes)
+            total_bytes=target_bytes,
+            exit_code=task.execution_info.exit_code)
