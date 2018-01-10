@@ -203,7 +203,7 @@ class Client(BaseClient):
 
     def list_applicaitons(self, job_id):
         try:
-            return job_submit_helper.list_applications(self, job_id)
+            return [models.Application(task) for task in job_submit_helper.list_applications(self, job_id)]
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
 

@@ -258,12 +258,17 @@ def print_job(client, job: aztk.spark.models.Job):
     if job.cluster:
         print_cluster(client, job.cluster)
 
+    print_applications(job.applications)
+    log.info("")
+
+
+def print_applications(applications: List[aztk.spark.models.Application]):
     print_format = '{:<36}| {:<15}| {:<14}'
     print_format_underline = '{:-<36}|{:-<16}|{:-<17}'
     log.info(print_format.format("Applications", "State", "Transition Time"))
     log.info(print_format_underline.format('', '', '', ''))
 
-    for application in job.applications:
+    for application in applications:
         log.info(
             print_format.format(
                 application.name,
@@ -271,31 +276,6 @@ def print_job(client, job: aztk.spark.models.Job):
                 utc_to_local(application.state_transition_time)
             )
         )
-
-    log.info('')
-
-def print_application(application: aztk.spark.models.Application):
-    log.info("")
-    log.info("App         %s", application.name)
-    log.info("------------------------------------------")
-
-
-    print_format = '{:<30}| {:<15}'
-    print_format_underline = '{:-<30}|{:-<17}'
-
-    log.info(
-        print_format.format(
-            "State",
-            application.state
-        )
-    )
-    log.info(
-        print_format.format(
-            "State transition time",
-            utc_to_local(application.state_transition_time) 
-        )
-    )
-    log.info('')
 
 
 class Spinner:

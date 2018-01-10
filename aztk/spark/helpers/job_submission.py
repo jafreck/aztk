@@ -59,10 +59,9 @@ def list_jobs(spark_client):
     return [cloud_job_schedule for cloud_job_schedule in spark_client.batch_client.job_schedule.list()]
 
 def list_applications(spark_client, job_id):
-    job = spark_client.get_job(job_id)
-
+    recent_run_job = __get_recent_job(spark_client, job_id)
     # get tasks from Batch job
-    return [application.id for application in spark_client.batch_client.task.list(job.recent_run_id) if application.id != job_id]
+    return [application for application in spark_client.batch_client.task.list(recent_run_job.id) if application.id != job_id]
 
 
 def get_job(spark_client, job_id):
