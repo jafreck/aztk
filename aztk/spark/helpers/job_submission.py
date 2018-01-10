@@ -1,11 +1,15 @@
-from typing import List
-import os
-import yaml
 import datetime
+import os
 import time
+from typing import List
+
 import azure.batch.models as batch_models
+import yaml
+
+import aztk.error as error
 from aztk.utils import constants, helpers
 from aztk.utils.command_builder import CommandBuilder
+
 
 '''
     Job Submission helper methods
@@ -64,8 +68,16 @@ def list_applications(spark_client, job_id):
 def get_job(spark_client, job_id):
     job = spark_client.batch_client.job_schedule.get(job_id)
     job_apps = [app for app in spark_client.batch_client.task.list(job_id=job.execution_info.recent_job.id) if app.id != job_id]
-
-    return job, job_apps
+    recent_run_job = __get_recent_job(spark_client, job_id)
+    pool_prefix = recent_run_job.pool_info.auto_pool_specification.auto_pool_id_prefix
+    pool = nodes = None
+    for cloud_pool in spark_client.batch_client.pool.list():
+        if pool_prefix in cloud_pool.id:
+            pool = cloud_pool
+            break
+    if pool:
+        nodes = spark_client.batch_client.compute_node.list(pool_id=pool.id)
+    return job, job_apps, pool, nodes
 
 
 def disable(spark_client, job_id):
@@ -118,21 +130,32 @@ def delete(spark_client, job_id):
 def get_application(spark_client, job_id, application_name):
     # info about the app
     recent_run_job = __get_recent_job(spark_client, job_id)
-    return spark_client.batch_client.task.get(job_id=recent_run_job.id, task_id=application_name)
+    try:
+        return spark_client.batch_client.task.get(job_id=recent_run_job.id, task_id=application_name)
+    except batch_models.batch_error.BatchErrorException:
+        raise error.AztkError("The Spark application {0} is still being provisioned or does not exist.".format(application_name))
 
 
 def get_application_log(spark_client, job_id, application_name):
     # TODO: change where the logs are uploaded so they aren't overwritten on scheduled runs
     #           current: job_id, application_name/output.log
     #           new: job_id, recent_run_job.id/application_name/output.log
-
-    return spark_client.get_application_log(job_id, application_name)
+    recent_run_job = __get_recent_job(spark_client, job_id)
+    try:
+        task = spark_client.batch_client.task.get(job_id=recent_run_job, task_id=application_name)
+    except batch_models.batch_error.BatchErrorException as e:
+        raise error.AztkError("The application {0} is still being provisioned or does not exist".format(application_name))
+    else:
+        if task.state in (batch_models.TaskState.active, batch_models.TaskState.running, batch_models.TaskState.preparing):
+            raise error.AztkError("The application {0} has not yet finished executing.".format(application_name))
+        
+        return spark_client.get_application_log(job_id, application_name)
 
 
 def stop_app(spark_client, job_id, application_name):
     recent_run_job = __get_recent_job(spark_client, job_id)
 
-    # TODO: stop spark job on node 
+    # TODO: stop spark job on node
 
     # stop batch task
     try:

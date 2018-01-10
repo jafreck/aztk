@@ -245,15 +245,18 @@ def print_jobs(jobs: List[aztk.spark.models.Job]):
         )
 
 
-def print_job(job: aztk.spark.models.Job):
+def print_job(client, job: aztk.spark.models.Job):
     print_format = '{:<36}| {:<15}'
 
     log.info("")
-    log.info("Job             %s", job.id)
+    log.info("Job              %s", job.id)
     log.info("------------------------------------------")
-    log.info(print_format.format("State:", job.state))
-    log.info(print_format.format("Transition Time:", utc_to_local(job.state_transition_time)))
+    log.info("State:           %s", job.state)
+    log.info("Transition Time: %s", utc_to_local(job.state_transition_time))
     log.info("")
+
+    if job.cluster:
+        print_cluster(client, job.cluster)
 
     print_format = '{:<36}| {:<15}| {:<14}'
     print_format_underline = '{:-<36}|{:-<16}|{:-<17}'

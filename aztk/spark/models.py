@@ -6,7 +6,7 @@ import azure.batch.models as batch_models
 
 
 class Cluster(aztk.models.Cluster):
-    def __init__(self, pool: batch_models.CloudPool, nodes: batch_models.ComputeNodePaged = None):
+    def __init__(self, pool: batch_models.CloudPool = None, nodes: batch_models.ComputeNodePaged = None):
         super().__init__(pool, nodes)
         self.master_node_id = self.__get_master_node_id()
         self.gpu_enabled = helpers.is_gpu_enabled(pool.vm_size)
@@ -188,14 +188,20 @@ class JobState():
 
 
 class Job():
-    def __init__(self, cloud_job_schedule: batch_models.CloudJobSchedule, cloud_tasks: List[batch_models.CloudTask] = None):
+    def __init__(self, cloud_job_schedule: batch_models.CloudJobSchedule,
+                 cloud_tasks: List[batch_models.CloudTask] = None,
+                 pool: batch_models.CloudPool = None,
+                 nodes: batch_models.ComputeNodePaged = None):
         self.id = cloud_job_schedule.id
         self.last_modified = cloud_job_schedule.last_modified
         self.state = cloud_job_schedule.state._value_
         self.state_transition_time = cloud_job_schedule.state_transition_time
         self.creation_time = cloud_job_schedule.creation_time
         self.applications = [Application(task) for task in (cloud_tasks or [])]
-
+        if pool:
+            self.cluster = Cluster(pool, nodes)
+        else:
+            self.cluster = None
 
 class ApplicationLog():
     def __init__(self, name: str, cluster_id: str, log: str, total_bytes: int, application_state: batch_models.TaskState):

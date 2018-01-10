@@ -209,8 +209,8 @@ class Client(BaseClient):
 
     def get_job(self, job_id):
         try:
-            job, apps = job_submit_helper.get_job(self, job_id)
-            return models.Job(job, apps)
+            job, apps, pool, nodes = job_submit_helper.get_job(self, job_id)
+            return models.Job(job, apps, pool, nodes)
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
 
