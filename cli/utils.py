@@ -295,7 +295,6 @@ def print_cluster_summary(cluster: aztk.spark.models.Cluster):
     for state in state_count:
         if state_count[state] > 0:
             log.info(print_format.format('', state.name, state_count[state]))
-            # log.info("\t" + state.name + "                     %s", state_count[state])
     log.info("")
 
 
@@ -321,7 +320,7 @@ def application_summary(applications):
             log.info(print_format.format(state + ":", states[state]))
 
     if warn_scheduling:
-        log.warn("\nNo Spark applications will be scheduled until the master is selected.")
+        log.warning("\nNo Spark applications will be scheduled until the master is selected.")
 
 def print_applications(applications):
     print_format = '{:<36}| {:<15}| {:<14}'
@@ -330,17 +329,18 @@ def print_applications(applications):
     log.info(print_format_underline.format('', '', '', ''))
 
     warn_scheduling = False
-    for application in applications:
-        if type(application) == str:
+    for name in applications:
+        if applications[name] is None:
             log.info(
                 print_format.format(
-                    application,
+                    name,
                     "scheduling",
                     "-"
                 )
             )
             warn_scheduling = True
         else:
+            application = applications[name]
             log.info(
                 print_format.format(
                     application.name,
@@ -349,7 +349,7 @@ def print_applications(applications):
                 )
             )
     if warn_scheduling:
-        log.warn("\nNo Spark applications will be scheduled until the master is selected.")
+        log.warning("\nNo Spark applications will be scheduled until the master is selected.")
 
 def print_application(application: aztk.spark.models.Application):
     print_format = '{:<30}| {:<15}'
@@ -370,6 +370,7 @@ def print_application(application: aztk.spark.models.Application):
         )
     )
     log.info("")
+
 
 class Spinner:
     busy = False

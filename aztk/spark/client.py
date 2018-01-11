@@ -207,9 +207,7 @@ class Client(BaseClient):
             for item in applications:
                 if applications[item]:
                     applications[item] = models.Application(applications[item])
-                else:
-                    applications[item] = item
-            return applications.values()
+            return applications
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
 
