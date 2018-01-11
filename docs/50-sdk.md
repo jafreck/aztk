@@ -264,6 +264,7 @@ Find some samples and getting stated tutorial in the `examples/sdk/` directory o
         - Dict{str: aztk.spark.models.Application or None}
             - the key is the name of the application
             - the value is None if the application has not yet been scheduled or an Application model if it has been scheduled
+
 - `get_job(self, job_id)`
 
     Get information about the AZTK Spark Job with id job_id
