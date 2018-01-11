@@ -12,4 +12,4 @@ def setup_parser(parser: argparse.ArgumentParser):
 
 def execute(args: typing.NamedTuple):
     spark_client = load_spark_client()
-    utils.print_applications(spark_client.list_applicaitons(args.job_id))
+    utils.print_applications(spark_client.list_applications(args.job_id))

@@ -166,7 +166,8 @@ class Client:
                      job_manager_task,
                      autoscale_formula,
                      software_metadata_key: str,
-                     vm_image_model):
+                     vm_image_model,
+                     application_metadata):
         """
             Job Submission
             :param job_configuration -> aztk_sdk.spark.models.JobConfiguration
@@ -200,7 +201,7 @@ class Client:
                 max_tasks_per_node=1,
                 metadata=[
                     batch_models.MetadataItem(
-                        name=constants.AZTK_SOFTWARE_METADATA_KEY, value=software_metadata_key),
+                        name=constants.AZTK_SOFTWARE_METADATA_KEY, value=software_metadata_key)
                 ]
             )
         )
@@ -210,7 +211,11 @@ class Client:
             pool_info=batch_models.PoolInformation(auto_pool_specification=auto_pool_specification),
             display_name=job_configuration.id,
             on_all_tasks_complete=batch_models.OnAllTasksComplete.terminate_job,
-            job_manager_task=job_manager_task
+            job_manager_task=job_manager_task,
+            metadata=[
+                batch_models.MetadataItem(
+                    name='applications', value=application_metadata)
+            ]
         )
 
         # define schedule

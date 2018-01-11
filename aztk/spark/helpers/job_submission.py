@@ -60,8 +60,19 @@ def list_jobs(spark_client):
 
 def list_applications(spark_client, job_id):
     recent_run_job = __get_recent_job(spark_client, job_id)
+    # get application names from Batch job metadata
+    applications = {}
+    for metadata_item in recent_run_job.metadata:
+        if metadata_item.name == "applications":
+            for app_name in metadata_item.value.split('\n'):
+                applications[app_name] = None
+
     # get tasks from Batch job
-    return [application for application in spark_client.batch_client.task.list(recent_run_job.id) if application.id != job_id]
+    for task in spark_client.batch_client.task.list(recent_run_job.id):
+        if task.id != job_id:
+            applications[task.id] = task
+
+    return applications
 
 
 def get_job(spark_client, job_id):

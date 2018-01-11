@@ -180,15 +180,15 @@ class Client(BaseClient):
             else:
                 raise error.AztkError("Jobs do not support both dedicated and low priority nodes." \
                                       " JobConfiguration fields max_dedicated_nodes and max_low_pri_nodes are mutually exclusive values.")
-
-
+            
             job = self.__submit_job(
                 job_configuration=job_configuration,
                 start_task=start_task,
                 job_manager_task=job_manager_task,
                 autoscale_formula=autoscale_formula,
                 software_metadata_key=software_metadata_key,
-                vm_image_model=vm_image)
+                vm_image_model=vm_image,
+                application_metadata='\n'.join(application.name for application in job_configuration.applications))
 
             return models.Job(job)
 
@@ -201,9 +201,15 @@ class Client(BaseClient):
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
 
-    def list_applicaitons(self, job_id):
+    def list_applications(self, job_id):
         try:
-            return [models.Application(task) for task in job_submit_helper.list_applications(self, job_id)]
+            applications = job_submit_helper.list_applications(self, job_id)
+            for item in applications:
+                if applications[item]:
+                    applications[item] = models.Application(applications[item])
+                else:
+                    applications[item] = item
+            return applications.values()
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
 
