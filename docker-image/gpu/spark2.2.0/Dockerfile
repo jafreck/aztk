@@ -72,8 +72,4 @@ ENV NUMBAPRO_LIBDEVICE /usr/local/cuda/nvvm/libdevice/
 ENV NUMBAPRO_NVVM /usr/local/cuda-8.0/nvvm/lib64/libnvvm.so
 ENV NUMBAPRO_CUDALIB /usr/local/cuda-8.0/targets/x86_64-linux/lib/
 
-# # Tensorflow
-# RUN pip install --upgrade tensorflow-gpu
-
-WORKDIR $SPARK_HOME
 CMD ["bin/spark-class", "org.apache.spark.deploy.master.Master"]
