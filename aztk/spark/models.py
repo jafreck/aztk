@@ -115,7 +115,8 @@ class Application:
             driver_memory=None,
             executor_memory=None,
             driver_cores=None,
-            executor_cores=None):
+            executor_cores=None,
+            max_retry_count=None):
         self.name = name
         self.application = application
         self.application_args = application_args
@@ -130,6 +131,7 @@ class Application:
         self.executor_memory = executor_memory
         self.driver_cores = driver_cores
         self.executor_cores = executor_cores
+        self.max_retry_count = max_retry_count
 
 
 class ApplicationLog():
