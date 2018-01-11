@@ -342,6 +342,25 @@ def print_applications(applications):
                 )
             )
 
+def print_application(application: aztk.spark.models.Application):
+    print_format = '{:<30}| {:<15}'
+
+    log.info("")
+    log.info("Application         %s", application.name)
+    log.info("-"*42)
+    log.info(
+        print_format.format(
+            "State",
+            application.state
+        )
+    )
+    log.info(
+        print_format.format(
+            "State transition time",
+            utc_to_local(application.state_transition_time) 
+        )
+    )
+    log.info("")
 
 class Spinner:
     busy = False

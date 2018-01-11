@@ -57,3 +57,19 @@ job:
         executor_memory: 
         driver_cores: 
         executor_cores: 
+
+# # Functioning example, execute from the root of the repo
+# job:
+#   cluster_configuration:
+#     vm_size: standard_f2
+#     size: 3
+ 
+#   applications:
+#     - name: pipy100
+#       application: ./examples/src/main/python/pi.py
+#       application_args: 
+#         - 100
+#     - name: pipy200
+#       application: ./examples/src/main/python/pi.py
+#       application_args: 
+#         - 200
