@@ -304,12 +304,15 @@ def application_summary(applications):
     for state in batch_models.TaskState:
         states[state.name] = 0
 
+    warn_scheduling = False
+
     for application in applications:
         if type(application) == str:
             states["scheduling"] += 1
+            warn_scheduling = True
         else:
             states[application.state] += 1
-    
+
     print_format = '{:<17} {:<14}'
     log.info("Applications")
     log.info("-"*42)
@@ -317,6 +320,8 @@ def application_summary(applications):
         if states[state] > 0:
             log.info(print_format.format(state + ":", states[state]))
 
+    if warn_scheduling:
+        log.warn("\nNo Spark applications will be scheduled until the master is selected.")
 
 def print_applications(applications):
     print_format = '{:<36}| {:<15}| {:<14}'
@@ -324,6 +329,7 @@ def print_applications(applications):
     log.info(print_format.format("Applications", "State", "Transition Time"))
     log.info(print_format_underline.format('', '', '', ''))
 
+    warn_scheduling = False
     for application in applications:
         if type(application) == str:
             log.info(
@@ -333,6 +339,7 @@ def print_applications(applications):
                     "-"
                 )
             )
+            warn_scheduling = True
         else:
             log.info(
                 print_format.format(
@@ -341,6 +348,8 @@ def print_applications(applications):
                     utc_to_local(application.state_transition_time)
                 )
             )
+    if warn_scheduling:
+        log.warn("\nNo Spark applications will be scheduled until the master is selected.")
 
 def print_application(application: aztk.spark.models.Application):
     print_format = '{:<30}| {:<15}'
@@ -357,7 +366,7 @@ def print_application(application: aztk.spark.models.Application):
     log.info(
         print_format.format(
             "State transition time",
-            utc_to_local(application.state_transition_time) 
+            utc_to_local(application.state_transition_time)
         )
     )
     log.info("")
