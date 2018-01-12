@@ -294,7 +294,7 @@ class JobConfig():
 
         if config.get('id') is not None:
             self.id = config['id']
-        
+
         cluster_configuration = config.get('cluster_configuration')
         if cluster_configuration:
             self.vm_size = cluster_configuration.get('vm_size')
@@ -302,7 +302,7 @@ class JobConfig():
             self.max_dedicated_nodes = cluster_configuration.get('size')
             self.max_low_pri_nodes = cluster_configuration.get('size_low_pri')
             self.custom_scripts = cluster_configuration.get('custom_scripts')
-       
+
         self.applications = config.get('applications')
 
         spark_configuration = config.get('spark_configuration')
@@ -343,6 +343,14 @@ class JobConfig():
         self._read_config_file(job_config_yaml)
         if id:
             self.id = id
+
+        for entry in self.applications:
+            if entry['name'] is None:
+                raise aztk.error.AztkError(
+                    "Application specified with no name. Please verify your configuration in job.yaml")
+            if entry['application'] is None:
+                raise aztk.error.AztkError(
+                    "No path to application specified for {} in job.yaml".format(entry['name']))
 
 
 def load_aztk_spark_config():
