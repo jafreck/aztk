@@ -110,7 +110,7 @@ def __app_submit_cmd(
 
     spark_submit_cmd.add_argument(
         os.environ['AZ_BATCH_TASK_WORKING_DIR'] + '/' + app + ' ' +
-        ' '.join(['\'' + str(app_arg) + '\'' for app_arg in app_args if app_args]))
+        ' '.join(['\'' + str(app_arg) + '\'' for app_arg in (app_args or [])]))
 
     return spark_submit_cmd
 
@@ -163,11 +163,17 @@ def recieve_submit_request(application_file_path):
         executor_cores=application['executor_cores'])
 
     try:
-        subprocess.call(cmd.to_str(), shell=True)
+        return_code = subprocess.call(cmd.to_str(), shell=True)
+        upload_log(blob_client, application)
+        return return_code
     except subprocess.CalledProcessError as e:
         print(e)
+        upload_log(blob_client, application)
+        return 1
 
-    upload_log(blob_client, application)
+    return 1
 
 if __name__ == "__main__":
-    recieve_submit_request(os.path.join(os.environ['AZ_BATCH_TASK_WORKING_DIR'], 'application.yaml'))
+    return_code = recieve_submit_request(os.path.join(os.environ['AZ_BATCH_TASK_WORKING_DIR'], 'application.yaml'))
+    # force batch task exit code to match spark exit code
+    sys.exit(return_code)

@@ -196,6 +196,7 @@ class Client:
                 vm_size=job_configuration.vm_size,
                 enable_auto_scale=True,
                 auto_scale_formula=autoscale_formula,
+                auto_scale_evaluation_interval=timedelta(minutes=5),
                 start_task=start_task,
                 enable_inter_node_communication=True,
                 max_tasks_per_node=1,
