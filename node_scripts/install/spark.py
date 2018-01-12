@@ -77,8 +77,11 @@ def start_spark_master():
            str(config.spark_web_ui_port)]
     print("Starting master with '{0}'".format(" ".join(cmd)))
     call(cmd)
-
-    start_history_server()
+    try:
+        start_history_server()
+    except Exception as e:
+        print("Failed to start history server with the following exception:")
+        print(e)
 
 
 def start_history_server():
@@ -192,6 +195,7 @@ def parse_configuration_file(path_to_file: str):
     except Exception as e:
         print("Failed to parse configuration file:", path_to_file, "with error:")
         print(e)
+
 
 def configure_history_server_log_path(path_to_log_file):
     # Check if the file path starts with a local file extension
