@@ -1,10 +1,8 @@
 import argparse
 import typing
 import time
-from cli.spark.aztklib import load_spark_client
-from cli import utils
-from cli import log
 import aztk.spark
+from cli import config, utils, log
 from cli.config import JobConfig
 
 
@@ -20,7 +18,7 @@ def setup_parser(parser: argparse.ArgumentParser):
 
 
 def execute(args: typing.NamedTuple):
-    spark_client = load_spark_client()
+    spark_client = aztk.spark.Client(config.load_aztk_screts())
     job_conf = JobConfig()
 
     job_conf.merge(args.job_id, args.job_conf)

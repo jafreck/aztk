@@ -1,8 +1,7 @@
 import argparse
 import typing
 import time
-from cli.spark.aztklib import load_spark_client
-from cli import utils
+from cli import utils, config
 
 def setup_parser(parser: argparse.ArgumentParser):
     parser.add_argument('--id',
@@ -16,6 +15,6 @@ def setup_parser(parser: argparse.ArgumentParser):
 
 
 def execute(args: typing.NamedTuple):
-    spark_client = load_spark_client()
+    spark_client = aztk.spark.Client(config.load_aztk_screts())
     app_logs = spark_client.get_job_application_log(args.job_id, args.app_name)
     print(app_logs.log)

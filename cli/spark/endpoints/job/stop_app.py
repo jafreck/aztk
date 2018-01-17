@@ -1,7 +1,8 @@
 import argparse
 import typing
 import time
-from cli.spark.aztklib import load_spark_client
+import aztk.spark
+from cli import config
 from cli import utils
 from cli import log
 
@@ -18,7 +19,7 @@ def setup_parser(parser: argparse.ArgumentParser):
 
 
 def execute(args: typing.NamedTuple):
-    spark_client = load_spark_client()
+    spark_client = aztk.spark.Client(config.load_aztk_screts())
 
     if spark_client.stop_job_app(args.job_id, args.app_name):
         log.info("Stopped app {0}".format(args.app_name))

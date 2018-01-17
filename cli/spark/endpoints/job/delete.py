@@ -1,7 +1,7 @@
 import argparse
 import typing
-from cli import log
-from cli.spark.aztklib import load_spark_client
+import aztk.spark
+from cli import log, config
 
 
 def setup_parser(parser: argparse.ArgumentParser):
@@ -18,7 +18,7 @@ def setup_parser(parser: argparse.ArgumentParser):
 
 
 def execute(args: typing.NamedTuple):
-    spark_client = load_spark_client()
+    spark_client = aztk.spark.Client(config.load_aztk_screts())
     job_id = args.job_id
 
     if not args.force:
