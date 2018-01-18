@@ -1,6 +1,6 @@
 import argparse
 import typing
-import time
+import aztk.spark
 from cli import utils, config
 
 def setup_parser(parser: argparse.ArgumentParser):

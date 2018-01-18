@@ -237,7 +237,6 @@ class Client:
         return self.batch_client.job_schedule.get(job_schedule_id=job_configuration.id)
 
 
-
     '''
     Define Public Interface
     '''
