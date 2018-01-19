@@ -290,11 +290,7 @@ def print_cluster_summary(cluster: aztk.spark.models.Cluster):
     log.info("| Dedicated:      %s", __pretty_dedicated_node_count(cluster))
     log.info("| Low priority:   %s", __pretty_low_pri_node_count(cluster))
     state_count = node_state_count(cluster)
-    if cluster.current_dedicated_nodes > 0 or cluster.current_low_pri_nodes > 0:
-        log.info("| State:")
-    for state in state_count:
-        if state_count[state] > 0:
-            log.info(print_format.format('', state.name, state_count[state]))
+    log.info("Master            %s", cluster.master_node_id or "Pending")
     log.info("")
 
 
