@@ -59,7 +59,8 @@ def get_log_from_storage(blob_client, container_name, application_name, task):
         cluster_id=container_name,
         application_state=task.state._value_,
         log=blob.content,
-        total_bytes=blob.properties.content_length)
+        total_bytes=blob.properties.content_length,
+        exit_code = task.execution_info.exit_code)
 
 
 def get_log(batch_client, blob_client, cluster_id: str, application_name: str, tail=False, current_bytes: int = 0):
