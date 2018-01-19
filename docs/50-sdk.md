@@ -399,6 +399,7 @@ Find some samples and getting stated tutorial in the `examples/sdk/` directory o
         - state_transition_time: datetime
         - previous_state: str
         - previous_state_transition_time: datetime
+        - exit_code: int
 
     <!---
     - _execution_info: azure.batch.models.TaskExecutionInformation

@@ -137,9 +137,11 @@ class Application:
         self.creation_time = cloud_task.creation_time
         self.state = cloud_task.state._value_
         self.state_transition_time = cloud_task.state_transition_time
+        self.exit_code = cloud_task.execution_info.exit_code
         if cloud_task.previous_state:
             self.previous_state = cloud_task.previous_state._value_
             self.previous_state_transition_time = cloud_task.previous_state_transition_time
+        
 
         self._execution_info = cloud_task.execution_info
         self._node_info = cloud_task.node_info
