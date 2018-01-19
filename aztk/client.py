@@ -215,9 +215,10 @@ class Client:
                                                                                   'aztk',
                                                                                   cluster_nodes,
                                                                                   ssh_key=ssh_key.exportKey().decode('utf-8')))
-            self.__delete_user_on_pool('aztk', pool.id, nodes)
         except OSError as exc:
             raise exc
+        finally:
+            self.__delete_user_on_pool('aztk', pool.id, nodes)
 
     def __cluster_copy(self, cluster_id, container_name, source_path, destination_path):
         pool, nodes = self.__get_pool_details(cluster_id)

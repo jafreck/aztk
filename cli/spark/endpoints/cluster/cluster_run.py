@@ -1,8 +1,7 @@
 import argparse
 import typing
-from cli.spark.aztklib import load_spark_client
-from cli import utils
-
+import aztk.spark
+from cli import utils, config
 
 def setup_parser(parser: argparse.ArgumentParser):
     parser.add_argument('--id',
@@ -13,6 +12,6 @@ def setup_parser(parser: argparse.ArgumentParser):
                         help='The command to run on your spark cluster')
 
 def execute(args: typing.NamedTuple):
-    spark_client = load_spark_client()
+    spark_client = aztk.spark.Client(config.load_aztk_screts())
     result = spark_client.cluster_run(args.cluster_id, args.command)
     #TODO: pretty print result
