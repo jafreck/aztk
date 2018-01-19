@@ -141,7 +141,6 @@ class Application:
         if cloud_task.previous_state:
             self.previous_state = cloud_task.previous_state._value_
             self.previous_state_transition_time = cloud_task.previous_state_transition_time
-        
 
         self._execution_info = cloud_task.execution_info
         self._node_info = cloud_task.node_info
