@@ -1,10 +1,11 @@
-from datetime import datetime
 import subprocess
-import aztk.spark
-from cli import config
-from azure.batch.models import BatchErrorException
-from aztk.error import AztkError
+from datetime import datetime
 
+from azure.batch.models import BatchErrorException
+
+import aztk.spark
+from aztk.error import AztkError
+from cli import config
 
 dt = datetime.now()
 time = dt.microsecond
