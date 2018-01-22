@@ -16,9 +16,7 @@ cluster_id = "test{}".format(time)
 spark_client = aztk.spark.Client(config.load_aztk_screts())
 
 
-
 def test_create_cluster():
-
     # TODO: make Cluster Configuration more robust, test each value
     cluster_configuration = aztk.spark.models.ClusterConfiguration(
         cluster_id=cluster_id,
@@ -98,7 +96,7 @@ def test_submit():
         spark_client.submit(cluster_id=cluster_id, application=application_configuration, wait=True)
     except (AztkError, BatchErrorException) as e:
         assert False
-    
+
     assert True
 
 def test_get_application_log():
@@ -112,15 +110,26 @@ def test_get_application_log():
 
     assert application_log.exit_code == 0
     assert application_log.name == "pipy100"
-    assert application_log.state == "completed"
+    assert application_log.application_state == "completed"
     assert application_log.log is not None
     assert application_log.total_bytes is not None
 
-def test_create_user():
+def test_create_user_password():
+    #TODO: test with paramiko
     pass
 
-def test_get_application_status():
+def test_create_user_ssh_key():
+    #TODO: test with paramiko
     pass
+
+def test_get_application_status_complete():
+    try:
+        spark_client.wait_until_application_done(cluster_id=cluster_id, task_id="pipy100")
+        status = spark_client.get_application_status(cluster_id=cluster_id, app_name="pipy100")
+    except (AztkError, BatchErrorException) as e:
+        assert False
+
+    assert status == "completed"
 
 def test_delete_cluster():
     try:
