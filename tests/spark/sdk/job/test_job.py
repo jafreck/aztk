@@ -40,6 +40,7 @@ def test_submit_job():
             max_low_pri_nodes=None
         )
         job = spark_client.submit_job(job_configuration=job_configuration)
+        spark_client.wait_until_job_finished(job_id=job_id)
     except (AztkError, BatchErrorException) as e:
         assert False
 
@@ -77,7 +78,7 @@ def test_get_job():
 
 def test_get_application():
     try:
-        application = spark_client.get_job_application_log(job_id=job_id, application_name="pipy100")
+        application = spark_client.get_application(job_id=job_id, application_name="pipy100")
     except (AztkError, BatchErrorException) as e:
         assert False
 
