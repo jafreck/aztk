@@ -65,7 +65,7 @@ def test_list_applications():
     assert applications not in (None, [])
     assert len(applications) == 2
     for application in applications:
-        assert isinstance(application, aztk.spark.models.Application)
+        assert isinstance(application, (aztk.spark.models.Application, str))
 
 def test_get_job():
     try:
