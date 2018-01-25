@@ -57,7 +57,7 @@ If you do not already have an Azure account, go to [https://azure.microsoft.com/
 
 
 #### Using AAD
-To get the required keys for your Azure Active Directory (AAD) Service Principal, Azure Batch Account and Azure Storage Account, please follow these instructions. Note that this is the reccomended path for use with AZTK, as some features require AAD and are disabled if using Shared Key authentication.
+To get the required keys for your Azure Active Directory (AAD) Service Principal, Azure Batch Account and Azure Storage Account, please follow these instructions. Note that this is the recommended path for use with AZTK, as some features require AAD and are disabled if using Shared Key authentication.
 
 1. Register an Azure Active Directory (AAD) Application
 
@@ -69,7 +69,7 @@ To get the required keys for your Azure Active Directory (AAD) Service Principal
 
 ![](./misc/AppRegistrations_1.png)
 
-- Click the "+ New application registration" option at the top left of the window. Fill in the necessary fields for the "Create" form.
+- Click the "+ New application registration" option at the top left of the window. Fill in the necessary fields for the "Create" form. For "Application type" use "Web app/ API."
 
 ![](./misc/AppRegistrations_2.png)
 
