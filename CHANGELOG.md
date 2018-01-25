@@ -4,11 +4,11 @@
 
 Major Features:
 - [Job Submission](docs/70-jobs.md)
+- AAD Support, see [Getting Started](docs/00-getting-started.md)
 - VNET Support
-- AAD Support
 
 **Breaking changes:**
-* `SecretsConfiguration` inputs changed. Check in [docs/50-sdk.md](docs/50-sdk.md) for the new format
+* `SecretsConfiguration` inputs changed. Check in [SDK](docs/50-sdk.md) for the new format
 
 ## 0.5.0 SDK
 ## 0.3.1 List cluster only list spark cluster
