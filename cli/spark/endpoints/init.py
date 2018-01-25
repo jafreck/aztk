@@ -10,7 +10,7 @@ def setup_parser(parser: argparse.ArgumentParser):
                         help="Create a .aztk/ folder in your home directory for global configurations.")
     software_parser = parser.add_mutually_exclusive_group()
     software_parser.add_argument('--python', action="store_true", required=False)
-    software_parser.add_argument('--r-base', action="store_true", required=False)
+    software_parser.add_argument('--r', action="store_true", required=False)
     software_parser.add_argument('--java', action="store_true", required=False)
     software_parser.add_argument('--scala', action="store_true", required=False)
 
@@ -19,7 +19,7 @@ def execute(args: typing.NamedTuple):
     # software_specific init
     if args.python:
         docker_repo = constants.DEFAULT_SPARK_PYTHON_DOCKER_REPO
-    elif args.r_base:
+    elif args.r:
         docker_repo = constants.DEFAULT_SPARK_R_BASE_DOCKER_REPO
     else:
         docker_repo = constants.DEFAULT_DOCKER_REPO
