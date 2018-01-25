@@ -14,6 +14,7 @@ def setup_parser(parser: argparse.ArgumentParser):
     software_parser.add_argument('--java', action="store_true", required=False)
     software_parser.add_argument('--scala', action="store_true", required=False)
 
+
 def execute(args: typing.NamedTuple):
     # software_specific init
     if args.python:
@@ -27,6 +28,7 @@ def execute(args: typing.NamedTuple):
         create_directory(constants.GLOBAL_INIT_DIRECTORY_DEST, docker_repo)
     else:
         create_directory(constants.LOCAL_INIT_DIRECTORY_DEST, docker_repo)
+
 
 def create_directory(dest_path: str, docker_repo: str):
     config_src_path = constants.INIT_DIRECTORY_SOURCE
