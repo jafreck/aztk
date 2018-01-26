@@ -80,17 +80,20 @@ def execute(args: typing.NamedTuple):
         file_shares = None
 
     if cluster_conf.username:
-        ssh_key, password = utils.get_ssh_key_or_prompt(spark_client.secrets_config.ssh_pub_key, cluster_conf.username, cluster_conf.password, spark_client.secrets_config)
+        ssh_key, password = utils.get_ssh_key_or_prompt(spark_client.secrets_config.ssh_pub_key,
+                                                        cluster_conf.username,
+                                                        cluster_conf.password,
+                                                        spark_client.secrets_config)
         user_conf = aztk.spark.models.UserConfiguration(
-                username=cluster_conf.username,
-                password=password,
-                ssh_key=ssh_key
+            username=cluster_conf.username,
+            password=password,
+            ssh_key=ssh_key
         )
     else:
         user_conf = None
-    
-    spinner = utils.Spinner()
+
     print_cluster_conf(cluster_conf)
+    spinner = utils.Spinner()
     spinner.start()
 
     # create spark cluster
