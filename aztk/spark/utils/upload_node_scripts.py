@@ -8,6 +8,9 @@ import yaml
 from pathlib import Path
 from aztk.utils import constants
 from aztk.utils import helpers
+from Crypto.PublicKey import RSA
+from Crypto.Random import get_random_bytes
+from Crypto.Cipher import AES, PKCS1_OAEP
 
 root = constants.ROOT_PATH
 
@@ -118,6 +121,14 @@ def zip_scripts(blob_client, container_id, custom_scripts, spark_configuration, 
                 zipf = __add_file_to_zip(zipf, jar, 'jars', binary=True)
 
     if user_conf:
+        encrypted_aes_session_key, cipher_aes_nonce, tag, ciphertext = encrypt_password(spark_configuration.ssh_key_pair['pub_key'], user_conf.password)
+        user_conf = yaml.dump({'username': user_conf.username,
+                               'password': ciphertext,
+                               'ssh-key': user_conf.ssh_key,
+                               'aes_session_key': encrypted_aes_session_key,
+                               'cipher_aes_nonce': cipher_aes_nonce,
+                               'tag': tag,
+                               'cluster_id': container_id})
         zipf = __add_str_to_zip(zipf, user_conf, 'user.yaml')
 
     # add helper file to node_scripts/submit/
@@ -126,3 +137,19 @@ def zip_scripts(blob_client, container_id, custom_scripts, spark_configuration, 
     zipf.close()
 
     return __upload(blob_client, container_id)
+
+
+def encrypt_password(ssh_pub_key, password):
+    if not password:
+        return [None, None, None, None]
+    recipient_key = RSA.import_key(ssh_pub_key)
+    session_key = get_random_bytes(16)
+
+    # Encrypt the session key with the public RSA key
+    cipher_rsa = PKCS1_OAEP.new(recipient_key)
+    encrypted_aes_session_key = cipher_rsa.encrypt(session_key)
+
+    # Encrypt the data with the AES session key
+    cipher_aes = AES.new(session_key, AES.MODE_EAX)
+    ciphertext, tag = cipher_aes.encrypt_and_digest(password.encode())
+    return [encrypted_aes_session_key, cipher_aes.nonce, tag, ciphertext]
