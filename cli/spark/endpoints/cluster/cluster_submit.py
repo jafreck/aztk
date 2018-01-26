@@ -1,8 +1,6 @@
 import argparse
 import typing
-from cli import log
-from cli import utils
-from cli.spark.aztklib import load_spark_client
+from cli import utils, config, log
 import aztk.spark
 
 
@@ -59,7 +57,11 @@ def setup_parser(parser: argparse.ArgumentParser):
 
     parser.add_argument('--executor-cores',
                         help='Number of cores per executor. (Default: All \
-                              available cores on the worker')
+                              available cores on the worker)')
+
+    parser.add_argument('--max-retry-count',
+                        help='Number of times the Spark job may be retried \
+                              if there is a failure')
 
     parser.add_argument('app',
                         help='App jar OR python file to execute. Use absolute \
@@ -70,7 +72,7 @@ def setup_parser(parser: argparse.ArgumentParser):
 
 
 def execute(args: typing.NamedTuple):
-    spark_client = load_spark_client()
+    spark_client = aztk.spark.Client(config.load_aztk_screts())
     jars = []
     py_files = []
     files = []
@@ -117,7 +119,7 @@ def execute(args: typing.NamedTuple):
 
     spark_client.submit(
         cluster_id=args.cluster_id,
-        application = aztk.spark.models.Application(
+        application = aztk.spark.models.ApplicationConfiguration(
             name=args.name,
             application=args.app,
             application_args=args.app_args,
@@ -131,7 +133,8 @@ def execute(args: typing.NamedTuple):
             driver_memory=args.driver_memory,
             executor_memory=args.executor_memory,
             driver_cores=args.driver_cores,
-            executor_cores=args.executor_cores
+            executor_cores=args.executor_cores,
+            max_retry_count=args.max_retry_count
         ),
         wait=False
     )
