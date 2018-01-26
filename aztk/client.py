@@ -190,8 +190,13 @@ class Client:
 
     def __create_user_on_pool(self, username, pool_id, nodes):
         ssh_key = RSA.generate(2048)
+        ssh_pub_key = ssh_key.publickey().exportKey('OpenSSH').decode('utf-8')
         with concurrent.futures.ThreadPoolExecutor() as executor:
-            futures = {executor.submit(self.__create_user_on_node, username, pool_id, node.id, ssh_key.publickey().exportKey('OpenSSH').decode('utf-8')): node for node in nodes}
+            futures = {executor.submit(self.__create_user_on_node,
+                                       username,
+                                       pool_id,
+                                       node.id,
+                                       ssh_pub_key): node for node in nodes}
             concurrent.futures.wait(futures)
         return ssh_key
 
