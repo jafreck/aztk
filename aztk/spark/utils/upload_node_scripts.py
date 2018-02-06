@@ -42,7 +42,7 @@ def zip_file_to_dir(file, directory: str, zipf: str, binary: bool = False):
     """
     if not zipf:
         zipf = zipfile.ZipFile(local_tmp_zipfile, "w", zipfile.ZIP_DEFLATED)
-    if isinstance(file, (os.PathLike, str, bytes)):
+    if isinstance(file, (str, bytes)):
         full_file_path = Path(file)
 
         with io.open(file, 'r') as f:
@@ -86,7 +86,7 @@ def __upload(blob_client, cluster_id):
 def __add_custom_scripts(zipf, custom_scripts):
     data = []
     for index, custom_script in enumerate(custom_scripts):
-        if isinstance(custom_script.script, (os.PathLike, str, bytes)):
+        if isinstance(custom_script.script, (str, bytes)):
             new_file_name = str(index) + '_' + os.path.basename(custom_script.script)
             with io.open(custom_script.script, 'r') as f:
                 zipf.writestr(os.path.join('custom-scripts', new_file_name), f.read().replace('\r\n', '\n'))
