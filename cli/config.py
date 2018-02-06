@@ -3,7 +3,7 @@ import yaml
 import typing
 from cli import log
 import aztk.spark
-from aztk.models import ServicePrincipalConfiguration, SharedKeyConfiguration, DockerConfiguration
+from aztk.spark.models import ServicePrincipalConfiguration, SharedKeyConfiguration, DockerConfiguration
 from aztk.spark.models import SecretsConfiguration
 
 

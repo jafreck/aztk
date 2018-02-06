@@ -1,3 +1,4 @@
+import io
 from Crypto.PublicKey import RSA
 from typing import List
 import aztk.models
@@ -39,8 +40,12 @@ class RemoteLogin(aztk.models.RemoteLogin):
     pass
 
 
+class File(aztk.models.File):
+    pass
+
+
 class SparkConfiguration():
-    def __init__(self, spark_defaults_conf: str = None, spark_env_sh: str = None, core_site_xml: str = None, jars: List[str]=None):
+    def __init__(self, spark_defaults_conf=None, spark_env_sh=None, core_site_xml=None, jars=None):
         self.spark_defaults_conf = spark_defaults_conf
         self.spark_env_sh = spark_env_sh
         self.core_site_xml = core_site_xml
@@ -88,9 +93,21 @@ class ClusterConfiguration(aztk.models.ClusterConfiguration):
                          subnet_id=subnet_id,
                          file_shares=file_shares,
                          user_configuration=user_configuration
-                        )
+                         )
         self.spark_configuration = spark_configuration
         self.gpu_enabled = helpers.is_gpu_enabled(vm_size)
+
+
+class SharedKeyConfiguration(aztk.models.SharedKeyConfiguration):
+    pass
+
+
+class ServicePrincipalConfiguration(aztk.models.ServicePrincipalConfiguration):
+    pass
+
+
+class DockerConfiguration(aztk.models.DockerConfiguration):
+    pass
 
 
 class SecretsConfiguration(aztk.models.SecretsConfiguration):
@@ -216,6 +233,7 @@ class Job():
             self.cluster = Cluster(pool, nodes)
         else:
             self.cluster = None
+
 
 class ApplicationLog():
     def __init__(self, name: str, cluster_id: str, log: str, total_bytes: int, application_state: batch_models.TaskState, exit_code: int):
