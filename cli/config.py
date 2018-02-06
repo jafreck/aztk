@@ -223,10 +223,6 @@ class ClusterConfig:
             raise aztk.error.AztkError(
                 "Please supply a value for wait in either the cluster.yaml configuration file or with a parameter (--wait or --no-wait)")
 
-        if self.username is not None and self.wait is False:
-            raise aztk.error.AztkError(
-                "You cannot create a user '{0}' if wait is set to false. By default, we create a user in the cluster.yaml file. Please either the configure your cluster.yaml file or set the parameter (--wait)".format(self.username))
-
         if self.size > 0 and self.size_low_pri > 0:
             self.mixed_mode = True
 
@@ -347,6 +343,7 @@ class JobConfig():
         self.spark_defaults_conf = None
         self.spark_env_sh = None
         self.core_site_xml = None
+        self.subnet_id = None
 
     def _merge_dict(self, config):
         config = config.get('job')
@@ -361,6 +358,7 @@ class JobConfig():
             self.max_dedicated_nodes = cluster_configuration.get('size')
             self.max_low_pri_nodes = cluster_configuration.get('size_low_pri')
             self.custom_scripts = cluster_configuration.get('custom_scripts')
+            self.subnet_id = cluster_configuration.get('subnet_id')
 
         self.applications = config.get('applications')
 

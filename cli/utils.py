@@ -16,6 +16,7 @@ def get_ssh_key_or_prompt(ssh_key, username, password, secrets_config):
     ssh_key = get_ssh_key.get_user_public_key(ssh_key, secrets_config)
 
     if username is not None and password is None and ssh_key is None:
+        log.warn("It is reccomended to use an SSH key for user creation instead of a password.")
         for i in range(3):
             if i > 0:
                 log.error("Please try again.")
@@ -331,6 +332,7 @@ def print_applications(applications):
                 print_format.format(
                     name,
                     "scheduling",
+                    "-",
                     "-"
                 )
             )
@@ -342,7 +344,7 @@ def print_applications(applications):
                     application.name,
                     application.state,
                     utc_to_local(application.state_transition_time),
-                    application.exit_code
+                    application.exit_code or "-"
                 )
             )
     if warn_scheduling:
