@@ -399,33 +399,24 @@ class JobConfig():
                     "No path to application specified for {} in job.yaml".format(entry['name']))
 
 
-def get_file_if_exists(file, local: bool):
-    if local:
-        if os.path.exists(os.path.join(aztk.utils.constants.DEFAULT_SPARK_CONF_SOURCE, file)):
-            return os.path.join(aztk.utils.constants.DEFAULT_SPARK_CONF_SOURCE, file)
-    else:
-        if os.path.exists(os.path.join(aztk.utils.constants.GLOBAL_CONFIG_PATH, file)):
-            return os.path.join(aztk.utils.constants.GLOBAL_CONFIG_PATH, file)
+def get_file_if_exists(file):
+    local_conf_file = os.path.join(aztk.utils.constants.DEFAULT_SPARK_CONF_SOURCE, file)
+    global_conf_file = os.path.join(aztk.utils.constants.GLOBAL_CONFIG_PATH, file)
+
+    if os.path.exists(local_conf_file):
+        return local_conf_file
+    if os.path.exists(global_conf_file):
+        return global_conf_file
+
+    return None
 
 
 def load_aztk_spark_config():
-    spark_defaults_conf = spark_env_sh = core_site_xml = None
-
-    spark_defaults_conf = get_file_if_exists('spark-defaults.conf', False)
-    spark_env_sh = get_file_if_exists('spark-env.sh', False)
-    core_site_xml = get_file_if_exists('core-site.xml', False)
-
-    spark_defaults_conf = get_file_if_exists('spark-defaults.conf', True)
-    spark_env_sh = get_file_if_exists('spark-env.sh', True)
-    core_site_xml = get_file_if_exists('core-site.xml', True)
-
-    jars = load_jars()
-
     return aztk.spark.models.SparkConfiguration(
-        spark_defaults_conf=spark_defaults_conf,
-        jars=jars,
-        spark_env_sh=spark_env_sh,
-        core_site_xml=core_site_xml)
+        spark_defaults_conf=get_file_if_exists('spark-defaults.conf'),
+        jars=load_jars(),
+        spark_env_sh=get_file_if_exists('spark-env.sh'),
+        core_site_xml=get_file_if_exists('core-site.xml'))
 
 
 def load_jars():
