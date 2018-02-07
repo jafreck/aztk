@@ -33,7 +33,7 @@ The minimum requirements to get started with this package are:
     If you would like to initialize your AZTK clusters with a specific development toolset, please pass one of the following flags:
     ```bash
     aztk spark init --python
-    aztk spark init --r-base
+    aztk spark init --R
     aztk spark init --scala
     aztk spark init --java
     ```
