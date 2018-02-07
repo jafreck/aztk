@@ -10,14 +10,10 @@ from cli import utils, config
 def setup_parser(parser: argparse.ArgumentParser):
     parser.add_argument('--id', dest='cluster_id',
                         help='The unique id of your spark cluster')
-
-    # Make --size and --size-low-pri mutually exclusive until there is a fix for
-    # having clusters with mixed priority types
-    size_group = parser.add_mutually_exclusive_group()
-    size_group.add_argument('--size', type=int,
-                            help='Number of vms in your cluster')
-    size_group.add_argument('--size-low-pri', type=int,
-                            help='Number of low priority vms in your cluster')
+    parser.add_argument('--size', type=int,
+                        help='Number of vms in your cluster')
+    parser.add_argument('--size-low-pri', type=int,
+                        help='Number of low priority vms in your cluster')
     parser.add_argument('--vm-size',
                         help='VM size for nodes in your cluster')
     parser.add_argument('--username',
@@ -43,6 +39,7 @@ def execute(args: typing.NamedTuple):
     cluster_conf = ClusterConfig()
 
     cluster_conf.merge(
+        spark_client=spark_client,
         uid=args.cluster_id,
         size=args.size,
         size_low_pri=args.size_low_pri,
@@ -52,13 +49,6 @@ def execute(args: typing.NamedTuple):
         username=args.username,
         password=args.password,
         docker_repo=args.docker_repo)
-
-    print_cluster_conf(cluster_conf)
-
-    spinner = utils.Spinner()
-
-    log.info("Please wait while your cluster is being provisioned")
-    spinner.start()
 
     if cluster_conf.custom_scripts:
         custom_scripts = []
@@ -86,6 +76,23 @@ def execute(args: typing.NamedTuple):
     else:
         file_shares = None
 
+    if cluster_conf.username:
+        ssh_key, password = utils.get_ssh_key_or_prompt(spark_client.secrets_config.ssh_pub_key,
+                                                        cluster_conf.username,
+                                                        cluster_conf.password,
+                                                        spark_client.secrets_config)
+        user_conf = aztk.spark.models.UserConfiguration(
+            username=cluster_conf.username,
+            password=password,
+            ssh_key=ssh_key
+        )
+    else:
+        user_conf = None
+
+    print_cluster_conf(cluster_conf)
+    spinner = utils.Spinner()
+    spinner.start()
+
     # create spark cluster
     cluster = spark_client.create_cluster(
         aztk.spark.models.ClusterConfiguration(
@@ -97,23 +104,11 @@ def execute(args: typing.NamedTuple):
             custom_scripts=custom_scripts,
             file_shares=file_shares,
             docker_repo=cluster_conf.docker_repo,
-            spark_configuration=load_aztk_spark_config()
+            spark_configuration=load_aztk_spark_config(),
+            user_configuration=user_conf
         ),
         wait=cluster_conf.wait
     )
-
-    if cluster_conf.username:
-        ssh_key = spark_client.secrets_config.ssh_pub_key
-
-        ssh_key, password = utils.get_ssh_key_or_prompt(
-            ssh_key, cluster_conf.username, cluster_conf.password, spark_client.secrets_config)
-
-        spark_client.create_user(
-            cluster_id=cluster_conf.uid,
-            username=cluster_conf.username,
-            password=password,
-            ssh_key=ssh_key
-        )
 
     spinner.stop()
 

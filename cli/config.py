@@ -128,6 +128,7 @@ class ClusterConfig:
         self.file_shares = None
         self.docker_repo = None
         self.wait = None
+        self.mixed_mode = False
 
     def _read_config_file(self, path: str = aztk.utils.constants.DEFAULT_CLUSTER_CONFIG_PATH):
         """
@@ -157,11 +158,9 @@ class ClusterConfig:
 
         if config.get('size') is not None:
             self.size = config['size']
-            self.size_low_pri = 0
 
         if config.get('size_low_pri') is not None:
             self.size_low_pri = config['size_low_pri']
-            self.size = 0
 
         if config.get('subnet_id') is not None:
             self.subnet_id = config['subnet_id']
@@ -184,7 +183,7 @@ class ClusterConfig:
         if config.get('wait') is not None:
             self.wait = config['wait']
 
-    def merge(self, uid, username, size, size_low_pri, vm_size, subnet_id, password, wait, docker_repo):
+    def merge(self, spark_client, uid, username, size, size_low_pri, vm_size, subnet_id, password, wait, docker_repo):
         """
             Reads configuration file (cluster.yaml), merges with command line parameters,
             checks for errors with configuration
@@ -224,10 +223,16 @@ class ClusterConfig:
             raise aztk.error.AztkError(
                 "Please supply a value for wait in either the cluster.yaml configuration file or with a parameter (--wait or --no-wait)")
 
-        if self.username is not None and self.wait is False:
-            raise aztk.error.AztkError(
-                "You cannot create a user '{0}' if wait is set to false. By default, we create a user in the cluster.yaml file. Please either the configure your cluster.yaml file or set the parameter (--wait)".format(self.username))
+        if self.size > 0 and self.size_low_pri > 0:
+            self.mixed_mode = True
 
+        if not spark_client.secrets_config.service_principal.tenant_id and self.mixed_mode:
+            raise aztk.error.AztkError(
+                "You must configure an AAD service principal to use AZTK in mixed mode (dedicated and low priority nodes).")
+
+        if not self.subnet_id and self.mixed_mode:
+            raise aztk.error.AztkError(
+                "You must configure a VNET to use AZTK in mixed mode (dedicated and low priority nodes). Set the VNET's subnet_id in your cluster.yaml.")
 
 class SshConfig:
 
@@ -337,6 +342,7 @@ class JobConfig():
         self.spark_defaults_conf = None
         self.spark_env_sh = None
         self.core_site_xml = None
+        self.subnet_id = None
 
     def _merge_dict(self, config):
         config = config.get('job')
@@ -351,6 +357,7 @@ class JobConfig():
             self.max_dedicated_nodes = cluster_configuration.get('size')
             self.max_low_pri_nodes = cluster_configuration.get('size_low_pri')
             self.custom_scripts = cluster_configuration.get('custom_scripts')
+            self.subnet_id = cluster_configuration.get('subnet_id')
 
         self.applications = config.get('applications')
 
