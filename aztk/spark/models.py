@@ -91,6 +91,7 @@ class ClusterConfiguration(aztk.models.ClusterConfiguration):
                         )
         self.spark_configuration = spark_configuration
         self.gpu_enabled = helpers.is_gpu_enabled(vm_size)
+        self.mixed_mode = True if (self.vm_count > 0) and (self.vm_low_pri_count > 0) else False
 
 
 class SecretsConfiguration(aztk.models.SecretsConfiguration):
@@ -178,7 +179,8 @@ class JobConfiguration:
             spark_configuration=None,
             docker_repo=None,
             max_dedicated_nodes=None,
-            max_low_pri_nodes=None):
+            max_low_pri_nodes=None,
+            subnet_id=None):
         self.id = id
         self.applications = applications
         self.custom_scripts = custom_scripts
@@ -188,6 +190,7 @@ class JobConfiguration:
         self.docker_repo = docker_repo
         self.max_dedicated_nodes = max_dedicated_nodes
         self.max_low_pri_nodes = max_low_pri_nodes
+        self.subnet_id = subnet_id
 
 
 class JobState():
