@@ -112,7 +112,13 @@ def __app_submit_cmd(
         os.environ['AZ_BATCH_TASK_WORKING_DIR'] + '/' + app + ' ' +
         ' '.join(['\'' + str(app_arg) + '\'' for app_arg in (app_args or [])]))
 
-    return spark_submit_cmd
+    ssh_cmd = CommandBuilder("ssh")
+    ssh_cmd.add_option("-i", "/root/.ssh/id_rsa")
+    ssh_cmd.add_argument("root@{}".format(master_ip))
+    ssh_cmd.add_argument('\"{}\"'.format(spark_submit_cmd.to_str()))
+    print(ssh_cmd.to_str())
+
+    return ssh_cmd
 
 
 def load_application(application_file_path):
