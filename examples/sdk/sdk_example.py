@@ -33,12 +33,13 @@ custom_script = aztk.spark.models.CustomScript(
 spark_conf = aztk.spark.models.SparkConfiguration(
     spark_defaults_conf=os.path.join(ROOT_PATH, 'config', 'spark-defaults.conf'),
     spark_env_sh=os.path.join(ROOT_PATH, 'config', 'spark-env.sh'),
-    core_site_xml=os.path.join(ROOT_PATH, 'config', 'core-site.xml')
+    core_site_xml=os.path.join(ROOT_PATH, 'config', 'core-site.xml'),
+    jars=[os.path.join(ROOT_PATH, 'config', 'jars', jar) for jar in os.listdir(os.path.join(ROOT_PATH, 'config', 'jars'))]
 )
 
 # configure my cluster
 cluster_config = aztk.spark.models.ClusterConfiguration(
-    cluster_id="sdk_test",
+    cluster_id="sdk-test",
     vm_low_pri_count=2,
     vm_size="standard_f2",
     custom_scripts=[custom_script],
