@@ -3,8 +3,10 @@ import os
 """
     DOCKER
 """
-DEFAULT_DOCKER_REPO = "aztk/base:spark2.2.0"
-DEFAULT_DOCKER_REPO_GPU = "aztk/gpu:spark2.2.0"
+DEFAULT_DOCKER_REPO = "aztk/base:latest"
+DEFAULT_DOCKER_REPO_GPU = "aztk/gpu:latest"
+DEFAULT_SPARK_PYTHON_DOCKER_REPO = "aztk/python:latest"
+DEFAULT_SPARK_R_BASE_DOCKER_REPO = "aztk/r-base:latest"
 DOCKER_SPARK_CONTAINER_NAME = "spark"
 
 # DOCKER SPARK
@@ -44,6 +46,8 @@ DEFAULT_SPARK_CONF_SOURCE = os.path.join(os.getcwd(), '.aztk')
 DEFAULT_SPARK_CONF_DEST = os.path.join(ROOT_PATH, 'node_scripts', 'conf')
 DEFAULT_SPARK_JARS_SOURCE = os.path.join(os.getcwd(), '.aztk', 'jars')
 DEFAULT_SPARK_JARS_DEST = os.path.join(ROOT_PATH, 'node_scripts', 'jars')
+DEFAULT_SPARK_JOB_CONFIG = os.path.join(os.getcwd(), '.aztk', 'job.yaml')
+GLOBAL_SPARK_JOB_CONFIG = os.path.join(HOME_DIRECTORY_PATH, '.aztk', 'job.yaml')
 
 CUSTOM_SCRIPTS_DEST = os.path.join(ROOT_PATH, 'node_scripts', 'custom-scripts')
 

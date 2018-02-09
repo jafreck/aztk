@@ -92,7 +92,7 @@ def start_history_server():
     properties = parse_configuration_file(path_to_spark_defaults_conf)
 
     # only enable the history server if it was enabled in the configuration file
-    if spark_event_log_enabled_key in properties:
+    if properties and spark_event_log_enabled_key in properties:
         if spark_event_log_directory_key in properties:
             configure_history_server_log_path(properties[spark_event_log_directory_key])
 
@@ -114,9 +114,19 @@ def start_spark_worker():
     print("Connecting to master with '{0}'".format(" ".join(cmd)))
     call(cmd)
 
+    # enable the shuffle service on all slaves
+    start_shuffle_service()
+
+
+def start_shuffle_service():
+    exe = os.path.join(spark_home, "sbin", "start-shuffle-service.sh")
+    print("Starting the shuffle service with {}".format(exe))
+    call([exe, " &"])
+
 
 def copyfile(src, dest):
     try:
+        os.makedirs(os.path.dirname(dest), exist_ok=True)
         shutil.copyfile(src, dest)
         file_stat = os.stat(dest)
         os.chmod(dest, file_stat.st_mode | 0o777)
@@ -177,9 +187,9 @@ def copy_jars():
             src = os.path.join(spark_default_path_src, jar)
             dest = os.path.join(spark_default_path_dest, jar)
             print("copy {} to {}".format(src, dest))
-            shutil.copyfile(src, dest)
+            copyfile(src, dest)
     except Exception as e:
-        print("Failed to copy jar files")
+        print("Failed to copy jar files with error:")
         print(e)
 
 
@@ -198,19 +208,19 @@ def parse_configuration_file(path_to_file: str):
 
 
 def configure_history_server_log_path(path_to_log_file):
-        # Check if the file path starts with a local file extension
-        # If so, create the path on disk otherwise ignore
-        print('Configuring spark history server log directory {}.'.format(path_to_log_file))
-        if path_to_log_file.startswith('file:/'):
-            # create the local path on disk
-            directory = path_to_log_file.replace('file:', '')
-            if os.path.exists(directory):
-                print('Skipping. Directory {} already exists.'.format(directory))
-            else:
-                print('Create direcotory {}.'.format(directory))
-                os.makedirs(directory)
-
-                # Make sure the directory can be accessed by all users
-                os.chmod(directory, mode=0o777)
+    # Check if the file path starts with a local file extension
+    # If so, create the path on disk otherwise ignore
+    print('Configuring spark history server log directory {}.'.format(path_to_log_file))
+    if path_to_log_file.startswith('file:/'):
+        # create the local path on disk
+        directory = path_to_log_file.replace('file:', '')
+        if os.path.exists(directory):
+            print('Skipping. Directory {} already exists.'.format(directory))
         else:
-            print('Skipping. The eventLog directory is not local.')
+            print('Create direcotory {}.'.format(directory))
+            os.makedirs(directory)
+
+            # Make sure the directory can be accessed by all users
+            os.chmod(directory, mode=0o777)
+    else:
+        print('Skipping. The eventLog directory is not local.')

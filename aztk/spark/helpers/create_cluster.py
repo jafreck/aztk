@@ -13,7 +13,7 @@ POOL_ADMIN_USER_IDENTITY = batch_models.UserIdentity(
 '''
 Cluster create helper methods
 '''
-def __docker_run_cmd(docker_repo: str = None, gpu_enabled: bool = False, file_mounts = []) -> str:
+def __docker_run_cmd(docker_repo: str = None, gpu_enabled: bool = False, file_mounts = [], mixed_mode = False) -> str:
     """
         Build the docker run command by setting up the environment variables
     """
@@ -23,29 +23,38 @@ def __docker_run_cmd(docker_repo: str = None, gpu_enabled: bool = False, file_mo
         cmd = CommandBuilder('docker run')
     cmd.add_option('--net', 'host')
     cmd.add_option('--name', constants.DOCKER_SPARK_CONTAINER_NAME)
-    cmd.add_option('-v', '/mnt/batch/tasks:/batch')
+    cmd.add_option('-v', '/mnt/batch/tasks:/mnt/batch/tasks')
 
     if file_mounts:
         for mount in file_mounts:
             cmd.add_option('-v', '{0}:{0}'.format(mount.mount_path))
 
-    cmd.add_option('-e', 'DOCKER_WORKING_DIR=/batch/startup/wd')
+    cmd.add_option('-e', 'DOCKER_WORKING_DIR=/mnt/batch/tasks/startup/wd')
     cmd.add_option('-e', 'AZ_BATCH_ACCOUNT_NAME=$AZ_BATCH_ACCOUNT_NAME')
     cmd.add_option('-e', 'BATCH_ACCOUNT_KEY=$BATCH_ACCOUNT_KEY')
-    cmd.add_option('-e', 'BATCH_ACCOUNT_URL=$BATCH_ACCOUNT_URL')
+    cmd.add_option('-e', 'BATCH_SERVICE_URL=$BATCH_SERVICE_URL')
     cmd.add_option('-e', 'STORAGE_ACCOUNT_NAME=$STORAGE_ACCOUNT_NAME')
     cmd.add_option('-e', 'STORAGE_ACCOUNT_KEY=$STORAGE_ACCOUNT_KEY')
     cmd.add_option('-e', 'STORAGE_ACCOUNT_SUFFIX=$STORAGE_ACCOUNT_SUFFIX')
+    cmd.add_option('-e', 'SP_TENANT_ID=$SP_TENANT_ID')
+    cmd.add_option('-e', 'SP_CLIENT_ID=$SP_CLIENT_ID')
+    cmd.add_option('-e', 'SP_CREDENTIAL=$SP_CREDENTIAL')
+    cmd.add_option('-e', 'SP_BATCH_RESOURCE_ID=$SP_BATCH_RESOURCE_ID')
+    cmd.add_option('-e', 'SP_STORAGE_RESOURCE_ID=$SP_STORAGE_RESOURCE_ID')
     cmd.add_option('-e', 'AZ_BATCH_POOL_ID=$AZ_BATCH_POOL_ID')
     cmd.add_option('-e', 'AZ_BATCH_NODE_ID=$AZ_BATCH_NODE_ID')
     cmd.add_option(
         '-e', 'AZ_BATCH_NODE_IS_DEDICATED=$AZ_BATCH_NODE_IS_DEDICATED')
+    cmd.add_option('-e', 'MIXED_MODE={}'.format(mixed_mode))
     cmd.add_option('-e', 'SPARK_WEB_UI_PORT=$SPARK_WEB_UI_PORT')
     cmd.add_option('-e', 'SPARK_WORKER_UI_PORT=$SPARK_WORKER_UI_PORT')
+    cmd.add_option('-e', 'SPARK_CONTAINER_NAME=$SPARK_CONTAINER_NAME')
+    cmd.add_option('-e', 'SPARK_SUBMIT_LOGS_FILE=$SPARK_SUBMIT_LOGS_FILE')
     cmd.add_option('-e', 'SPARK_JUPYTER_PORT=$SPARK_JUPYTER_PORT')
     cmd.add_option('-e', 'SPARK_JOB_UI_PORT=$SPARK_JOB_UI_PORT')
     cmd.add_option('-p', '8080:8080')       # Spark Master UI
     cmd.add_option('-p', '7077:7077')       # Spark Master
+    cmd.add_option('-p', '7337:7337')       # Spark Shuffle Service
     cmd.add_option('-p', '4040:4040')       # Job UI
     cmd.add_option('-p', '8888:8888')       # Jupyter UI
     cmd.add_option('-p', '8787:8787')       # Rstudio Server
@@ -59,29 +68,63 @@ def __docker_run_cmd(docker_repo: str = None, gpu_enabled: bool = False, file_mo
     cmd.add_option('-p', '50075:50075')     # DataNode WebUI
     cmd.add_option('-p', '50090:50090')     # Secondary NameNode http address
     cmd.add_option('-d', docker_repo)
-    cmd.add_argument('/bin/bash /batch/startup/wd/docker_main.sh')
-    
+    cmd.add_argument('/bin/bash /mnt/batch/tasks/startup/wd/docker_main.sh')
+       
     return cmd.to_str()
 
 def __get_docker_credentials(spark_client):
     creds = []
-
-    if spark_client.secrets_config.docker_endpoint:
-        creds.append(batch_models.EnvironmentSetting(
-            name="DOCKER_ENDPOINT", value=spark_client.secrets_config.docker_endpoint))
-    if spark_client.secrets_config.docker_username:
-        creds.append(batch_models.EnvironmentSetting(
-            name="DOCKER_USERNAME", value=spark_client.secrets_config.docker_username))
-    if spark_client.secrets_config.docker_password:
-        creds.append(batch_models.EnvironmentSetting(
-            name="DOCKER_PASSWORD", value=spark_client.secrets_config.docker_password))
+    docker = spark_client.secrets_config.docker
+    if docker:
+        if docker.endpoint:
+            creds.append(batch_models.EnvironmentSetting(
+                name="DOCKER_ENDPOINT", value=docker.endpoint))
+        if docker.username:
+            creds.append(batch_models.EnvironmentSetting(
+                name="DOCKER_USERNAME", value=docker.username))
+        if docker.password:
+            creds.append(batch_models.EnvironmentSetting(
+                name="DOCKER_PASSWORD", value=docker.password))
 
     return creds
 
+
+def __get_secrets_env(spark_client):
+    shared_key = spark_client.secrets_config.shared_key
+    service_principal = spark_client.secrets_config.service_principal
+    if shared_key:
+        return [
+            batch_models.EnvironmentSetting(
+                name="BATCH_SERVICE_URL", value=shared_key.batch_service_url),
+            batch_models.EnvironmentSetting(
+                name="BATCH_ACCOUNT_KEY", value=shared_key.batch_account_key),
+            batch_models.EnvironmentSetting(
+                name="STORAGE_ACCOUNT_NAME", value=shared_key.storage_account_name),
+            batch_models.EnvironmentSetting(
+                name="STORAGE_ACCOUNT_KEY", value=shared_key.storage_account_key),
+            batch_models.EnvironmentSetting(
+                name="STORAGE_ACCOUNT_SUFFIX", value=shared_key.storage_account_suffix),
+        ]
+    else:
+        return [
+            batch_models.EnvironmentSetting(
+                name="SP_TENANT_ID", value=service_principal.tenant_id),
+            batch_models.EnvironmentSetting(
+                name="SP_CLIENT_ID", value=service_principal.client_id),
+            batch_models.EnvironmentSetting(
+                name="SP_CREDENTIAL", value=service_principal.credential),
+            batch_models.EnvironmentSetting(
+                name="SP_BATCH_RESOURCE_ID", value=service_principal.batch_account_resource_id),
+            batch_models.EnvironmentSetting(
+                name="SP_STORAGE_RESOURCE_ID", value=service_principal.storage_account_resource_id),
+        ]
+
+
 def __cluster_install_cmd(zip_resource_file: batch_models.ResourceFile,
-                            gpu_enabled: bool,
-                            docker_repo: str = None,
-                            file_mounts = []):
+                          gpu_enabled: bool,
+                          docker_repo: str = None,
+                          file_mounts = [],
+                          mixed_mode: bool = False):
     """
         For Docker on ubuntu 16.04 - return the command line
         to be run on the start task of the pool to setup spark.
@@ -116,7 +159,7 @@ def __cluster_install_cmd(zip_resource_file: batch_models.ResourceFile,
             constants.DOCKER_SPARK_CONTAINER_NAME,
             gpu_enabled,
             docker_repo,
-            __docker_run_cmd(docker_repo, gpu_enabled, file_mounts)),
+            __docker_run_cmd(docker_repo, gpu_enabled, file_mounts, mixed_mode)),
     ]
 
     commands = shares + setup
@@ -127,7 +170,8 @@ def generate_cluster_start_task(
         zip_resource_file: batch_models.ResourceFile,
         gpu_enabled: bool,
         docker_repo: str = None,
-        file_shares: List[aztk_models.FileShare] = None):
+        file_shares: List[aztk_models.FileShare] = None,
+        mixed_mode: bool = False):
     """
         This will return the start task object for the pool to be created.
         :param cluster_id str: Id of the cluster(Used for uploading the resource files)
@@ -140,19 +184,12 @@ def generate_cluster_start_task(
     spark_jupyter_port = constants.DOCKER_SPARK_JUPYTER_PORT
     spark_job_ui_port = constants.DOCKER_SPARK_JOB_UI_PORT
     spark_rstudio_server_port = constants.DOCKER_SPARK_RSTUDIO_SERVER_PORT
+    
+    spark_container_name = constants.DOCKER_SPARK_CONTAINER_NAME
+    spark_submit_logs_file = constants.SPARK_SUBMIT_LOGS_FILE
 
     # TODO use certificate
-    environment_settings = [
-        batch_models.EnvironmentSetting(
-            name="BATCH_ACCOUNT_KEY", value=spark_client.batch_config.account_key),
-        batch_models.EnvironmentSetting(
-            name="BATCH_ACCOUNT_URL", value=spark_client.batch_config.account_url),
-        batch_models.EnvironmentSetting(
-            name="STORAGE_ACCOUNT_NAME", value=spark_client.blob_config.account_name),
-        batch_models.EnvironmentSetting(
-            name="STORAGE_ACCOUNT_KEY", value=spark_client.blob_config.account_key),
-        batch_models.EnvironmentSetting(
-            name="STORAGE_ACCOUNT_SUFFIX", value=spark_client.blob_config.account_suffix),
+    environment_settings = __get_secrets_env(spark_client) + [
         batch_models.EnvironmentSetting(
             name="SPARK_WEB_UI_PORT", value=spark_web_ui_port),
         batch_models.EnvironmentSetting(
@@ -162,11 +199,15 @@ def generate_cluster_start_task(
         batch_models.EnvironmentSetting(
             name="SPARK_JOB_UI_PORT", value=spark_job_ui_port),
         batch_models.EnvironmentSetting(
+            name="SPARK_CONTAINER_NAME", value=spark_container_name),
+        batch_models.EnvironmentSetting(
+            name="SPARK_SUBMIT_LOGS_FILE", value=spark_submit_logs_file),
+        batch_models.EnvironmentSetting(
             name="SPARK_RSTUDIO_SERVER_PORT", value=spark_rstudio_server_port),
     ] + __get_docker_credentials(spark_client)
 
     # start task command
-    command = __cluster_install_cmd(zip_resource_file, gpu_enabled, docker_repo, file_shares)
+    command = __cluster_install_cmd(zip_resource_file, gpu_enabled, docker_repo, file_shares, mixed_mode)
 
     return batch_models.StartTask(
         command_line=helpers.wrap_commands_in_shell(command),
