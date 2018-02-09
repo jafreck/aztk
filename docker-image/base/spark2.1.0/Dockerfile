@@ -31,6 +31,7 @@ RUN apt-get clean \
        libncursesw5-dev \
        xz-utils \
        tk-dev \
+       ssh \
     && apt-get update -y \
     # install [software-properties-common] 
     # so we can use [apt-add-repository] to add the repository [ppa:webupd8team/java] 
