@@ -1,4 +1,5 @@
 import subprocess
+import time
 from datetime import datetime
 
 import azure.batch.models as batch_models
@@ -18,6 +19,17 @@ cluster_id = "test{}".format(time)
 # load secrets
 # note: this assumes secrets are set up in .aztk/secrets
 spark_client = aztk.spark.Client(config.load_aztk_screts())
+
+
+# helper method
+def wait_until_cluster_deleted(cluster_id: str):
+    while True:
+        try:
+            spark_client.get_cluster(cluster_id)
+            time.sleep(1)
+        except BatchErrorException:
+            # break when the cluster is not found
+            break
 
 
 def test_create_cluster():
@@ -47,6 +59,11 @@ def test_create_cluster():
     assert cluster.gpu_enabled is False
     assert cluster.master_node_id is not None
     assert cluster.current_low_pri_nodes == 0
+
+    try:
+        success = spark_client.delete_cluster(cluster_id=cluster_configuration.cluster_id)
+    except (AztkError, BatchErrorException) as e:
+        assert False
 
 
 def test_get_cluster():
@@ -78,6 +95,13 @@ def test_get_cluster():
     assert cluster.master_node_id is not None
     assert cluster.current_low_pri_nodes == 0
 
+    try:
+        success = spark_client.delete_cluster(cluster_id=cluster_configuration.cluster_id)
+        wait_until_cluster_deleted(cluster_id=cluster_configuration.cluster_id)
+        wait_until_cluster_deleted(cluster_id=cluster_configuration.cluster_id)
+    except (AztkError, BatchErrorException) as e:
+        assert False
+
 
 def test_list_clusters():
     test_id = "test-list-cluster-"
@@ -99,6 +123,12 @@ def test_list_clusters():
     except (AztkError, BatchErrorException) as e:
         assert False
     assert cluster_configuration.cluster_id in [cluster.id for cluster in clusters]
+
+    try:
+        success = spark_client.delete_cluster(cluster_id=cluster_configuration.cluster_id)
+        wait_until_cluster_deleted(cluster_id=cluster_configuration.cluster_id)
+    except (AztkError, BatchErrorException) as e:
+        assert False
 
 
 def test_get_remote_login_settings():
@@ -124,6 +154,12 @@ def test_get_remote_login_settings():
 
     assert rls.ip_address is not None
     assert rls.port is not None
+
+    try:
+        success = spark_client.delete_cluster(cluster_id=cluster_configuration.cluster_id)
+        wait_until_cluster_deleted(cluster_id=cluster_configuration.cluster_id)
+    except (AztkError, BatchErrorException) as e:
+        assert False
 
 
 def test_submit():
@@ -163,6 +199,12 @@ def test_submit():
         assert False
 
     assert True
+
+    try:
+        success = spark_client.delete_cluster(cluster_id=cluster_configuration.cluster_id)
+        wait_until_cluster_deleted(cluster_id=cluster_configuration.cluster_id)
+    except (AztkError, BatchErrorException) as e:
+        assert False
 
 
 def test_get_application_log():
@@ -210,6 +252,12 @@ def test_get_application_log():
     assert application_log.application_state == "completed"
     assert application_log.log is not None
     assert application_log.total_bytes is not None
+
+    try:
+        success = spark_client.delete_cluster(cluster_id=cluster_configuration.cluster_id)
+        wait_until_cluster_deleted(cluster_id=cluster_configuration.cluster_id)
+    except (AztkError, BatchErrorException) as e:
+        assert False
 
 
 def test_create_user_password():
@@ -263,6 +311,12 @@ def test_get_application_status_complete():
 
     assert status == "completed"
 
+    try:
+        success = spark_client.delete_cluster(cluster_id=cluster_configuration.cluster_id)
+        wait_until_cluster_deleted(cluster_id=cluster_configuration.cluster_id)
+    except (AztkError, BatchErrorException) as e:
+        assert False
+
 
 def test_delete_cluster():
     test_id = "test-delete-cluster-"
@@ -281,6 +335,7 @@ def test_delete_cluster():
     try:
         spark_client.create_cluster(cluster_configuration, wait=True)
         success = spark_client.delete_cluster(cluster_id=cluster_configuration.cluster_id)
+        wait_until_cluster_deleted(cluster_id=cluster_configuration.cluster_id)
     except (AztkError, BatchErrorException) as e:
         assert False
 
