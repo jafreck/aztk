@@ -14,7 +14,7 @@ from cli import config
 # base cluster name
 dt = datetime.now()
 current_time = dt.microsecond
-cluster_id = "test{}".format(current_time)
+base_cluster_id = "test{}".format(current_time)
 
 # load secrets
 # note: this assumes secrets are set up in .aztk/secrets
@@ -27,7 +27,7 @@ def wait_until_cluster_deleted(cluster_id: str):
         try:
             spark_client.get_cluster(cluster_id)
             time.sleep(1)
-        except BatchErrorException:
+        except AztkError:
             # break when the cluster is not found
             break
 
@@ -36,7 +36,7 @@ def test_create_cluster():
     test_id = "test-create-cluster-"
     # TODO: make Cluster Configuration more robust, test each value
     cluster_configuration = aztk.spark.models.ClusterConfiguration(
-        cluster_id=test_id+cluster_id,
+        cluster_id=test_id+base_cluster_id,
         vm_count=2,
         vm_low_pri_count=0,
         vm_size="standard_f2",
@@ -60,16 +60,16 @@ def test_create_cluster():
     assert cluster.master_node_id is not None
     assert cluster.current_low_pri_nodes == 0
 
-    try:
-        success = spark_client.delete_cluster(cluster_id=cluster_configuration.cluster_id)
-    except (AztkError, BatchErrorException) as e:
-        assert False
+    success = spark_client.delete_cluster(cluster_id=cluster_configuration.cluster_id)
+    wait_until_cluster_deleted(cluster_id=cluster_configuration.cluster_id)
+
+
 
 
 def test_get_cluster():
     test_id = "test-get-cluster-"
     cluster_configuration = aztk.spark.models.ClusterConfiguration(
-        cluster_id=test_id+cluster_id,
+        cluster_id=test_id+base_cluster_id,
         vm_count=2,
         vm_low_pri_count=0,
         vm_size="standard_f2",
@@ -95,17 +95,15 @@ def test_get_cluster():
     assert cluster.master_node_id is not None
     assert cluster.current_low_pri_nodes == 0
 
-    try:
-        success = spark_client.delete_cluster(cluster_id=cluster_configuration.cluster_id)
-        wait_until_cluster_deleted(cluster_id=cluster_configuration.cluster_id)
-    except (AztkError, BatchErrorException) as e:
-        assert False
+    success = spark_client.delete_cluster(cluster_id=cluster_configuration.cluster_id)
+    wait_until_cluster_deleted(cluster_id=cluster_configuration.cluster_id)
+
 
 
 def test_list_clusters():
     test_id = "test-list-cluster-"
     cluster_configuration = aztk.spark.models.ClusterConfiguration(
-        cluster_id=test_id+cluster_id,
+        cluster_id=test_id+base_cluster_id,
         vm_count=2,
         vm_low_pri_count=0,
         vm_size="standard_f2",
@@ -123,17 +121,15 @@ def test_list_clusters():
         assert False
     assert cluster_configuration.cluster_id in [cluster.id for cluster in clusters]
 
-    try:
-        success = spark_client.delete_cluster(cluster_id=cluster_configuration.cluster_id)
-        wait_until_cluster_deleted(cluster_id=cluster_configuration.cluster_id)
-    except (AztkError, BatchErrorException) as e:
-        assert False
+    success = spark_client.delete_cluster(cluster_id=cluster_configuration.cluster_id)
+    wait_until_cluster_deleted(cluster_id=cluster_configuration.cluster_id)
+
 
 
 def test_get_remote_login_settings():
     test_id = "test-get-remote-login-cluster-"
     cluster_configuration = aztk.spark.models.ClusterConfiguration(
-        cluster_id=test_id+cluster_id,
+        cluster_id=test_id+base_cluster_id,
         vm_count=2,
         vm_low_pri_count=0,
         vm_size="standard_f2",
@@ -154,17 +150,15 @@ def test_get_remote_login_settings():
     assert rls.ip_address is not None
     assert rls.port is not None
 
-    try:
-        success = spark_client.delete_cluster(cluster_id=cluster_configuration.cluster_id)
-        wait_until_cluster_deleted(cluster_id=cluster_configuration.cluster_id)
-    except (AztkError, BatchErrorException) as e:
-        assert False
+    success = spark_client.delete_cluster(cluster_id=cluster_configuration.cluster_id)
+    wait_until_cluster_deleted(cluster_id=cluster_configuration.cluster_id)
+
 
 
 def test_submit():
     test_id = "test-submit-cluster-"
     cluster_configuration = aztk.spark.models.ClusterConfiguration(
-        cluster_id=test_id+cluster_id,
+        cluster_id=test_id+base_cluster_id,
         vm_count=2,
         vm_low_pri_count=0,
         vm_size="standard_f2",
@@ -199,17 +193,15 @@ def test_submit():
 
     assert True
 
-    try:
-        success = spark_client.delete_cluster(cluster_id=cluster_configuration.cluster_id)
-        wait_until_cluster_deleted(cluster_id=cluster_configuration.cluster_id)
-    except (AztkError, BatchErrorException) as e:
-        assert False
+    success = spark_client.delete_cluster(cluster_id=cluster_configuration.cluster_id)
+    wait_until_cluster_deleted(cluster_id=cluster_configuration.cluster_id)
+
 
 
 def test_get_application_log():
     test_id = "test-get-application-log-cluster-"
     cluster_configuration = aztk.spark.models.ClusterConfiguration(
-        cluster_id=test_id+cluster_id,
+        cluster_id=test_id+base_cluster_id,
         vm_count=2,
         vm_low_pri_count=0,
         vm_size="standard_f2",
@@ -252,11 +244,9 @@ def test_get_application_log():
     assert application_log.log is not None
     assert application_log.total_bytes is not None
 
-    try:
-        success = spark_client.delete_cluster(cluster_id=cluster_configuration.cluster_id)
-        wait_until_cluster_deleted(cluster_id=cluster_configuration.cluster_id)
-    except (AztkError, BatchErrorException) as e:
-        assert False
+    success = spark_client.delete_cluster(cluster_id=cluster_configuration.cluster_id)
+    wait_until_cluster_deleted(cluster_id=cluster_configuration.cluster_id)
+
 
 
 def test_create_user_password():
@@ -272,7 +262,7 @@ def test_create_user_ssh_key():
 def test_get_application_status_complete():
     test_id = "test-get-application-status-cluster-"
     cluster_configuration = aztk.spark.models.ClusterConfiguration(
-        cluster_id=test_id+cluster_id,
+        cluster_id=test_id+base_cluster_id,
         vm_count=2,
         vm_low_pri_count=0,
         vm_size="standard_f2",
@@ -304,23 +294,21 @@ def test_get_application_status_complete():
         spark_client.submit(cluster_id=cluster_configuration.cluster_id, application=application_configuration, wait=True)
         spark_client.submit(cluster_configuration, application_configuration)
         spark_client.wait_until_application_done(cluster_id=cluster_configuration.cluster_id, task_id=application_configuration.name)
-        status = spark_client.get_application_status(cluster_id=cluster_id, app_name=application_configuration.name)
+        status = spark_client.get_application_status(cluster_id=cluster_configuration.cluster_id, app_name=application_configuration.name)
     except (AztkError, BatchErrorException) as e:
         assert False
 
     assert status == "completed"
 
-    try:
-        success = spark_client.delete_cluster(cluster_id=cluster_configuration.cluster_id)
-        wait_until_cluster_deleted(cluster_id=cluster_configuration.cluster_id)
-    except (AztkError, BatchErrorException) as e:
-        assert False
+    success = spark_client.delete_cluster(cluster_id=cluster_configuration.cluster_id)
+    wait_until_cluster_deleted(cluster_id=cluster_configuration.cluster_id)
+
 
 
 def test_delete_cluster():
     test_id = "test-delete-cluster-"
     cluster_configuration = aztk.spark.models.ClusterConfiguration(
-        cluster_id=test_id+cluster_id,
+        cluster_id=test_id+base_cluster_id,
         vm_count=2,
         vm_low_pri_count=0,
         vm_size="standard_f2",
