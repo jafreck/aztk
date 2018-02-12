@@ -13,8 +13,8 @@ from cli import config
 
 # base cluster name
 dt = datetime.now()
-time = dt.microsecond
-cluster_id = "test{}".format(time)
+current_time = dt.microsecond
+cluster_id = "test{}".format(current_time)
 
 # load secrets
 # note: this assumes secrets are set up in .aztk/secrets
@@ -88,7 +88,7 @@ def test_get_cluster():
 
     assert cluster.pool is not None
     assert cluster.nodes is not None
-    assert cluster.id == cluster_id
+    assert cluster.id == cluster_configuration.cluster_id
     assert cluster.vm_size == "standard_f2"
     assert cluster.current_dedicated_nodes == 2
     assert cluster.gpu_enabled is False
@@ -97,7 +97,6 @@ def test_get_cluster():
 
     try:
         success = spark_client.delete_cluster(cluster_id=cluster_configuration.cluster_id)
-        wait_until_cluster_deleted(cluster_id=cluster_configuration.cluster_id)
         wait_until_cluster_deleted(cluster_id=cluster_configuration.cluster_id)
     except (AztkError, BatchErrorException) as e:
         assert False
