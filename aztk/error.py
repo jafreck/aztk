@@ -13,9 +13,7 @@ class AztkError(Exception):
 
 
 class AzureApiInitError(AztkError):
-    def __init__(self, message: str = None):
-        super().__init__()
-        self.message = message
+    pass
 
 class InvalidPluginDefinitionError(AztkError):
     pass
