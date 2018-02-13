@@ -27,9 +27,7 @@ class Client(BaseClient):
         try:
             zip_resource_files = None
             node_data = NodeData(cluster_conf).add_core().done()
-            print("Node data", node_data)
             zip_resource_files = cluster_data.upload_node_data(node_data).as_resource_file()
-            print("REs data", zip_resource_files)
 
             start_task = create_cluster_helper.generate_cluster_start_task(self,
                                                                            zip_resource_files,

@@ -38,6 +38,7 @@ class NodeData:
         self.done()
 
     def add_core(self):
+        self._add_node_scripts()
         self._add_custom_scripts()
         self._add_plugins()
         self._add_spark_configuration()
