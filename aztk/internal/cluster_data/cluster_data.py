@@ -42,12 +42,12 @@ class ClusterData:
 
     def upload_cluster_file(self, blob_path: str, local_path: str) -> BlobData:
         blob_data = self.upload_file(self.CLUSTER_DIR + "/" + blob_path, local_path)
-        blob_data.dest = local_path
+        blob_data.dest = blob_path
         return blob_data
 
     def upload_application_file(self, blob_path: str, local_path: str) -> BlobData:
         blob_data = self.upload_file(self.APPLICATIONS_DIR + "/" + blob_path, local_path)
-        blob_data.dest = local_path
+        blob_data.dest = blob_path
         return blob_data
 
     def upload_node_data(self, node_data: NodeData) -> BlobData:

@@ -4,7 +4,7 @@ from azure.storage.blob import BlockBlobService, BlobPermissions
 
 class BlobData:
     """
-
+    Object mapping to a blob entry. Can generate resource files for batch
     """
     def __init__(self, blob_client: BlockBlobService, container: str, blob: str):
         self.container = container
