@@ -9,6 +9,7 @@ class BlobData:
     def __init__(self, blob_client: BlockBlobService, container: str, blob: str):
         self.container = container
         self.blob = blob
+        self.dest = blob
         self.blob_client = blob_client
 
 
@@ -22,4 +23,4 @@ class BlobData:
         sas_url = self.blob_client.make_blob_url(
             self.container, self.blob, sas_token=sas_token)
 
-        return batch_models.ResourceFile(file_path=dest or self.blob, blob_source=sas_url)
+        return batch_models.ResourceFile(file_path=dest or self.dest, blob_source=sas_url)

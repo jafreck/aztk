@@ -43,7 +43,9 @@ class ClusterData:
         return self.upload_file(self.CLUSTER_DIR + "/" + blob_path, local_path)
 
     def upload_node_data(self, node_data: NodeData) -> BlobData:
-        return self.upload_cluster_file("node-scripts.zip", node_data.zip_path)
+        blob_data =  self.upload_cluster_file("node-scripts.zip", node_data.zip_path)
+        blob_data.dest = "node-scripts.zip"
+        return blob_data
 
     def _ensure_container(self):
         self.blob_client.create_container(self.cluster_id, fail_on_exist=False)
