@@ -14,7 +14,7 @@ from cli import config
 # base cluster name
 dt = datetime.now()
 current_time = dt.microsecond
-base_cluster_id = "test{}".format(current_time)
+base_cluster_id = "{}".format(current_time)
 
 # load secrets
 # note: this assumes secrets are set up in .aztk/secrets
@@ -260,7 +260,7 @@ def test_create_user_ssh_key():
 
 
 def test_get_application_status_complete():
-    test_id = "test-get-application-status-cluster-"
+    test_id = "test-app-status-complete-cluster-"
     cluster_configuration = aztk.spark.models.ClusterConfiguration(
         cluster_id=test_id+base_cluster_id,
         vm_count=2,
