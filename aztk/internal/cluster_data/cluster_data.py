@@ -12,6 +12,7 @@ class ClusterData:
     """
     # ALl data related to cluster(config, metadata, etc.) should be under this folder
     CLUSTER_DIR = "cluster"
+    APPLICATIONS_DIR = "applications"
     CLUSTER_CONFIG_FILE = "config.yaml"
 
     def __init__(self, blob_client: BlockBlobService, cluster_id: str):
@@ -40,12 +41,17 @@ class ClusterData:
         return BlobData(self.blob_client, self.cluster_id, blob_path)
 
     def upload_cluster_file(self, blob_path: str, local_path: str) -> BlobData:
-        return self.upload_file(self.CLUSTER_DIR + "/" + blob_path, local_path)
+        blob_data = self.upload_file(self.CLUSTER_DIR + "/" + blob_path, local_path)
+        blob_data.dest = local_path
+        return blob_data
+
+    def upload_application_file(self, blob_path: str, local_path: str) -> BlobData:
+        blob_data = self.upload_file(self.APPLICATIONS_DIR + "/" + blob_path, local_path)
+        blob_data.dest = local_path
+        return blob_data
 
     def upload_node_data(self, node_data: NodeData) -> BlobData:
-        blob_data =  self.upload_cluster_file("node-scripts.zip", node_data.zip_path)
-        blob_data.dest = "node-scripts.zip"
-        return blob_data
+        return self.upload_cluster_file("node-scripts.zip", node_data.zip_path)
 
     def _ensure_container(self):
         self.blob_client.create_container(self.cluster_id, fail_on_exist=False)
