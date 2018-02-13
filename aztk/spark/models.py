@@ -209,6 +209,14 @@ class JobConfiguration:
         self.max_low_pri_nodes = max_low_pri_nodes
         self.subnet_id = subnet_id
 
+    def as_cluster_config(self):
+        return ClusterConfiguration(
+            cluster_id =  self.id,
+            custom_scripts = self.custom_scripts,
+            vm_size=self.vm_size,
+            spark_configuration=self.spark_configuration,
+        )
+
 
 class JobState():
     complete = 'completed'
