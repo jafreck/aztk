@@ -5,12 +5,14 @@ from azure.storage.blob import BlockBlobService
 from .node_data import NodeData
 from .blob_data import BlobData
 
+
 class ClusterData:
     """
     Class handling the management of data for a cluster
     """
     # ALl data related to cluster(config, metadata, etc.) should be under this folder
     CLUSTER_DIR = "cluster"
+    CLUSTER_CONFIG_FILE = "config.yaml"
 
     def __init__(self, blob_client: BlockBlobService, cluster_id: str):
         self.blob_client = blob_client
@@ -18,26 +20,20 @@ class ClusterData:
         self._ensure_container()
 
     def save_cluster_config(self, cluster_config):
-        blob_path = "config.yaml"
+        blob_path = self.CLUSTER_DIR + "/" + self.CLUSTER_CONFIG_FILE
         content = yaml.dump(cluster_config)
         container_name = cluster_config.cluster_id
-        self.blob_client.create_blob_from_text(container_name, blob_path,
-                                               content)
+        self.blob_client.create_blob_from_text(container_name, blob_path, content)
 
     def read_cluster_config(self):
-        blob_path = "config.yaml"
+        blob_path = self.CLUSTER_DIR + "/" + self.CLUSTER_CONFIG_FILE
         try:
-            result = self.blob_client.get_blob_to_text(self.cluster_id,
-                                                       blob_path)
+            result = self.blob_client.get_blob_to_text(self.cluster_id, blob_path)
             return yaml.load(result.content)
         except azure.common.AzureMissingResourceHttpError:
-            logging.warn(
-                "Cluster %s doesn't have cluster configuration in storage",
-                self.cluster_id)
+            logging.warn("Cluster %s doesn't have cluster configuration in storage", self.cluster_id)
         except yaml.YAMLError:
-            logging.warn(
-                "Cluster %s contains invalid cluster configuration in blob",
-                self.cluster_id)
+            logging.warn("Cluster %s contains invalid cluster configuration in blob", self.cluster_id)
 
     def upload_file(self, blob_path: str, local_path: str) -> BlobData:
         self.blob_client.create_blob_from_path(self.cluster_id, blob_path, local_path)

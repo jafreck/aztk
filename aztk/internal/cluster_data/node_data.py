@@ -31,7 +31,7 @@ class NodeData:
         self.zipf = zipfile.ZipFile(self.zip_path, "w", zipfile.ZIP_DEFLATED)
 
     def __enter__(self):
-        self.create()
+        self.add_core()
         return self
 
     def __exit__(self, type, value, traceback):
