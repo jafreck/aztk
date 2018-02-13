@@ -199,7 +199,7 @@ def test_submit():
 
 
 def test_get_application_log():
-    test_id = "test-get-application-log-cluster-"
+    test_id = "test-get-app-log-cluster-"
     cluster_configuration = aztk.spark.models.ClusterConfiguration(
         cluster_id=test_id+base_cluster_id,
         vm_count=2,
@@ -232,14 +232,14 @@ def test_get_application_log():
         )
         spark_client.submit(cluster_id=cluster_configuration.cluster_id, application=application_configuration, wait=True)
         application_log = spark_client.get_application_log(cluster_id=cluster_configuration.cluster_id,
-                                                           application_name="pipy100",
+                                                           application_name=application_configuration.name,
                                                            tail=False,
                                                            current_bytes=0)
     except (AztkError, BatchErrorException):
         assert False
 
     assert application_log.exit_code == 0
-    assert application_log.name == "pipy100"
+    assert application_log.name == application_configuration.name == "pipy100"
     assert application_log.application_state == "completed"
     assert application_log.log is not None
     assert application_log.total_bytes is not None
@@ -292,7 +292,7 @@ def test_get_application_status_complete():
             max_retry_count=None
         )
         spark_client.submit(cluster_id=cluster_configuration.cluster_id, application=application_configuration, wait=True)
-        spark_client.submit(cluster_configuration, application_configuration)
+        spark_client.submit(cluster_configuration.cluster_id, application_configuration)
         spark_client.wait_until_application_done(cluster_id=cluster_configuration.cluster_id, task_id=application_configuration.name)
         status = spark_client.get_application_status(cluster_id=cluster_configuration.cluster_id, app_name=application_configuration.name)
     except (AztkError, BatchErrorException) as e:
