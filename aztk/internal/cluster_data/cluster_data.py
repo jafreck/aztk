@@ -2,12 +2,15 @@ import yaml
 import logging
 import azure.common
 from azure.storage.blob import BlockBlobService
-
+from node_data import NodeData
+from blob_data import BlobData
 
 class ClusterData:
     """
     Class handling the management of data for a cluster
     """
+    # ALl data related to cluster(config, metadata, etc.) should be under this folder
+    CLUSTER_DIR = "cluster"
 
     def __init__(self, blob_client: BlockBlobService, cluster_id: str):
         self.blob_client = blob_client
@@ -35,6 +38,16 @@ class ClusterData:
             logging.warn(
                 "Cluster %s contains invalid cluster configuration in blob",
                 self.cluster_id)
+
+    def upload_file(self, blob_path: str, local_path: str) -> BlobData:
+        self.blob_client.create_blob_from_path(self.cluster_id, blob_path, local_path)
+        return BlobData(self.blob_client, self.cluster_id, blob_path)
+
+    def upload_cluster_file(self, blob_path: str, local_path: str) -> BlobData:
+        return self.upload_file(self.CLUSTER_DIR + "/" + blob_path, local_path)
+
+    def upload_node_data(self, node_data: NodeData) -> BlobData:
+        return self.upload_cluster_file("node-scripts.zip", node_data.zip_dir)
 
     def _ensure_container(self):
         self.blob_client.create_container(self.cluster_id, fail_on_exist=False)
