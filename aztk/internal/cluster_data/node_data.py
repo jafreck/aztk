@@ -30,15 +30,24 @@ class NodeData:
         file_utils.ensure_dir(self.zip_path)
         self.zipf = zipfile.ZipFile(self.zip_path, "w", zipfile.ZIP_DEFLATED)
 
-    def create(self):
+    def __enter__(self):
+        self.create()
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self.done()
+
+    def add_core(self):
         self._add_custom_scripts()
         self._add_plugins()
         self._add_spark_configuration()
         self._add_user_conf()
         self.add_file(os.path.join(constants.ROOT_PATH, 'aztk', 'utils', 'command_builder.py'), '', binary=False)
+        return self
 
-    def close(self):
+    def done(self):
         self.zipf.close()
+        return self
 
     def add_file(self, file_path: str, zip_dir: str, binary: bool = True):
         if not file_path:
@@ -98,8 +107,9 @@ class NodeData:
             binary=False)
 
         # add ssh keys for passwordless ssh
-        self.add_file(spark_configuration.ssh_key_pair['pub_key'], 'id_rsa.pub')
-        self.add_file(spark_configuration.ssh_key_pair['priv_key'], 'id_rsa')
+        self.zipf.writestr( 'id_rsa.pub', spark_configuration.ssh_key_pair['pub_key'])
+        self.zipf.writestr( 'id_rsa', spark_configuration.ssh_key_pair['priv_key'])
+
         if spark_configuration.jars:
             for jar in spark_configuration.jars:
                 self.add_file(jar, 'jars', binary=True)
@@ -139,7 +149,7 @@ class NodeData:
                         runOn=definition.run_on.value,
                     ))
 
-        zipf.writestr(os.path.join('plugins', 'plugins-manifest.json'), json.dumps(data))
+        self.zipf.writestr(os.path.join('plugins', 'plugins-manifest.json'), json.dumps(data))
         return zipf
 
     def _add_node_scripts(self):

@@ -25,7 +25,11 @@ class Client(BaseClient):
         cluster_conf.validate()
         cluster_data = self.get_cluster_data(cluster_conf.cluster_id)
         try:
-            zip_resource_files = cluster_data.upload_node_data(NodeData(cluster_conf)).as_resource_file()
+            zip_resource_files = None
+            node_data = NodeData(cluster_conf).add_core().done()
+            print("Node data", node_data)
+            zip_resource_files = cluster_data.upload_node_data(node_data).as_resource_file()
+            print("REs data", zip_resource_files)
 
             start_task = create_cluster_helper.generate_cluster_start_task(self,
                                                                            zip_resource_files,
@@ -159,7 +163,7 @@ class Client(BaseClient):
     def submit_job(self, job_configuration):
         try:
             cluster_data = self.get_cluster_data(job_configuration.id)
-            node_data = NodeData(job_configuration.as_cluster_config())
+            node_data =  NodeData(job_configuration.as_cluster_config()).add_core().done()
             zip_resource_files = cluster_data.upload_node_data(node_data).as_resource_file()
 
             start_task = create_cluster_helper.generate_cluster_start_task(self,
