@@ -136,7 +136,7 @@ class NodeData:
         data = []
         for plugin in self.cluster_config.plugins:
             for file in plugin.files:
-                zipf = self.zipf.writestr(file.content(), 'plugins/{0}/{1}'.format(plugin.name, file.target))
+                zipf = self.zipf.writestr('plugins/{0}/{1}'.format(plugin.name, file.target), file.content())
             if plugin.execute:
                 data.append(dict(
                     name=plugin.name,
