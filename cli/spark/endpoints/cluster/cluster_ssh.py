@@ -42,7 +42,7 @@ http_prefix = 'http://localhost:'
 def execute(args: typing.NamedTuple):
     spark_client = aztk.spark.Client(config.load_aztk_screts())
     cluster = spark_client.get_cluster(args.cluster_id)
-    cluster_config = utils.helpers.read_cluster_config(args.cluster_id, spark_client.blob_client)
+    cluster_config = spark_client.get_cluster_data(args.cluster_id).read_cluster_config()
     ssh_conf = SshConfig()
 
     ssh_conf.merge(
