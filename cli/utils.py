@@ -185,7 +185,7 @@ def ssh_in_master(
                 "-L", "{0}:localhost:{1}".format(port[0], port[1]))
     if configuration and configuration.plugins:
         for plugin in configuration.plugins:
-            for port in plugin.definition.ports:
+            for port in plugin.ports:
                 if port.expose_publicly:
                     ssh_command.add_option("-L", "{0}:localhost:{1}".format(port.public_port, port.internal))
 
@@ -419,10 +419,9 @@ def print_cluster_conf(cluster_conf: ClusterConfiguration, wait: bool):
     if user_configuration.password:
         log.info("Password: %s", '*' * len(user_configuration.password))
     log.info("Plugins:")
-    if len(cluster_conf.plugins) == 0:
+    if cluster_conf.plugins is None or len(cluster_conf.plugins) == 0:
         log.info("    None Configured")
     else:
         for plugin in cluster_conf.plugins:
-            args = ", ".join([ "{0}: {1}".format(k, v) for [k, v] in plugin.args.items()])
-            log.info("  - %s: (%s)", plugin.name, args)
+            log.info("  - %s", plugin.name)
     log.info("-------------------------------------------")

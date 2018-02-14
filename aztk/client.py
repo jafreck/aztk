@@ -6,7 +6,6 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta, timezone
 
 import aztk.models as models
-from aztk.plugins.internal import PluginManager, plugin_manager
 import azure.batch.models as batch_models
 import azure.batch.models.batch_error as batch_error
 import aztk.utils.azure_api as azure_api

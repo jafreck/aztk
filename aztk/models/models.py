@@ -1,9 +1,8 @@
 from typing import List
 from aztk import error
-from aztk.plugins.internal import plugin_manager
 from aztk.utils import constants
 import azure.batch.models as batch_models
-from aztk.plugins import PluginDefinition
+from aztk.models.plugins import PluginConfiguration
 from aztk.internal import ConfigurationBase
 import yaml
 import logging
@@ -44,28 +43,6 @@ class UserConfiguration(ConfigurationBase):
             "password",
         ])
 
-
-class PluginConfiguration(ConfigurationBase):
-    """
-    Contains the configuration to use a plugin
-    """
-    def __init__(self, name, args: dict = None):
-        self.name = name
-        self.args = args or dict()
-        if plugin_manager.has_plugin(self.name):
-            self.definition = plugin_manager.get_plugin(self.name).definition
-
-    def plugin(self):
-        return plugin_manager.get_plugin(self.name)
-
-    def validate(self) -> bool:
-        if not self.name:
-            raise error.AztkError("Plugin is missing a name")
-
-        if not self.definition:
-            raise error.AztkError(
-                "Cannot find a plugin with name '{0}'".format(self.name))
-        self.plugin().validate_args(self.args)
 
 
 class ClusterConfiguration(ConfigurationBase):

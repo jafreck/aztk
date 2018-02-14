@@ -11,7 +11,7 @@ from aztk.spark.models import (
     UserConfiguration,
     PluginConfiguration,
 )
-
+from aztk.models.plugins.internal import PluginReference
 
 def load_aztk_screts() -> SecretsConfiguration:
     """
@@ -194,7 +194,8 @@ def cluster_config_from_dict(config: dict):
     if config.get('plugins') not in [[None], None]:
         output.plugins = []
         for plugin in config['plugins']:
-            output.plugins.append(PluginConfiguration.from_dict(plugin))
+            ref = PluginReference.from_dict(plugin)
+            output.plugins.append(ref.get_plugin())
 
     if config.get('wait') is not None:
         wait = config['wait']

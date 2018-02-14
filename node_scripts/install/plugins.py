@@ -1,5 +1,6 @@
 import os
 import json
+import yaml
 import subprocess
 from pathlib import Path
 
@@ -13,7 +14,7 @@ def _read_manifest_file(path=None):
     else:
         with open(path, 'r') as stream:
             try:
-                custom_scripts = json.load(stream)
+                custom_scripts = yaml.load(stream)
             except json.JSONDecodeError as err:
                 print("Error in plugins manifest: {0}".format(err))
 
@@ -24,7 +25,7 @@ def setup_plugins(is_master: bool = False, is_worker: bool = False):
 
     plugins_dir = _plugins_dir()
     plugins_manifest = _read_manifest_file(
-        os.path.join(plugins_dir, 'plugins-manifest.json'))
+        os.path.join(plugins_dir, 'plugins-manifest.yaml'))
 
     if not os.path.exists(log_folder):
         os.makedirs(log_folder)
@@ -64,10 +65,10 @@ def _setup_plugins(plugins_manifest, is_master=False, is_worker=False):
     for plugin in plugins_manifest:
         if _run_on_this_node(plugin, is_master, is_worker):
             path = os.path.join(plugins_dir, plugin['execute'])
-            _run_script(plugin.get("name"), path, plugin.get('args'))
+            _run_script(plugin.get("name"), path, plugin.get('args'), plugin.get('env'))
 
 
-def _run_script(name: str, script_path: str = None, args: dict = None):
+def _run_script(name: str, script_path: str = None, args: dict = None, env: dict = None):
     if not os.path.isfile(script_path):
         print("Cannot run plugin script: {0} file does not exist".format(
             script_path))
@@ -78,15 +79,17 @@ def _run_script(name: str, script_path: str = None, args: dict = None):
     print("Running plugin script:", script_path)
 
     my_env = os.environ.copy()
-    if args:
-        for [key, value] in args.items():
+    if env:
+        for [key, value] in env.items():
             my_env[key] = value
 
+    if args is None:
+        args = []
 
     out_file = open(os.path.join(log_folder, '{0}.txt'.format(name)), 'w')
     try:
         subprocess.call(
-            [script_path],
+            [script_path] + args,
             env=my_env,
             stdout=out_file,
             stderr=out_file)

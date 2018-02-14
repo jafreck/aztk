@@ -133,24 +133,20 @@ class NodeData:
         self.zipf.writestr('user.yaml', user_conf)
 
     def _add_plugins(self):
-        plugins = self.cluster_config.plugins
         data = []
-        for plugin_conf in plugins:
-            plugin = plugin_conf.plugin()
-            definition = plugin.definition
-            for file in definition.files:
-                filePath = os.path.join(plugin.path, file)
-                zipf = self.add_file(filePath, 'plugins/{0}'.format(plugin.name), binary=False)
-            if definition.execute:
-                data.append(
-                    dict(
-                        name=plugin.name,
-                        execute='{0}/{1}'.format(plugin.name, definition.execute),
-                        args=plugin.process_args(plugin_conf.args),
-                        runOn=definition.run_on.value,
-                    ))
+        for plugin in self.cluster_config.plugins:
+            for file in plugin.files:
+                zipf = self.zipf.writestr(file.content(), 'plugins/{0}/{1}'.format(plugin.name, file.target))
+            if plugin.execute:
+                data.append(dict(
+                    name=plugin.name,
+                    execute='{0}/{1}'.format(plugin.name, plugin.execute),
+                    args=plugin.args,
+                    env=plugin.env,
+                    runOn=plugin.run_on.value,
+                ))
 
-        self.zipf.writestr(os.path.join('plugins', 'plugins-manifest.json'), json.dumps(data))
+        self.zipf.writestr(os.path.join('plugins', 'plugins-manifest.yaml'), yaml.dump(data))
         return zipf
 
     def _add_node_scripts(self):

@@ -15,7 +15,7 @@ class AztkError(Exception):
 class AzureApiInitError(AztkError):
     pass
 
-class InvalidPluginDefinitionError(AztkError):
+class InvalidPluginConfigurationError(AztkError):
     pass
 
 class InvalidModelError(AztkError):
@@ -27,9 +27,5 @@ class MissingRequiredAttributeError(InvalidModelError):
 class InvalidCustomScriptError(InvalidModelError):
     pass
 
-class InvalidPluginConfigurationError(InvalidModelError):
-    # from aztk.plugins import PluginDefinition
-
-    def __init__(self, message:str, pluginDefinition = None):
-        super().__init__(message)
-        self.pluginDefinition = pluginDefinition
+class InvalidPluginReferenceError(InvalidModelError):
+    pass
