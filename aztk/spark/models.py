@@ -112,19 +112,6 @@ class ClusterConfiguration(aztk.models.ClusterConfiguration):
     def gpu_enabled(self):
         return helpers.is_gpu_enabled(self.vm_size)
 
-
-class SharedKeyConfiguration(aztk.models.SharedKeyConfiguration):
-    pass
-
-
-class ServicePrincipalConfiguration(aztk.models.ServicePrincipalConfiguration):
-    pass
-
-
-class DockerConfiguration(aztk.models.DockerConfiguration):
-    pass
-
-
 class SecretsConfiguration(aztk.models.SecretsConfiguration):
     pass
 
