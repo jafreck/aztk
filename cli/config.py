@@ -318,7 +318,28 @@ class JobConfig():
             self.custom_scripts = cluster_configuration.get('custom_scripts')
             self.subnet_id = cluster_configuration.get('subnet_id')
 
-        self.applications = config.get('applications')
+        applications = config.get('applications')
+        if applications:
+            self.applications = []
+            for application in applications:
+                self.applications.append(
+                    aztk.spark.models.ApplicationConfiguration(
+                        name=application.get('name'),
+                        application=application.get('application'),
+                        application_args=application.get('application_args'),
+                        main_class=application.get('main_class'),
+                        jars=application.get('jars'),
+                        py_files=application.get('py_files'),
+                        files=application.get('files'),
+                        driver_java_options=application.get('driver_java_options'),
+                        driver_library_path=application.get('driver_library_path'),
+                        driver_class_path=application.get('driver_class_path'),
+                        driver_memory=application.get('driver_memory'),
+                        executor_memory=application.get('executor_memory'),
+                        driver_cores=application.get('driver_cores'),
+                        executor_cores=application.get('executor_cores')
+                    )
+                )
 
         spark_configuration = config.get('spark_configuration')
         if spark_configuration:
@@ -361,12 +382,12 @@ class JobConfig():
             self.id = id
 
         for entry in self.applications:
-            if entry['name'] is None:
+            if entry.name is None:
                 raise aztk.error.AztkError(
                     "Application specified with no name. Please verify your configuration in job.yaml")
-            if entry['application'] is None:
+            if entry.application is None:
                 raise aztk.error.AztkError(
-                    "No path to application specified for {} in job.yaml".format(entry['name']))
+                    "No path to application specified for {} in job.yaml".format(entry.name))
 
 
 def get_file_if_exists(file):
