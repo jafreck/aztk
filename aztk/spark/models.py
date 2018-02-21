@@ -71,31 +71,46 @@ class UserConfiguration(aztk.models.UserConfiguration):
     pass
 
 
+class ServicePrincipalConfiguration(aztk.models.ServicePrincipalConfiguration):
+    pass
+
+
+class SharedKeyConfiguration(aztk.models.SharedKeyConfiguration):
+    pass
+
+
+class DockerConfiguration(aztk.models.DockerConfiguration):
+    pass
+
+
 class ClusterConfiguration(aztk.models.ClusterConfiguration):
     def __init__(
             self,
             custom_scripts: List[CustomScript] = None,
             file_shares: List[FileShare] = None,
             cluster_id: str = None,
-            vm_count=None,
-            vm_low_pri_count=None,
+            vm_count=0,
+            vm_low_pri_count=0,
             vm_size=None,
             subnet_id=None,
-            docker_repo: str = None,
-            spark_configuration: SparkConfiguration = None,
-            user_configuration: UserConfiguration = None):
-        super().__init__(custom_scripts=custom_scripts,
-                         cluster_id=cluster_id,
-                         vm_count=vm_count,
-                         vm_low_pri_count=vm_low_pri_count,
-                         vm_size=vm_size,
-                         docker_repo=docker_repo,
-                         subnet_id=subnet_id,
-                         file_shares=file_shares,
-                         user_configuration=user_configuration
-                         )
+            docker_repo: str=None,
+            user_configuration: UserConfiguration=None,
+            spark_configuration: SparkConfiguration = None):
+        super().__init__(
+            custom_scripts=custom_scripts,
+            cluster_id=cluster_id,
+            vm_count=vm_count,
+            vm_low_pri_count=vm_low_pri_count,
+            vm_size=vm_size,
+            docker_repo=docker_repo,
+            subnet_id=subnet_id,
+            file_shares=file_shares,
+            user_configuration=user_configuration,
+        )
         self.spark_configuration = spark_configuration
-        self.gpu_enabled = helpers.is_gpu_enabled(vm_size)
+
+    def gpu_enabled(self):
+        return helpers.is_gpu_enabled(self.vm_size)
 
 
 class SharedKeyConfiguration(aztk.models.SharedKeyConfiguration):
@@ -125,9 +140,9 @@ class ApplicationConfiguration:
             application=None,
             application_args=None,
             main_class=None,
-            jars=[],
-            py_files=[],
-            files=[],
+            jars=None,
+            py_files=None,
+            files=None,
             driver_java_options=None,
             driver_library_path=None,
             driver_class_path=None,
@@ -140,9 +155,9 @@ class ApplicationConfiguration:
         self.application = application
         self.application_args = application_args
         self.main_class = main_class
-        self.jars = jars
-        self.py_files = py_files
-        self.files = files
+        self.jars = jars or []
+        self.py_files = py_files or []
+        self.files = files or []
         self.driver_java_options = driver_java_options
         self.driver_library_path = driver_library_path
         self.driver_class_path = driver_class_path
