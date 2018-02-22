@@ -41,13 +41,15 @@ def test_submit_job():
         )
         job = spark_client.submit_job(job_configuration=job_configuration)
         spark_client.wait_until_job_finished(job_id=job_configuration.id)
-    except (AztkError, BatchErrorException) as e:
+
+        assert job.id == job_configuration.id
+        assert job.state is not None
+
+    except (AztkError, BatchErrorException):
         assert False
 
-    assert job.id == job_configuration.id
-    assert job.state is not None
-
-    spark_client.delete_job(job_configuration.id)
+    finally:
+        spark_client.delete_job(job_configuration.id)
 
 
 def test_list_jobs():
@@ -78,13 +80,15 @@ def test_list_jobs():
         spark_client.wait_until_job_finished(job_configuration.id)
 
         jobs = spark_client.list_jobs()
-    except (AztkError, BatchErrorException) as e:
+
+        assert jobs is not None
+        assert job_configuration.id in [job.id for job in jobs]
+
+    except (AztkError, BatchErrorException):
         assert False
 
-    assert jobs is not None
-    assert job_configuration.id in [job.id for job in jobs]
-
-    spark_client.delete_job(job_configuration.id)
+    finally:
+        spark_client.delete_job(job_configuration.id)
 
 
 def test_list_applications():
@@ -115,15 +119,17 @@ def test_list_applications():
         spark_client.wait_until_job_finished(job_configuration.id)
 
         applications = spark_client.list_applications(job_id=job_configuration.id)
-    except (AztkError, BatchErrorException) as e:
+
+        assert applications not in (None, [])
+        assert len(applications) == 2
+        for application in applications:
+            assert isinstance(application, (aztk.spark.models.Application, str))
+
+    except (AztkError, BatchErrorException):
         assert False
 
-    assert applications not in (None, [])
-    assert len(applications) == 2
-    for application in applications:
-        assert isinstance(application, (aztk.spark.models.Application, str))
-
-    spark_client.delete_job(job_configuration.id)
+    finally:
+        spark_client.delete_job(job_configuration.id)
 
 
 def test_get_job():
@@ -154,14 +160,15 @@ def test_get_job():
         spark_client.wait_until_job_finished(job_configuration.id)
 
         job = spark_client.get_job(job_id=job_configuration.id)
-    except (AztkError, BatchErrorException) as e:
+        assert job.id == job_configuration.id
+        assert app1.name in [app.name for app in job.applications]
+        assert app2.name in [app.name for app in job.applications]
+
+    except (AztkError, BatchErrorException):
         assert False
 
-    assert job.id == job_configuration.id
-    assert app1.name in [app.name for app in job.applications]
-    assert app2.name in [app.name for app in job.applications]
-
-    spark_client.delete_job(job_configuration.id)
+    finally:
+        spark_client.delete_job(job_configuration.id)
 
 
 def test_get_application():
@@ -187,15 +194,17 @@ def test_get_application():
         spark_client.wait_until_job_finished(job_configuration.id)
         
         application = spark_client.get_application(job_id=job_configuration.id, application_name="pipy100")
-    except (AztkError, BatchErrorException) as e:
+
+        assert isinstance(application, aztk.spark.models.Application)
+        assert application.exit_code == 0
+        assert application.state == "completed"
+        assert application.name == "pipy100"
+
+    except (AztkError, BatchErrorException):
         assert False
 
-    assert isinstance(application, aztk.spark.models.Application)
-    assert application.exit_code == 0
-    assert application.state == "completed"
-    assert application.name == "pipy100"
-
-    spark_client.delete_job(job_configuration.id)
+    finally:
+        spark_client.delete_job(job_configuration.id)
 
 
 def test_get_application_log():
@@ -221,16 +230,18 @@ def test_get_application_log():
         spark_client.wait_until_job_finished(job_configuration.id)
 
         application_log = spark_client.get_job_application_log(job_id=job_configuration.id, application_name="pipy100")
-    except (AztkError, BatchErrorException) as e:
+
+        assert isinstance(application_log, aztk.spark.models.ApplicationLog)
+        assert application_log.log is not None
+        assert application_log.exit_code == 0
+        assert application_log.name == "pipy100"
+        assert application_log.total_bytes != 0
+        
+    except (AztkError, BatchErrorException):
         assert False
 
-    assert isinstance(application_log, aztk.spark.models.ApplicationLog)
-    assert application_log.log is not None
-    assert application_log.exit_code == 0
-    assert application_log.name == "pipy100"
-    assert application_log.total_bytes != 0
-
-    spark_client.delete_job(job_configuration.id)
+    finally:
+        spark_client.delete_job(job_configuration.id)
 
 
 def test_delete_job():
@@ -255,12 +266,19 @@ def test_delete_job():
         spark_client.submit_job(job_configuration=job_configuration)
         spark_client.wait_until_job_finished(job_configuration.id)
         spark_client.delete_job(job_configuration.id)
-    except (AztkError, BatchErrorException) as e:
+
+        assert job_configuration.id not in spark_client.list_jobs()
+        try:
+            spark_client.get_job(job_configuration.id)
+        except AztkError:
+            # this should fail
+            assert True
+    
+    except (AztkError, BatchErrorException):
         assert False
 
-    assert job_configuration.id not in spark_client.list_jobs()
-    try:
-        spark_client.get_job(job_configuration.id)
-    except AztkError as e:
-        # this should fail
-        assert True
+    finally:
+        try:
+            spark_client.delete_job(job_configuration.id)
+        except Exception:
+            pass
