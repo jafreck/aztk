@@ -2,7 +2,7 @@
 
 ## 0.6.0 Mixed Mode, Cluster Run & Copy
 
-__Features:__
+**Features:**
 - `aztk spark init` customization flags
 - `aztk spark cluster run` command added
 - `aztk spark cluster copy` command added
@@ -12,7 +12,7 @@ __Features:__
 - add flag `worker_on_master` option for cluster and job submission mode
 - Spark driver runs on master node for single application job submission mode
 
-__Bug Fixes:__
+**Bug Fixes:**
 - load jars in `.aztk/jars/` in job submission mode
 - replace outdated error in cluster_create
 - fix type error crash if not jars are specificed in job submission
