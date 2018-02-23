@@ -35,7 +35,8 @@ class Client(BaseClient):
                                                                            cluster_conf.gpu_enabled(),
                                                                            cluster_conf.docker_repo,
                                                                            cluster_conf.file_shares,
-                                                                           cluster_conf.mixed_mode())
+                                                                           cluster_conf.mixed_mode(),
+                                                                           cluster_conf.worker_on_master)
 
             software_metadata_key = "spark"
 
@@ -199,7 +200,7 @@ class Client(BaseClient):
             else:
                 raise error.AztkError("Jobs do not support both dedicated and low priority nodes." \
                                       " JobConfiguration fields max_dedicated_nodes and max_low_pri_nodes are mutually exclusive values.")
-            
+
             job = self.__submit_job(
                 job_configuration=job_configuration,
                 start_task=start_task,

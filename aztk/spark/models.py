@@ -91,11 +91,12 @@ class ClusterConfiguration(aztk.models.ClusterConfiguration):
             cluster_id: str = None,
             vm_count=0,
             vm_low_pri_count=0,
-            vm_size=None,
-            subnet_id=None,
-            docker_repo: str=None,
-            user_configuration: UserConfiguration=None,
-            spark_configuration: SparkConfiguration = None):
+            vm_size = None,
+            subnet_id = None,
+            docker_repo: str = None,
+            user_configuration: UserConfiguration = None,
+            spark_configuration: SparkConfiguration = None,
+            worker_on_master = None):
         super().__init__(
             custom_scripts=custom_scripts,
             cluster_id=cluster_id,
@@ -108,9 +109,15 @@ class ClusterConfiguration(aztk.models.ClusterConfiguration):
             user_configuration=user_configuration,
         )
         self.spark_configuration = spark_configuration
+        self.worker_on_master = worker_on_master
 
     def gpu_enabled(self):
         return helpers.is_gpu_enabled(self.vm_size)
+
+    def merge(self, other):
+        super().merge(other)
+        self._merge_attributes(other, ["worker_on_master"])
+
 
 class SecretsConfiguration(aztk.models.SecretsConfiguration):
     pass

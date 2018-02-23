@@ -186,6 +186,9 @@ def cluster_config_from_dict(config: dict):
     if config.get('docker_repo') is not None:
         output.docker_repo = config['docker_repo']
 
+    if config.get('worker_on_master') is not None:
+        output.worker_on_master = config['worker_on_master']
+
     if config.get('wait') is not None:
         wait = config['wait']
 
