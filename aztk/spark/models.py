@@ -91,12 +91,12 @@ class ClusterConfiguration(aztk.models.ClusterConfiguration):
             cluster_id: str = None,
             vm_count=0,
             vm_low_pri_count=0,
-            vm_size = None,
-            subnet_id = None,
+            vm_size=None,
+            subnet_id=None,
             docker_repo: str = None,
             user_configuration: UserConfiguration = None,
             spark_configuration: SparkConfiguration = None,
-            worker_on_master = None):
+            worker_on_master: bool = None):
         super().__init__(
             custom_scripts=custom_scripts,
             cluster_id=cluster_id,
@@ -205,7 +205,8 @@ class JobConfiguration:
             docker_repo=None,
             max_dedicated_nodes=None,
             max_low_pri_nodes=None,
-            subnet_id=None):
+            subnet_id=None,
+            worker_on_master=None):
         self.id = id
         self.applications = applications
         self.custom_scripts = custom_scripts
@@ -216,6 +217,7 @@ class JobConfiguration:
         self.max_dedicated_nodes = max_dedicated_nodes
         self.max_low_pri_nodes = max_low_pri_nodes
         self.subnet_id = subnet_id
+        self.worker_on_master = worker_on_master
 
 
 class JobState():

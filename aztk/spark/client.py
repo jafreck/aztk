@@ -171,7 +171,8 @@ class Client(BaseClient):
             start_task = create_cluster_helper.generate_cluster_start_task(self,
                                                                            zip_resource_files,
                                                                            job_configuration.gpu_enabled,
-                                                                           job_configuration.docker_repo)
+                                                                           job_configuration.docker_repo,
+                                                                           worker_on_master=job_configuration.worker_on_master)
 
             application_tasks = []
             for application in job_configuration.applications:
