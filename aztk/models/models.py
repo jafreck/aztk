@@ -1,3 +1,4 @@
+import io
 from typing import List
 from aztk import error
 from aztk.utils import constants
@@ -19,9 +20,14 @@ class FileShare:
         self.file_share_path = file_share_path
         self.mount_path = mount_path
 
+class File:
+    def __init__(self, name: str, payload: io.StringIO):
+        self.name = name
+        self.payload = payload
+
 
 class CustomScript:
-    def __init__(self, name: str = None, script: str = None, run_on=None):
+    def __init__(self, name: str = None, script = None, run_on=None):
         self.name = name
         self.script = script
         self.run_on = run_on

@@ -35,7 +35,8 @@ class Client(BaseClient):
                                                                            cluster_conf.docker_repo,
                                                                            cluster_conf.file_shares,
                                                                            cluster_conf.plugins,
-                                                                           cluster_conf.mixed_mode())
+                                                                           cluster_conf.mixed_mode(),
+                                                                           cluster_conf.worker_on_master)
 
             software_metadata_key = "spark"
 
@@ -125,6 +126,8 @@ class Client(BaseClient):
         try:
             cluster = self.get_cluster(cluster_id)
             master_node_id = cluster.master_node_id
+            if not master_node_id:
+                raise error.ClusterNotReadyError("The master has not yet been picked, a user cannot be added.")
             self.__create_user(cluster.id, master_node_id, username, password, ssh_key)
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
@@ -167,7 +170,8 @@ class Client(BaseClient):
             start_task = create_cluster_helper.generate_cluster_start_task(self,
                                                                            zip_resource_files,
                                                                            job_configuration.gpu_enabled,
-                                                                           job_configuration.docker_repo)
+                                                                           job_configuration.docker_repo,
+                                                                           worker_on_master=job_configuration.worker_on_master)
 
             application_tasks = []
             for application in job_configuration.applications:
@@ -204,7 +208,7 @@ class Client(BaseClient):
                 autoscale_formula=autoscale_formula,
                 software_metadata_key=software_metadata_key,
                 vm_image_model=vm_image,
-                application_metadata='\n'.join(application.name for application in job_configuration.applications))
+                application_metadata='\n'.join(application.name for application in (job_configuration.applications or [])))
 
             return models.Job(job)
 

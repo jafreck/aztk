@@ -1,3 +1,4 @@
+import io
 from Crypto.PublicKey import RSA
 from typing import List
 import aztk.models
@@ -39,8 +40,12 @@ class RemoteLogin(aztk.models.RemoteLogin):
     pass
 
 
+class File(aztk.models.File):
+    pass
+
+
 class SparkConfiguration():
-    def __init__(self, spark_defaults_conf: str = None, spark_env_sh: str = None, core_site_xml: str = None, jars: List[str]=None):
+    def __init__(self, spark_defaults_conf=None, spark_env_sh=None, core_site_xml=None, jars=None):
         self.spark_defaults_conf = spark_defaults_conf
         self.spark_env_sh = spark_env_sh
         self.core_site_xml = core_site_xml
@@ -91,9 +96,10 @@ class ClusterConfiguration(aztk.models.ClusterConfiguration):
             vm_low_pri_count=0,
             vm_size=None,
             subnet_id=None,
-            docker_repo: str=None,
-            user_configuration: UserConfiguration=None,
-            spark_configuration: SparkConfiguration = None):
+            docker_repo: str = None,
+            user_configuration: UserConfiguration = None,
+            spark_configuration: SparkConfiguration = None,
+            worker_on_master: bool = None):
         super().__init__(
             custom_scripts=custom_scripts,
             cluster_id=cluster_id,
@@ -106,9 +112,14 @@ class ClusterConfiguration(aztk.models.ClusterConfiguration):
             user_configuration=user_configuration,
         )
         self.spark_configuration = spark_configuration
+        self.worker_on_master = worker_on_master
 
     def gpu_enabled(self):
         return helpers.is_gpu_enabled(self.vm_size)
+
+    def merge(self, other):
+        super().merge(other)
+        self._merge_attributes(other, ["worker_on_master"])
 
 
 class SecretsConfiguration(aztk.models.SecretsConfiguration):
@@ -197,7 +208,8 @@ class JobConfiguration:
             docker_repo=None,
             max_dedicated_nodes=None,
             max_low_pri_nodes=None,
-            subnet_id=None):
+            subnet_id=None,
+            worker_on_master=None):
         self.id = id
         self.applications = applications
         self.custom_scripts = custom_scripts
@@ -208,6 +220,7 @@ class JobConfiguration:
         self.max_dedicated_nodes = max_dedicated_nodes
         self.max_low_pri_nodes = max_low_pri_nodes
         self.subnet_id = subnet_id
+        self.worker_on_master = worker_on_master
 
     def as_cluster_config(self):
         return ClusterConfiguration(

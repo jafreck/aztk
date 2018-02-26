@@ -3,14 +3,14 @@ Contains all errors used in Aztk.
 All error should inherit from `AztkError`
 """
 
-class ClusterNotReadyError(Exception):
-    pass
 
 
 class AztkError(Exception):
     def __init__(self, message: str = None):
         super().__init__(message)
 
+class ClusterNotReadyError(AztkError):
+    pass
 
 class AzureApiInitError(AztkError):
     pass

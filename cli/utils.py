@@ -339,7 +339,7 @@ def print_applications(applications):
                     application.name,
                     application.state,
                     utc_to_local(application.state_transition_time),
-                    application.exit_code or "-"
+                    application.exit_code if application.exit_code is not None else "-"
                 )
             )
     if warn_scheduling:
@@ -419,7 +419,7 @@ def print_cluster_conf(cluster_conf: ClusterConfiguration, wait: bool):
     if user_configuration.password:
         log.info("Password: %s", '*' * len(user_configuration.password))
     log.info("Plugins:")
-    if cluster_conf.plugins is None or len(cluster_conf.plugins) == 0:
+    if not cluster_conf.plugins:
         log.info("    None Configured")
     else:
         for plugin in cluster_conf.plugins:
