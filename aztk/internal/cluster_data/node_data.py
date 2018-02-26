@@ -50,16 +50,18 @@ class NodeData:
         self.zipf.close()
         return self
 
-    def add_file(self, file_path: str, zip_dir: str, binary: bool = True):
-        if not file_path:
+    def add_file(self, file: str, zip_dir: str, binary: bool = True):
+        if not file:
             return
-
-        full_file_path = Path(file_path)
-        if binary:
-            self.zipf.write(file_path, os.path.join(zip_dir, full_file_path.name))
-        else:
-            with io.open(file_path, 'r') as f:
-                self.zipf.writestr(os.path.join(zip_dir, full_file_path.name), f.read().replace('\r\n', '\n'))
+        if isinstance(file, (str, bytes)):
+            full_file_path = Path(file)
+            with io.open(file, 'r') as f:
+                if binary:
+                    self.zipf.write(file, os.path.join(zip_dir, full_file_path.name))
+                else:
+                    self.zipf.writestr(os.path.join(zip_dir, full_file_path.name), f.read().replace('\r\n', '\n'))
+        elif isinstance(file, models.File):
+            self.zipf.writestr(os.path.join(zip_dir, file.name), file.payload.getvalue())
 
     def add_files(self, file_paths: List[str], zip_dir, binary: bool = True):
         """
@@ -82,15 +84,19 @@ class NodeData:
     def _add_custom_scripts(self):
         data = []
         for index, custom_script in enumerate(self.cluster_config.custom_scripts):
-            new_file_name = str(index) + '_' + os.path.basename(custom_script.script)
-            data.append(dict(script=new_file_name, runOn=str(custom_script.run_on)))
-            try:
-                with io.open(custom_script.script, 'r') as f:
-                    self.zipf.writestr(
-                        os.path.join(CUSTOM_SCRIPT_FOLDER, new_file_name),
-                        f.read().replace('\r\n', '\n'))
-            except FileNotFoundError:
-                raise InvalidCustomScriptError("Custom script '{0}' doesn't exists.".format(custom_script.script))
+            if isinstance(custom_script.script, (str, bytes)):
+                new_file_name = str(index) + '_' + os.path.basename(custom_script.script)
+                data.append(dict(script=new_file_name, runOn=str(custom_script.run_on)))
+                try:
+                    with io.open(custom_script.script, 'r') as f:
+                        self.zipf.writestr(
+                            os.path.join(CUSTOM_SCRIPT_FOLDER, new_file_name),
+                            f.read().replace('\r\n', '\n'))
+                except FileNotFoundError:
+                    raise InvalidCustomScriptError("Custom script '{0}' doesn't exists.".format(custom_script.script))
+            elif isinstance(custom_script.script, models.File):
+                new_file_name = str(index) + '_' + custom_script.script.name
+                self.zipf.writestr(os.path.join('custom-scripts', new_file_name), custom_script.script.payload.getvalue())
 
         self.zipf.writestr(
             os.path.join(CUSTOM_SCRIPT_FOLDER, CUSTOM_SCRIPT_METADATA_FILE), yaml.dump(data, default_flow_style=False))
