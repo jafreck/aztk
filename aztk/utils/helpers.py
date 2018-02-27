@@ -377,3 +377,26 @@ def format_batch_exception(batch_exception):
     l.append("-------------------------------------------")
 
     return '\n'.join(l)
+
+
+def save_cluster_config(cluster_config, blob_client):
+    blob_path = "config.yaml"
+    content = yaml.dump(cluster_config)
+    container_name = cluster_config.cluster_id
+    blob_client.create_container(container_name, fail_on_exist=False)
+    blob_client.create_blob_from_text(container_name, blob_path, content)
+
+
+def read_cluster_config(cluster_id: str, blob_client: blob.BlockBlobService):
+    blob_path = "config.yaml"
+    try:
+        result = blob_client.get_blob_to_text(cluster_id, blob_path)
+        return yaml.load(result.content)
+    except azure.common.AzureMissingResourceHttpError:
+        logging.warn(
+            "Cluster %s doesn't have cluster configuration in storage",
+            cluster_id)
+    except yaml.YAMLError:
+        logging.warn(
+            "Cluster %s contains invalid cluster configuration in blob",
+            cluster_id)
