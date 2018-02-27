@@ -425,3 +425,8 @@ def print_cluster_conf(cluster_conf: ClusterConfiguration, wait: bool):
         for plugin in cluster_conf.plugins:
             log.info("  - %s", plugin.name)
     log.info("-------------------------------------------")
+
+
+def log_property(label: str, value: str):
+    label += ":"
+    log.info("{0:30} {1}".format(label, value))
