@@ -30,13 +30,6 @@ class NodeData:
         file_utils.ensure_dir(self.zip_path)
         self.zipf = zipfile.ZipFile(self.zip_path, "w", zipfile.ZIP_DEFLATED)
 
-    def __enter__(self):
-        self.add_core()
-        return self
-
-    def __exit__(self, type, value, traceback):
-        self.done()
-
     def add_core(self):
         self._add_node_scripts()
         self._add_custom_scripts()

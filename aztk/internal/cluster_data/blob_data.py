@@ -13,7 +13,7 @@ class BlobData:
         self.blob_client = blob_client
 
 
-    def as_resource_file(self, dest: str = None) -> batch_models.ResourceFile:
+    def to_resource_file(self, dest: str = None) -> batch_models.ResourceFile:
         sas_token = self.blob_client.generate_blob_shared_access_signature(
             self.container,
             self.blob,

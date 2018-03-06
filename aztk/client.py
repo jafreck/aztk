@@ -28,7 +28,7 @@ class Client:
 
 
 
-    def get_cluster_data(self, cluster_id: str) -> cluster_data.ClusterData:
+    def _get_cluster_data(self, cluster_id: str) -> cluster_data.ClusterData:
         """
         Returns ClusterData object to manage data related to the given cluster id
         """
@@ -73,7 +73,7 @@ class Client:
             :param VmImageModel: the type of image to provision for the cluster
             :param wait: wait until the cluster is ready
         """
-        self.get_cluster_data(cluster_conf.cluster_id).save_cluster_config(cluster_conf)
+        self._get_cluster_data(cluster_conf.cluster_id).save_cluster_config(cluster_conf)
         # reuse pool_id as job_id
         pool_id = cluster_conf.cluster_id
         job_id = cluster_conf.cluster_id
