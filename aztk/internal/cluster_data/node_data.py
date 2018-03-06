@@ -76,6 +76,9 @@ class NodeData:
 
     def _add_custom_scripts(self):
         data = []
+        if not self.cluster_config.custom_scripts:
+            return
+
         for index, custom_script in enumerate(self.cluster_config.custom_scripts):
             if isinstance(custom_script.script, (str, bytes)):
                 new_file_name = str(index) + '_' + os.path.basename(custom_script.script)
