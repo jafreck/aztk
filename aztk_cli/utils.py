@@ -147,7 +147,7 @@ def ssh_in_master(
 
     # Get master node id from task (job and task are both named pool_id)
     cluster = client.get_cluster(cluster_id)
-    configuration = client.get_cluster_data(cluster_id).read_cluster_config()
+    configuration = client.get_cluster_config(cluster_id)
 
     master_node_id = cluster.master_node_id
 

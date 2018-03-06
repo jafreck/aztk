@@ -26,7 +26,8 @@ class Client:
         self.batch_client = azure_api.make_batch_client(secrets_config)
         self.blob_client = azure_api.make_blob_client(secrets_config)
 
-
+    def get_cluster_config(self, cluster_id: str) -> models.ClusterConfiguration:
+        return self._get_cluster_data(cluster_id).read_cluster_config()
 
     def _get_cluster_data(self, cluster_id: str) -> cluster_data.ClusterData:
         """
