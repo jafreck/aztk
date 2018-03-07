@@ -135,6 +135,9 @@ class NodeData:
         self.zipf.writestr('user.yaml', user_conf)
 
     def _add_plugins(self):
+        if not self.cluster_config.plugins:
+            return
+
         data = []
         for plugin in self.cluster_config.plugins:
             for file in plugin.files:
