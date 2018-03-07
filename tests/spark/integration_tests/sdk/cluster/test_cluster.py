@@ -9,7 +9,7 @@ import aztk.spark
 import pytest
 from aztk.utils import constants
 from aztk.error import AztkError
-from cli import config
+from aztk_cli import config
 
 
 # base cluster name
@@ -19,7 +19,7 @@ base_cluster_id = "cluster-{}".format(current_time)
 
 # load secrets
 # note: this assumes secrets are set up in .aztk/secrets
-spark_client = aztk.spark.Client(config.load_aztk_screts())
+spark_client = aztk.spark.Client(config.load_aztk_secrets())
 
 
 # helper method
