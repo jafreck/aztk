@@ -1,6 +1,6 @@
 import os
 from core import config
-from install import pick_master, spark, scripts, create_user
+from install import pick_master, spark, scripts, create_user, plugins
 import wait_until_master_selected
 
 
@@ -24,10 +24,12 @@ def setup_node():
 
     if is_master:
         setup_as_master()
+        plugins.setup_plugins(is_master=True, is_worker=True)
         scripts.run_custom_scripts(is_master=True, is_worker=True)
 
     else:
         setup_as_worker()
+        plugins.setup_plugins(is_master=False, is_worker=True)
         scripts.run_custom_scripts(is_master=False, is_worker=True)
 
     open("/tmp/setup_complete", 'a').close()
@@ -37,7 +39,8 @@ def setup_as_master():
     print("Setting up as master.")
     spark.setup_connection()
     spark.start_spark_master()
-    spark.start_spark_worker()
+    if os.environ["WORKER_ON_MASTER"] == "True":
+        spark.start_spark_worker()
 
 
 def setup_as_worker():

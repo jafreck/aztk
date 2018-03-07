@@ -28,14 +28,17 @@ class Client(BaseClient):
                                                                  cluster_conf.cluster_id,
                                                                  cluster_conf.custom_scripts,
                                                                  cluster_conf.spark_configuration,
-                                                                 cluster_conf.user_configuration)
+                                                                 cluster_conf.user_configuration,
+                                                                 cluster_conf.plugins)
 
             start_task = create_cluster_helper.generate_cluster_start_task(self,
                                                                            zip_resource_files,
                                                                            cluster_conf.gpu_enabled(),
                                                                            cluster_conf.docker_repo,
                                                                            cluster_conf.file_shares,
-                                                                           cluster_conf.mixed_mode())
+                                                                           cluster_conf.plugins,
+                                                                           cluster_conf.mixed_mode(),
+                                                                           cluster_conf.worker_on_master)
 
             software_metadata_key = "spark"
 
@@ -170,7 +173,8 @@ class Client(BaseClient):
             start_task = create_cluster_helper.generate_cluster_start_task(self,
                                                                            zip_resource_files,
                                                                            job_configuration.gpu_enabled,
-                                                                           job_configuration.docker_repo)
+                                                                           job_configuration.docker_repo,
+                                                                           worker_on_master=job_configuration.worker_on_master)
 
             application_tasks = []
             for application in job_configuration.applications:
@@ -207,7 +211,7 @@ class Client(BaseClient):
                 autoscale_formula=autoscale_formula,
                 software_metadata_key=software_metadata_key,
                 vm_image_model=vm_image,
-                application_metadata='\n'.join(application.name for application in job_configuration.applications))
+                application_metadata='\n'.join(application.name for application in (job_configuration.applications or [])))
 
             return models.Job(job)
 
