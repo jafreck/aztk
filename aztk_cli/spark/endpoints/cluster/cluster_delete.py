@@ -22,6 +22,7 @@ def execute(args: typing.NamedTuple):
     cluster_id = args.cluster_id
 
     if not args.force:
+        log.warn("All logs persisted for this cluster will be deleted.")
         confirmation_cluster_id = input("Please confirm the id of the cluster you wish to delete: ")
 
         if confirmation_cluster_id  != cluster_id:
