@@ -230,6 +230,9 @@ class JobConfiguration:
             spark_configuration=self.spark_configuration,
         )
 
+    def mixed_mode(self) -> bool:
+        return self.max_dedicated_nodes > 0 and self.max_low_pri_nodes > 0
+
 
 class JobState():
     complete = 'completed'

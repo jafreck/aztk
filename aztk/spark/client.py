@@ -171,6 +171,7 @@ class Client(BaseClient):
                                                                            zip_resource_files,
                                                                            job_configuration.gpu_enabled,
                                                                            job_configuration.docker_repo,
+                                                                           mixed_mode=job_configuration.mixed_mode(),
                                                                            worker_on_master=job_configuration.worker_on_master)
 
             application_tasks = []
@@ -189,17 +190,10 @@ class Client(BaseClient):
                 offer='UbuntuServer',
                 sku='16.04')
 
-            if job_configuration.max_dedicated_nodes and not job_configuration.max_low_pri_nodes:
-                autoscale_formula = "maxNumberofVMs = {0}; targetNumberofVMs = {1};" \
-                                    " $TargetDedicatedNodes=min(maxNumberofVMs, targetNumberofVMs)".format(
-                                        job_configuration.max_dedicated_nodes, job_configuration.max_dedicated_nodes)
-            elif job_configuration.max_low_pri_nodes and not job_configuration.max_dedicated_nodes:
-                autoscale_formula = "maxNumberofVMs = {0}; targetNumberofVMs = {1};" \
-                                    " $TargetLowPriorityNodes=min(maxNumberofVMs, targetNumberofVMs)".format(
-                                        job_configuration.max_low_pri_nodes, job_configuration.max_low_pri_nodes)
-            else:
-                raise error.AztkError("Jobs do not support both dedicated and low priority nodes." \
-                                      " JobConfiguration fields max_dedicated_nodes and max_low_pri_nodes are mutually exclusive values.")
+            autoscale_formula = "$TargetDedicatedNodes = {0}; " \
+                                "$TargetLowPriorityNodes = {1}".format(
+                                    job_configuration.max_dedicated_nodes, 
+                                    job_configuration.max_low_pri_nodes)
 
             job = self.__submit_job(
                 job_configuration=job_configuration,
