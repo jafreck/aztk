@@ -61,6 +61,9 @@ class Client:
 
         if pool_exists:
             self.batch_client.pool.delete(pool_id)
+        
+        cluster_data = self._get_cluster_data(pool_id)
+        cluster_data.delete_container(pool_id)
 
         return job_exists or pool_exists
 

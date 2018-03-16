@@ -138,6 +138,10 @@ def delete(spark_client, job_id):
     except batch_models.batch_error.BatchErrorException:
         pass
 
+    # delete storage container
+    cluster_data = spark_client._get_cluster_data(job_id)
+    cluster_data.delete_container(job_id)
+
     return deleted_job_or_job_schedule
 
 
