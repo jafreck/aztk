@@ -259,6 +259,7 @@ class Client:
             self.__delete_user_on_pool('aztk', pool.id, nodes)
         except (OSError, batch_error.BatchErrorException) as exc:
             raise exc
+
     def __submit_job(self,
                      job_configuration,
                      start_task,
