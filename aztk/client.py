@@ -1,6 +1,7 @@
 import asyncio
 import concurrent.futures
 import sys
+import yaml
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta, timezone
 
@@ -15,7 +16,7 @@ import aztk.utils.ssh as ssh_lib
 import azure.batch.models as batch_models
 from azure.batch.models import batch_error
 from Crypto.PublicKey import RSA
-
+from aztk.internal import cluster_data
 
 class Client:
     def __init__(self, secrets_config: models.SecretsConfiguration):
@@ -24,6 +25,15 @@ class Client:
         azure_api.validate_secrets(secrets_config)
         self.batch_client = azure_api.make_batch_client(secrets_config)
         self.blob_client = azure_api.make_blob_client(secrets_config)
+
+    def get_cluster_config(self, cluster_id: str) -> models.ClusterConfiguration:
+        return self._get_cluster_data(cluster_id).read_cluster_config()
+
+    def _get_cluster_data(self, cluster_id: str) -> cluster_data.ClusterData:
+        """
+        Returns ClusterData object to manage data related to the given cluster id
+        """
+        return cluster_data.ClusterData(self.blob_client, cluster_id)
 
     '''
     General Batch Operations
@@ -54,7 +64,7 @@ class Client:
 
         return job_exists or pool_exists
 
-    def __create_pool_and_job(self, cluster_conf, software_metadata_key: str, start_task, VmImageModel):
+    def __create_pool_and_job(self, cluster_conf: models.ClusterConfiguration, software_metadata_key: str, start_task, VmImageModel):
         """
             Create a pool and job
             :param cluster_conf: the configuration object used to create the cluster
@@ -64,6 +74,7 @@ class Client:
             :param VmImageModel: the type of image to provision for the cluster
             :param wait: wait until the cluster is ready
         """
+        self._get_cluster_data(cluster_conf.cluster_id).save_cluster_config(cluster_conf)
         # reuse pool_id as job_id
         pool_id = cluster_conf.cluster_id
         job_id = cluster_conf.cluster_id
@@ -97,6 +108,8 @@ class Client:
             metadata=[
                 batch_models.MetadataItem(
                     name=constants.AZTK_SOFTWARE_METADATA_KEY, value=software_metadata_key),
+                batch_models.MetadataItem(
+                        name=constants.AZTK_MODE_METADATA_KEY, value=constants.AZTK_CLUSTER_MODE_METADATA)
             ])
 
         # Create the pool + create user for the pool
@@ -129,10 +142,13 @@ class Client:
         pools = self.batch_client.pool.list()
         software_metadata = (
             constants.AZTK_SOFTWARE_METADATA_KEY, software_metadata_key)
+        cluster_metadata = (
+            constants.AZTK_MODE_METADATA_KEY, constants.AZTK_CLUSTER_MODE_METADATA)
 
         aztk_pools = []
         for pool in [pool for pool in pools if pool.metadata]:
-            if software_metadata in [(metadata.name, metadata.value) for metadata in pool.metadata]:
+            pool_metadata = [(metadata.name, metadata.value) for metadata in pool.metadata]
+            if all([metadata in pool_metadata for metadata in [software_metadata, cluster_metadata]]):
                 aztk_pools.append(pool)
         return aztk_pools
 
@@ -284,12 +300,14 @@ class Client:
                 auto_scale_formula=autoscale_formula,
                 auto_scale_evaluation_interval=timedelta(minutes=5),
                 start_task=start_task,
-                enable_inter_node_communication=True,
+                enable_inter_node_communication=not job_configuration.mixed_mode(),
                 network_configuration=network_conf,
                 max_tasks_per_node=1,
                 metadata=[
                     batch_models.MetadataItem(
-                        name=constants.AZTK_SOFTWARE_METADATA_KEY, value=software_metadata_key)
+                        name=constants.AZTK_SOFTWARE_METADATA_KEY, value=software_metadata_key),
+                    batch_models.MetadataItem(
+                        name=constants.AZTK_MODE_METADATA_KEY, value=constants.AZTK_JOB_MODE_METADATA)
                 ]
             )
         )

@@ -9,7 +9,8 @@ from aztk.spark.helpers import create_cluster as create_cluster_helper
 from aztk.spark.helpers import submit as cluster_submit_helper
 from aztk.spark.helpers import job_submission as job_submit_helper
 from aztk.spark.helpers import get_log as get_log_helper
-from aztk.spark.utils import upload_node_scripts, util
+from aztk.spark.utils import util
+from aztk.internal.cluster_data import NodeData
 import yaml
 
 
@@ -22,20 +23,20 @@ class Client(BaseClient):
     '''
     def create_cluster(self, cluster_conf: models.ClusterConfiguration, wait: bool = False):
         cluster_conf.validate()
-
+        cluster_data = self._get_cluster_data(cluster_conf.cluster_id)
         try:
-            zip_resource_files = upload_node_scripts.zip_scripts(self.blob_client,
-                                                                 cluster_conf.cluster_id,
-                                                                 cluster_conf.custom_scripts,
-                                                                 cluster_conf.spark_configuration,
-                                                                 cluster_conf.user_configuration)
+            zip_resource_files = None
+            node_data = NodeData(cluster_conf).add_core().done()
+            zip_resource_files = cluster_data.upload_node_data(node_data).to_resource_file()
 
             start_task = create_cluster_helper.generate_cluster_start_task(self,
                                                                            zip_resource_files,
                                                                            cluster_conf.gpu_enabled(),
                                                                            cluster_conf.docker_repo,
                                                                            cluster_conf.file_shares,
-                                                                           cluster_conf.mixed_mode())
+                                                                           cluster_conf.plugins,
+                                                                           cluster_conf.mixed_mode(),
+                                                                           cluster_conf.worker_on_master)
 
             software_metadata_key = "spark"
 
@@ -162,15 +163,17 @@ class Client(BaseClient):
     '''
     def submit_job(self, job_configuration):
         try:
-            zip_resource_files = upload_node_scripts.zip_scripts(self.blob_client,
-                                                                 job_configuration.id,
-                                                                 job_configuration.custom_scripts,
-                                                                 job_configuration.spark_configuration)
+            job_configuration.validate()
+            cluster_data = self._get_cluster_data(job_configuration.id)
+            node_data =  NodeData(job_configuration.to_cluster_config()).add_core().done()
+            zip_resource_files = cluster_data.upload_node_data(node_data).to_resource_file()
 
             start_task = create_cluster_helper.generate_cluster_start_task(self,
                                                                            zip_resource_files,
                                                                            job_configuration.gpu_enabled,
-                                                                           job_configuration.docker_repo)
+                                                                           job_configuration.docker_repo,
+                                                                           mixed_mode=job_configuration.mixed_mode(),
+                                                                           worker_on_master=job_configuration.worker_on_master)
 
             application_tasks = []
             for application in job_configuration.applications:
@@ -188,17 +191,10 @@ class Client(BaseClient):
                 offer='UbuntuServer',
                 sku='16.04')
 
-            if job_configuration.max_dedicated_nodes and not job_configuration.max_low_pri_nodes:
-                autoscale_formula = "maxNumberofVMs = {0}; targetNumberofVMs = {1};" \
-                                    " $TargetDedicatedNodes=min(maxNumberofVMs, targetNumberofVMs)".format(
-                                        job_configuration.max_dedicated_nodes, job_configuration.max_dedicated_nodes)
-            elif job_configuration.max_low_pri_nodes and not job_configuration.max_dedicated_nodes:
-                autoscale_formula = "maxNumberofVMs = {0}; targetNumberofVMs = {1};" \
-                                    " $TargetLowPriorityNodes=min(maxNumberofVMs, targetNumberofVMs)".format(
-                                        job_configuration.max_low_pri_nodes, job_configuration.max_low_pri_nodes)
-            else:
-                raise error.AztkError("Jobs do not support both dedicated and low priority nodes." \
-                                      " JobConfiguration fields max_dedicated_nodes and max_low_pri_nodes are mutually exclusive values.")
+            autoscale_formula = "$TargetDedicatedNodes = {0}; " \
+                                "$TargetLowPriorityNodes = {1}".format(
+                                    job_configuration.max_dedicated_nodes, 
+                                    job_configuration.max_low_pri_nodes)
 
             job = self.__submit_job(
                 job_configuration=job_configuration,
@@ -207,7 +203,7 @@ class Client(BaseClient):
                 autoscale_formula=autoscale_formula,
                 software_metadata_key=software_metadata_key,
                 vm_image_model=vm_image,
-                application_metadata='\n'.join(application.name for application in job_configuration.applications))
+                application_metadata='\n'.join(application.name for application in (job_configuration.applications or [])))
 
             return models.Job(job)
 
