@@ -122,7 +122,7 @@ def stop(spark_client, job_id):
     spark_client.batch_client.job_schedule.terminate(job_id)
 
 
-def delete(spark_client, job_id):
+def delete(spark_client, job_id, keep_logs: bool = False):
     recent_run_job = __get_recent_job(spark_client, job_id)
     deleted_job_or_job_schedule = False
     # delete job
@@ -139,8 +139,9 @@ def delete(spark_client, job_id):
         pass
 
     # delete storage container
-    cluster_data = spark_client._get_cluster_data(job_id)
-    cluster_data.delete_container(job_id)
+    if keep_logs:
+        cluster_data = spark_client._get_cluster_data(job_id)
+        cluster_data.delete_container(job_id)
 
     return deleted_job_or_job_schedule
 
