@@ -22,6 +22,7 @@ setup(
     version=version.__version__,
     description='On-demand, Dockerized, Spark Jobs on Azure (powered by Azure Batch)',
     long_description=long_description,
+    long_description_content_type='text/markdown',
     url='https://github.com/Azure/aztk',
     author='Microsoft',
     author_email='askaztk@microsoft.com',
