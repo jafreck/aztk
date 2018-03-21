@@ -9,6 +9,7 @@ from aztk.spark.helpers import create_cluster as create_cluster_helper
 from aztk.spark.helpers import submit as cluster_submit_helper
 from aztk.spark.helpers import job_submission as job_submit_helper
 from aztk.spark.helpers import get_log as get_log_helper
+from aztk.spark.helpers import cluster_diagnostic_helper
 from aztk.spark.utils import util
 from aztk.internal.cluster_data import NodeData
 import yaml
@@ -146,15 +147,15 @@ class Client(BaseClient):
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
 
-    def cluster_run(self, cluster_id: str, command: str):
+    def cluster_run(self, cluster_id: str, command: str, host=False):
         try:
-            return self.__cluster_run(cluster_id, 'spark', command)
+            return self.__cluster_run(cluster_id, command, container_name='spark' if not host else None)
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
 
-    def cluster_copy(self, cluster_id: str, source_path: str, destination_path: str):
+    def cluster_copy(self, cluster_id: str, source_path: str, destination_path: str, host=False, get=False):
         try:
-            return self.__cluster_copy(cluster_id, 'spark', source_path, destination_path)
+            return self.__cluster_copy(cluster_id, source_path, destination_path, container_name='spark' if not host else None, get=get)
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
 
@@ -272,3 +273,10 @@ class Client(BaseClient):
     def wait_until_all_jobs_finished(self, jobs):
         for job in jobs:
             self.wait_until_job_finished(job)
+
+    def run_cluster_diagnostics(self, cluster_id):
+        try:
+            output = cluster_diagnostic_helper.run(self, cluster_id)
+            return output
+        except batch_error.BatchErrorException as e:
+            raise error.AztkError(helpers.format_batch_exception(e))
