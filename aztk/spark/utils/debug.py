@@ -72,7 +72,7 @@ def get_docker_images(docker_client):
         for image in images:
             output += json.dumps(image.attrs, sort_keys=True, indent=4)
         return ("docker-images.txt", output)
-    except docker.errors.APIerror as e:
+    except docker.errors.APIError as e:
         return ("docker-images.err", e.__str__())
 
 
@@ -87,13 +87,12 @@ def get_docker_containers(docker_client):
             logs.append((container.name + "/docker.log", container.logs()))
             logs.append(get_docker_process_status(container))
             if container.name == "spark": #TODO: find a more robust way to get specific info off specific containers
-                logs.append(get_container_aztk_script(container))
-                # logs.append(get_spark_logs(container))
-                [logs.append(tup) for tup in get_spark_logs(container)]
+                logs.extend(get_container_aztk_script(container))
+                logs.extend(get_spark_logs(container))
 
         logs.append(("docker-containers.txt", container_attrs))
         return logs
-    except docker.errors.APIerror as e:
+    except docker.errors.APIError as e:
         return [("docker-containers.err", e.__str__())]
 
 
@@ -105,7 +104,7 @@ def get_docker_process_status(container):
             return (out_file_name, output)
         else:
             return (out_file_name, "exit_code: {0}\n{1}".format(exit_code, output))
-    except docker.errors.APIerror as e:
+    except docker.errors.APIError as e:
         return (container.name + "ps_aux.err", e.__str__())
 
 
@@ -113,8 +112,8 @@ def get_container_aztk_script(container):
     aztk_path = "/mnt/batch/tasks/startup/wd"
     try:
         stream, _ = container.get_archive(aztk_path) # second item is stat info
-        data = b''.join([item for item in stream])
-        return (container.name + "/" + "aztk-scripts.tar", data)
+        data = io.BytesIO(b''.join([item for item in stream]))
+        return extract_tar_in_memory(container, data)
     except docker.errors.APIError as e:
         return (container.name + "/" + "aztk-scripts.err", e.__str__())
 
@@ -125,17 +124,28 @@ def get_spark_logs(container):
     try:
         stream, _ = container.get_archive(spark_logs_path) # second item is stat info
         data = io.BytesIO(b''.join([item for item in stream]))
-        tarf = tarfile.open(fileobj=data)
-        logs = []
-        for member in tarf.getnames():
-            print("MEMBER:", member)
-            file_bytes = tarf.extractfile(member).read()
-            logs.append(member, file_bytes)
-
-
-        return (container.name + "/" + "spark-logs.tar", data)
+        return extract_tar_in_memory(container, data)
     except docker.errors.APIError as e:
-        return (container.name + "/" + "spark-logs.err", e.__str__())
+        return [(container.name + "/" + "spark-logs.err", e.__str__())]
+
+
+def filter_members(members):
+    skip_files = ["id_rsa", "id_rsa.pub", "docker.log"]
+    skip_extensions = [".pyc", ".zip"]
+    for tarinfo in members:
+        if (os.path.splitext(tarinfo.name)[1] not in skip_extensions and
+                os.path.basename(tarinfo.name) not in skip_files):
+            yield tarinfo
+
+
+def extract_tar_in_memory(container, data):
+    tarf = tarfile.open(fileobj=data)
+    logs = []
+    for member in filter_members(tarf):
+        file_bytes = tarf.extractfile(member)
+        if file_bytes is not None:
+            logs.append((container.name + "/" + member.name, b''.join(file_bytes.readlines())))
+    return logs
 
 
 if __name__ == "__main__":
