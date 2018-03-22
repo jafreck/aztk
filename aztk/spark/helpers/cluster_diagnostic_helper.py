@@ -4,14 +4,15 @@ from aztk.utils.command_builder import CommandBuilder
 from aztk import models as aztk_models
 import azure.batch.models as batch_models
 
-def run(spark_client, cluster_id, path):
+def run(spark_client, cluster_id, output_directory):
     # copy debug program to each node
     spark_client.cluster_copy(cluster_id, os.path.abspath("./aztk/spark/utils/debug.py"), "/tmp/debug.py", host=True)
     ssh_cmd = _build_diagnostic_ssh_command()
     output = spark_client.cluster_run(cluster_id, ssh_cmd, host=True)
-    # local_path = os.path.abspath(path)
+    local_path = os.path.join(os.path.abspath(output_directory), "debug", "debug.zip") #TODO: add timestamp
+    print("run localpath", local_path)
     remote_path = "/tmp/debug.zip"
-    output = spark_client.cluster_copy(cluster_id, remote_path, path, host=True, get=True)
+    output = spark_client.cluster_copy(cluster_id, remote_path, local_path, host=True, get=True)
     return output
 
 

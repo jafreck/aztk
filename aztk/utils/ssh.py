@@ -72,9 +72,10 @@ def copy_from_node(source_path, destination_path, username, hostname, port, ssh_
     sftp_client = client.open_sftp()
     output = None
     try:
-        with open(destination_path + str(port), 'wb') as f:
+        destination_path = os.path.join(os.path.dirname(destination_path), str(port), os.path.basename(destination_path))
+        os.makedirs(os.path.dirname(destination_path), exist_ok=True)
+        with open(destination_path, 'wb') as f: #SpooledTemporaryFile instead??
             sftp_client.getfo(source_path, f)
-        # output = sftp_client.getfo(open(source_path, 'wb'), destination_path)
     except (IOError, PermissionError) as e:
         print(e)
 

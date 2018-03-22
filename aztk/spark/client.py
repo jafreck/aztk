@@ -274,9 +274,9 @@ class Client(BaseClient):
         for job in jobs:
             self.wait_until_job_finished(job)
 
-    def run_cluster_diagnostics(self, cluster_id, path):
+    def run_cluster_diagnostics(self, cluster_id, output_directory):
         try:
-            output = cluster_diagnostic_helper.run(self, cluster_id, path)
+            output = cluster_diagnostic_helper.run(self, cluster_id, output_directory)
             return output
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
