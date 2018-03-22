@@ -155,7 +155,8 @@ class Client(BaseClient):
 
     def cluster_copy(self, cluster_id: str, source_path: str, destination_path: str, host=False, get=False):
         try:
-            return self.__cluster_copy(cluster_id, source_path, destination_path, container_name='spark' if not host else None, get=get)
+            container_name = None if host else 'spark'
+            return self.__cluster_copy(cluster_id, source_path, destination_path, container_name=container_name, get=get)
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
 
