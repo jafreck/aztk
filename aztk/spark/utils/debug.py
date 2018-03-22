@@ -2,13 +2,14 @@
     Diagnostic program that runs on each node in the cluster
     This program must be run with sudo
 """
-import os
 import io
 import json
+import os
 import socket
-from subprocess import check_output, STDOUT, CalledProcessError
-from zipfile import ZipFile, ZIP_DEFLATED
 import tarfile
+from subprocess import STDOUT, CalledProcessError, check_output
+from zipfile import ZIP_DEFLATED, ZipFile
+
 import docker
 
 
