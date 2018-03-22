@@ -88,7 +88,8 @@ def get_docker_containers(docker_client):
             logs.append(get_docker_process_status(container))
             if container.name == "spark": #TODO: find a more robust way to get specific info off specific containers
                 logs.append(get_container_aztk_script(container))
-                logs.append(get_spark_logs(container))
+                # logs.append(get_spark_logs(container))
+                [logs.append(tup) for tup in get_spark_logs(container)]
 
         logs.append(("docker-containers.txt", container_attrs))
         return logs
@@ -123,7 +124,15 @@ def get_spark_logs(container):
     data = b''
     try:
         stream, _ = container.get_archive(spark_logs_path) # second item is stat info
-        data = b''.join([item for item in stream])
+        data = io.BytesIO(b''.join([item for item in stream]))
+        tarf = tarfile.open(fileobj=data)
+        logs = []
+        for member in tarf.getnames():
+            print("MEMBER:", member)
+            file_bytes = tarf.extractfile(member).read()
+            logs.append(member, file_bytes)
+
+
         return (container.name + "/" + "spark-logs.tar", data)
     except docker.errors.APIError as e:
         return (container.name + "/" + "spark-logs.err", e.__str__())
