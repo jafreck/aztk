@@ -88,12 +88,14 @@ def start_history_server():
     # configure the history server
     spark_event_log_enabled_key = 'spark.eventLog.enabled'
     spark_event_log_directory_key = 'spark.eventLog.dir'
+    spark_history_fs_log_directory = 'spark.history.fs.logDirectory'
     path_to_spark_defaults_conf = os.path.join(spark_home, 'conf/spark-defaults.conf')
     properties = parse_configuration_file(path_to_spark_defaults_conf)
+    required_keys = [spark_event_log_directory_key, spark_history_fs_log_directory]
 
     # only enable the history server if it was enabled in the configuration file
     if properties and spark_event_log_enabled_key in properties:
-        if spark_event_log_directory_key in properties:
+        if all(key in properties for key in required_keys):
             configure_history_server_log_path(properties[spark_event_log_directory_key])
 
         exe = os.path.join(spark_home, "sbin", "start-history-server.sh")
