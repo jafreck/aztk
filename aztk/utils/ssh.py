@@ -68,14 +68,17 @@ async def clus_exec_command(command, username, nodes, ports=None, ssh_key=None, 
 
 
 def copy_from_node(source_path, destination_path, username, hostname, port, ssh_key=None, password=None, container_name=None):
-    print("running copy from node!")
     client = connect(hostname=hostname, port=port, username=username, password=password, pkey=ssh_key)
     sftp_client = client.open_sftp()
     output = None
     try:
-        output = sftp_client.get(source_path, destination_path)
+        with open(destination_path + str(port), 'wb') as f:
+            sftp_client.getfo(source_path, f)
+        # output = sftp_client.getfo(open(source_path, 'wb'), destination_path)
     except (IOError, PermissionError) as e:
         print(e)
+
+    sftp_client.close()
 
     client.close()
     return output
@@ -100,6 +103,7 @@ def node_copy(source_path, destination_path, username, hostname, port, ssh_key=N
     except (IOError, PermissionError) as e:
         print(e)
 
+    sftp_client.close()
     client.close()
     #TODO: progress bar
 
