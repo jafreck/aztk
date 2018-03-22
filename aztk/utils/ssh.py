@@ -67,24 +67,22 @@ async def clus_exec_command(command, username, nodes, ports=None, ssh_key=None, 
     )
 
 
-def copy_from_node(source_path, destination_path, username, hostname, port, ssh_key=None, password=None, container_name=None):
+def copy_from_node(node_id, source_path, destination_path, username, hostname, port, ssh_key=None, password=None, container_name=None):
     client = connect(hostname=hostname, port=port, username=username, password=password, pkey=ssh_key)
     sftp_client = client.open_sftp()
-    output = None
     try:
-        destination_path = os.path.join(os.path.dirname(destination_path), str(port), os.path.basename(destination_path))
+        destination_path = os.path.join(os.path.dirname(destination_path), node_id, os.path.basename(destination_path))
         os.makedirs(os.path.dirname(destination_path), exist_ok=True)
         with open(destination_path, 'wb') as f: #SpooledTemporaryFile instead??
             sftp_client.getfo(source_path, f)
+            return f
     except (IOError, PermissionError) as e:
         print(e)
+    finally:
+        sftp_client.close()
+        client.close()
 
-    sftp_client.close()
-
-    client.close()
-    return output
-
-def node_copy(source_path, destination_path, username, hostname, port, ssh_key=None, password=None, container_name=None):
+def node_copy(node_id, source_path, destination_path, username, hostname, port, ssh_key=None, password=None, container_name=None):
     client = connect(hostname=hostname, port=port, username=username, password=password, pkey=ssh_key)
     sftp_client = client.open_sftp()
 
@@ -113,12 +111,13 @@ async def clus_copy(username, nodes, source_path, destination_path, ssh_key=None
     await asyncio.gather(
         *[asyncio.get_event_loop().run_in_executor(ThreadPoolExecutor(),
                                                    copy_from_node if get else node_copy,
+                                                   node.id,
                                                    source_path,
                                                    destination_path,
                                                    username,
-                                                   node.ip_address,
-                                                   node.port,
+                                                   node_rls.ip_address,
+                                                   node_rls.port,
                                                    ssh_key,
                                                    password,
-                                                   container_name) for node in nodes]
+                                                   container_name) for node, node_rls in nodes]
     )

@@ -8,17 +8,19 @@ def run(spark_client, cluster_id, output_directory):
     # copy debug program to each node
     spark_client.cluster_copy(cluster_id, os.path.abspath("./aztk/spark/utils/debug.py"), "/tmp/debug.py", host=True)
     ssh_cmd = _build_diagnostic_ssh_command()
-    output = spark_client.cluster_run(cluster_id, ssh_cmd, host=True)
+    run_output = spark_client.cluster_run(cluster_id, ssh_cmd, host=True)
     local_path = os.path.join(os.path.abspath(output_directory), "debug", "debug.zip") #TODO: add timestamp
-    print("run localpath", local_path)
     remote_path = "/tmp/debug.zip"
     output = spark_client.cluster_copy(cluster_id, remote_path, local_path, host=True, get=True)
+    # write run output to debug/ directory
+    with open(os.path.join(os.path.dirname(local_path), "debug-output.txt"), 'w') as f:
+        [f.write(line + '\n') for node_output in run_output for line in node_output]
     return output
 
 
 def _build_diagnostic_ssh_command():
     return "sudo rm -rf /tmp/debug.zip; "\
            "sudo apt-get install -y python3-pip; "\
-           "pip3 install --upgrade pip; "\
-           "pip3 install docker; "\
-           "sudo python3 /tmp/debug.py 2>&1 > /tmp/debug-output.txt"
+           "sudo -H pip3 install --upgrade pip; "\
+           "sudo -H pip3 install docker; "\
+           "sudo python3 /tmp/debug.py"
