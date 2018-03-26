@@ -89,6 +89,7 @@ def get_docker_containers(docker_client):
             if container.name == "spark": #TODO: find a more robust way to get specific info off specific containers
                 logs.extend(get_container_aztk_script(container))
                 logs.extend(get_spark_logs(container))
+                logs.extend(get_spark_app_logs(container))
 
         logs.append(("docker-containers.txt", container_attrs))
         return logs
@@ -126,10 +127,10 @@ def get_spark_logs(container):
         return [(container.name + "/" + "spark-logs.err", e.__str__())]
 
 
-def get_spark_app_logs(contianer):
+def get_spark_app_logs(container):
     spark_app_logs_path = "/home/spark-current/work"
     try:
-        stream, _ = container.get_archive(spark_logs_path)
+        stream, _ = container.get_archive(spark_app_logs_path)
         return extract_tar_in_memory(container, stream)
     except docker.errors.APIError as e:
         return [(container.name + "/" + "spark-work-logs.err", e.__str__())]
