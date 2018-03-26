@@ -19,6 +19,7 @@ class PluginManager:
         jupyter=plugins.JupyterPlugin,
         rstudio_server=plugins.RStudioServerPlugin,
         hdfs=plugins.HDFSPlugin,
+        spark_ui_proxy=plugins.SparkUIProxyPlugin,
     )
 
     def __init__(self):
