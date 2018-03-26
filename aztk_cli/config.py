@@ -309,8 +309,8 @@ class JobConfig():
         self.spark_configuration = None
         self.vm_size = None
         self.docker_repo = None
-        self.max_dedicated_nodes = None
-        self.max_low_pri_nodes = None
+        self.max_dedicated_nodes = 0
+        self.max_low_pri_nodes = 0
         self.spark_defaults_conf = None
         self.spark_env_sh = None
         self.core_site_xml = None
@@ -327,8 +327,11 @@ class JobConfig():
         if cluster_configuration:
             self.vm_size = cluster_configuration.get('vm_size')
             self.docker_repo = cluster_configuration.get('docker_repo')
-            self.max_dedicated_nodes = cluster_configuration.get('size')
-            self.max_low_pri_nodes = cluster_configuration.get('size_low_pri')
+            if cluster_configuration.get('size') is not None:
+                self.max_dedicated_nodes = cluster_configuration.get('size')
+            if cluster_configuration.get('size_low_pri') is not None:
+                print("max_low_pri nodes is None")
+                self.max_low_pri_nodes = cluster_configuration.get('size_low_pri')
             self.custom_scripts = cluster_configuration.get('custom_scripts')
             self.subnet_id = cluster_configuration.get('subnet_id')
             self.worker_on_master = cluster_configuration.get("worker_on_master")
