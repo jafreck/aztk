@@ -13,7 +13,7 @@ def run(spark_client, cluster_id, output_directory):
     remote_path = "/tmp/debug.zip"
     output = spark_client.cluster_copy(cluster_id, remote_path, local_path, host=True, get=True)
     # write run output to debug/ directory
-    with open(os.path.join(os.path.dirname(local_path), "debug-output.txt"), 'w') as f:
+    with open(os.path.join(os.path.dirname(local_path), "debug-output.txt"), 'w', encoding="UTF-8") as f:
         [f.write(line + '\n') for node_output in run_output for line in node_output]
     return output
 

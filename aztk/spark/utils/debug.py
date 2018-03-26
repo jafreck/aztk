@@ -112,21 +112,27 @@ def get_container_aztk_script(container):
     aztk_path = "/mnt/batch/tasks/startup/wd"
     try:
         stream, _ = container.get_archive(aztk_path) # second item is stat info
-        data = io.BytesIO(b''.join([item for item in stream]))
-        return extract_tar_in_memory(container, data)
+        return extract_tar_in_memory(container, stream)
     except docker.errors.APIError as e:
         return (container.name + "/" + "aztk-scripts.err", e.__str__())
 
 
 def get_spark_logs(container):
     spark_logs_path = "/home/spark-current/logs"
-    data = b''
     try:
         stream, _ = container.get_archive(spark_logs_path) # second item is stat info
-        data = io.BytesIO(b''.join([item for item in stream]))
-        return extract_tar_in_memory(container, data)
+        return extract_tar_in_memory(container, stream)
     except docker.errors.APIError as e:
         return [(container.name + "/" + "spark-logs.err", e.__str__())]
+
+
+def get_spark_app_logs(contianer):
+    spark_app_logs_path = "/home/spark-current/work"
+    try:
+        stream, _ = container.get_archive(spark_logs_path)
+        return extract_tar_in_memory(container, stream)
+    except docker.errors.APIError as e:
+        return [(container.name + "/" + "spark-work-logs.err", e.__str__())]
 
 
 def filter_members(members):
@@ -139,6 +145,7 @@ def filter_members(members):
 
 
 def extract_tar_in_memory(container, data):
+    data = io.BytesIO(b''.join([item for item in data]))
     tarf = tarfile.open(fileobj=data)
     logs = []
     for member in filter_members(tarf):
