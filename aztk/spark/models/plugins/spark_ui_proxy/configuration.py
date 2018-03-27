@@ -19,6 +19,7 @@ class SparkUIProxyPlugin(PluginConfiguration):
             ],
             run_on=PluginRunTarget.Master,
             execute="spark_ui_proxy.sh",
+            args=["localhost:8080", "9999"],
             files=[
                 PluginFile("spark_ui_proxy.sh", os.path.join(dir_path, "spark_ui_proxy.sh")),
                 PluginFile("spark_ui_proxy.py", os.path.join(dir_path, "spark_ui_proxy.py")),
