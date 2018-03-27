@@ -28,7 +28,8 @@ done
 echo "Starting setup using Docker"
 
 $(pyenv root)/versions/$AZTK_PYTHON_VERSION/bin/pip install -r $(dirname $0)/requirements.txt
-export PYTHONPATH=$PYTHONPATH:$DOCKER_WORKING_DIR
+
+echo 'export PYTHONPATH=$PYTHONPATH:$DOCKER_WORKING_DIR' >> ~/.bashrc
 
 echo "Running main.py script"
 $(pyenv root)/versions/$AZTK_PYTHON_VERSION/bin/python $(dirname $0)/main.py install
