@@ -14,9 +14,9 @@ def setup_parser(parser: argparse.ArgumentParser):
                         dest='app_name',
                         required=True,
                         help='The unique id of your job name')
-    
+
     output_group = parser.add_mutually_exclusive_group()
-    
+
     output_group.add_argument('--output',
                               help='Path to the file you wish to output to. If not \
                                     specified, output is printed to stdout')
