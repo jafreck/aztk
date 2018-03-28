@@ -202,10 +202,9 @@ def start_history_server():
     if properties:
         if all(key in properties for key in required_keys):
             configure_history_server_log_path(properties[spark_history_fs_log_directory])
-        exe = os.path.join(spark_home, "sbin", "start-history-server.sh")
-        cmd = [exe]
-        print("Starting history server")
-        call(cmd)
+            exe = os.path.join(spark_home, "sbin", "start-history-server.sh")
+            print("Starting history server")
+            call([exe])
 
 
 def configure_history_server_log_path(path_to_log_file):
