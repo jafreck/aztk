@@ -1,3 +1,4 @@
+import os
 import argparse
 import typing
 from aztk_cli import utils, config, log
@@ -63,6 +64,10 @@ def setup_parser(parser: argparse.ArgumentParser):
                         help='Number of times the Spark job may be retried \
                               if there is a failure')
 
+    parser.add_argument('--output',
+                        help='Path to the file you wish to output to. If not \
+                              specified, output is printed to stdout')
+
     parser.add_argument('app',
                         help='App jar OR python file to execute. Use absolute \
                               path to reference file.')
@@ -72,6 +77,9 @@ def setup_parser(parser: argparse.ArgumentParser):
 
 
 def execute(args: typing.NamedTuple):
+    if not args.wait and args.output:
+        raise aztk.error.AztkError("--output flag requires --wait flag")
+
     spark_client = aztk.spark.Client(config.load_aztk_secrets())
     jars = []
     py_files = []
@@ -140,4 +148,13 @@ def execute(args: typing.NamedTuple):
     )
 
     if args.wait:
-        utils.stream_logs(client=spark_client, cluster_id=args.cluster_id, application_name=args.name)
+        if not args.output:
+            utils.stream_logs(client=spark_client, cluster_id=args.cluster_id, application_name=args.name)
+        else:
+            spinner = utils.Spinner()
+            spinner.start()
+            spark_client.wait_until_application_done(cluster_id=args.cluster_id, task_id=args.name)
+            application_log = spark_client.get_application_log(cluster_id=args.cluster_id, application_name=args.name)
+            with open(os.path.abspath(os.path.expanduser(args.output)), "w", encoding="UTF-8") as f:
+                f.write(application_log.log)
+            spinner.stop()
