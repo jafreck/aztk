@@ -11,7 +11,7 @@ This is the default cluster configuration:
 # id: <id of the cluster to be created>
 id: spark_cluster
 
-# vm_size: <vm-size, see available options here: https://azure.microsoft.com/en-us/pricing/details/virtual-machines/linux/>
+# vm_size: <vm-size, see available options here: https://azure.microsoft.com/pricing/details/batch//>
 vm_size: standard_a2
 
 # size: <number of dedicated nodes in the cluster, not that clusters must contain all dedicated or all low priority nodes>
