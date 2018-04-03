@@ -7,7 +7,7 @@ import datetime
 from typing import List
 import azure.storage.blob as blob
 import azure.batch.models as batch_models
-from command_builder import CommandBuilder
+from aztk.utils.command_builder import CommandBuilder
 from core import config
 
 # limit azure.storage logging
@@ -116,6 +116,9 @@ def __app_submit_cmd(
     spark_submit_cmd.add_argument(
         os.environ['AZ_BATCH_TASK_WORKING_DIR'] + '/' + app + ' ' +
         ' '.join(['\'' + str(app_arg) + '\'' for app_arg in (app_args or [])]))
+
+    with open("spark-submit.txt", mode="w", encoding="UTF-8") as stream:
+        stream.write(spark_submit_cmd.to_str())
 
     return spark_submit_cmd
 
