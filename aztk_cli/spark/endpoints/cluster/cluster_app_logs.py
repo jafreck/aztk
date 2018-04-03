@@ -1,9 +1,10 @@
-import os
 import argparse
+import os
 import typing
-import aztk
 
-from aztk_cli import utils, config
+import aztk
+from aztk_cli import config, utils
+
 
 def setup_parser(parser: argparse.ArgumentParser):
     parser.add_argument('--id',

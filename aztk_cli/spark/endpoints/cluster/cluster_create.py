@@ -1,11 +1,11 @@
-import os
 import argparse
+import os
 import typing
+
 import aztk.spark
 from aztk.spark.models import ClusterConfiguration, UserConfiguration
-from aztk_cli import log
+from aztk_cli import config, log, utils
 from aztk_cli.config import load_aztk_spark_config
-from aztk_cli import utils, config
 
 
 def setup_parser(parser: argparse.ArgumentParser):
@@ -85,4 +85,3 @@ def execute(args: typing.NamedTuple):
         log.info("Cluster %s created successfully.", cluster.id)
     else:
         log.info("Cluster %s is being provisioned.", cluster.id)
-
