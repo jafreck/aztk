@@ -32,10 +32,8 @@ def execute(args: typing.NamedTuple):
     else:
         app_log = spark_client.get_application_log(cluster_id=args.cluster_id, application_name=args.app_name)
         if args.output:
-            spinner = utils.Spinner()
-            spinner.start()
-            with open(os.path.abspath(os.path.expanduser(args.output)), "w", encoding="UTF-8") as f:
-                f.write(app_log.log)
-            spinner.stop()
+            with utils.Spinner():
+                with open(os.path.abspath(os.path.expanduser(args.output)), "w", encoding="UTF-8") as f:
+                    f.write(app_log.log)
         else:
             print(app_log.log)

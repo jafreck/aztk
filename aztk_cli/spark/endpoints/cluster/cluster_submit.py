@@ -152,10 +152,8 @@ def execute(args: typing.NamedTuple):
         if not args.output:
             utils.stream_logs(client=spark_client, cluster_id=args.cluster_id, application_name=args.name)
         else:
-            spinner = utils.Spinner()
-            spinner.start()
-            spark_client.wait_until_application_done(cluster_id=args.cluster_id, task_id=args.name)
-            application_log = spark_client.get_application_log(cluster_id=args.cluster_id, application_name=args.name)
-            with open(os.path.abspath(os.path.expanduser(args.output)), "w", encoding="UTF-8") as f:
-                f.write(application_log.log)
-            spinner.stop()
+            with utils.Spinner():
+                spark_client.wait_until_application_done(cluster_id=args.cluster_id, task_id=args.name)
+                application_log = spark_client.get_application_log(cluster_id=args.cluster_id, application_name=args.name)
+                with open(os.path.abspath(os.path.expanduser(args.output)), "w", encoding="UTF-8") as f:
+                    f.write(application_log.log)
