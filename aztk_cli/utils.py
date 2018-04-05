@@ -134,7 +134,8 @@ def ssh_in_master(
         jobhistoryui: str = None,
         ports=None,
         host: bool = False,
-        connect: bool = True):
+        connect: bool = True,
+        internal: bool = False):
     """
         SSH into head node of spark-app
         :param cluster_id: Id of the cluster to ssh in
@@ -156,6 +157,7 @@ def ssh_in_master(
 
     # get remote login settings for the user
     remote_login_settings = client.get_remote_login_settings(cluster.id, master_node_id)
+    master_internal_node_ip = [node.ip_address for node in cluster.nodes if node.id == master_node_id][0]
     master_node_ip = remote_login_settings.ip_address
     master_node_port = remote_login_settings.port
 
@@ -190,8 +192,11 @@ def ssh_in_master(
                     ssh_command.add_option("-L", "{0}:localhost:{1}".format(port.public_port, port.internal))
 
     user = username if username is not None else '<username>'
-    ssh_command.add_argument(
-        "{0}@{1} -p {2}".format(user, master_node_ip, master_node_port))
+    if internal:
+        ssh_command.add_argument("{0}@{1}".format(user, master_internal_node_ip))
+    else:
+        ssh_command.add_argument(
+            "{0}@{1} -p {2}".format(user, master_node_ip, master_node_port))
 
     if host is False:
         ssh_command.add_argument("\'sudo docker exec -it spark /bin/bash\'")
