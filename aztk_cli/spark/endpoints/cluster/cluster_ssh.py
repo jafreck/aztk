@@ -98,7 +98,7 @@ def print_plugin_ports(cluster_config: ClusterConfiguration):
         if has_ports:
             log.info("plugins:")
         for plugin in plugin_ports:
-            if len(plugin_ports[plugin]) > 0:
+            if plugin_ports[plugin]:
                 log.info("  " + plugin)
                 for port in plugin_ports[plugin]:
                     label = "    - open"
