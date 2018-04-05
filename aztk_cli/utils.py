@@ -121,7 +121,7 @@ def stream_logs(client, cluster_id, application_name):
             current_bytes=current_bytes)
         print(app_logs.log, end="")
         if app_logs.application_state == 'completed':
-            break
+            return app_logs.exit_code
         current_bytes = app_logs.total_bytes
         time.sleep(3)
 
@@ -378,6 +378,12 @@ class Spinner:
     def __init__(self, delay=None):
         self.spinner_generator = self.spinning_cursor()
         if delay and float(delay): self.delay = delay
+
+    def __enter__(self):
+        return self.start()
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        return self.stop()
 
     def spinner_task(self):
         while self.busy:
