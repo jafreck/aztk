@@ -19,7 +19,9 @@ def __app_cmd():
     docker_exec.add_argument("-i")
     docker_exec.add_option("-e", "AZ_BATCH_TASK_WORKING_DIR=$AZ_BATCH_TASK_WORKING_DIR")
     docker_exec.add_option("-e", "AZ_BATCH_JOB_ID=$AZ_BATCH_JOB_ID")
-    docker_exec.add_argument("spark /bin/bash >> output.log 2>&1 -c \"python \$DOCKER_WORKING_DIR/job_submission.py\"")
+    docker_exec.add_argument("spark /bin/bash >> output.log 2>&1 -c \""\
+                             "source ~/.bashrc; "\
+                             "python \$DOCKER_WORKING_DIR/aztk/node_scripts/job_submission.py\"")
     return docker_exec.to_str()
 
 
@@ -122,7 +124,7 @@ def stop(spark_client, job_id):
     spark_client.batch_client.job_schedule.terminate(job_id)
 
 
-def delete(spark_client, job_id):
+def delete(spark_client, job_id, keep_logs: bool = False):
     recent_run_job = __get_recent_job(spark_client, job_id)
     deleted_job_or_job_schedule = False
     # delete job
@@ -137,6 +139,11 @@ def delete(spark_client, job_id):
         deleted_job_or_job_schedule = True
     except batch_models.batch_error.BatchErrorException:
         pass
+
+    # delete storage container
+    if keep_logs:
+        cluster_data = spark_client._get_cluster_data(job_id)
+        cluster_data.delete_container(job_id)
 
     return deleted_job_or_job_schedule
 

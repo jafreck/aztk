@@ -4,23 +4,26 @@
 # Usage:
 # setup_node.sh [container_name] [gpu_enabled] [docker_repo] [docker_cmd]
 
-
 container_name=$1
 gpu_enabled=$2
 repo_name=$3
 docker_run_cmd=$4
 
+echo "Installing pre-reqs"
 apt-get -y install linux-image-extra-$(uname -r) linux-image-extra-virtual
 apt-get -y install apt-transport-https
 apt-get -y install curl
 apt-get -y install ca-certificates
 apt-get -y install software-properties-common
+echo "Done installing pre-reqs"
 
 # Install docker
+echo "Installing Docker"
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
 add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
 apt-get -y update
 apt-get -y install docker-ce
+echo "Done installing Docker"
 
 if [ $gpu_enabled == "True" ]; then
     echo "running nvidia install"
@@ -44,7 +47,7 @@ echo "Pulling $repo_name"
 
 # Unzip resource files and set permissions
 apt-get -y install unzip
-chmod 777 $AZ_BATCH_TASK_WORKING_DIR/docker_main.sh
+chmod 777 $AZ_BATCH_TASK_WORKING_DIR/aztk/node_scripts/docker_main.sh
 
 # Check docker is running
 docker info > /dev/null 2>&1
@@ -68,7 +71,7 @@ else
     done;
 
     # wait until container setup is complete
-    docker exec spark /bin/bash -c 'python $DOCKER_WORKING_DIR/wait_until_setup_complete.py'
+    docker exec spark /bin/bash -c 'python $DOCKER_WORKING_DIR/aztk/node_scripts/wait_until_setup_complete.py'
 
     # Setup symbolic link for the docker logs
     docker_log=$(docker inspect --format='{{.LogPath}}' $container_name)
