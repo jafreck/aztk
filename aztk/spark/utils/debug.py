@@ -10,7 +10,7 @@ import tarfile
 from subprocess import STDOUT, CalledProcessError, check_output
 from zipfile import ZIP_DEFLATED, ZipFile
 
-import docker
+import docker # pylint: disable=import-error
 
 
 def main():
