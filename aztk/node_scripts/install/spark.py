@@ -115,7 +115,6 @@ def start_spark_worker():
     call(cmd)
 
 
-
 def start_shuffle_service():
     exe = os.path.join(spark_home, "sbin", "start-shuffle-service.sh")
     print("Starting the shuffle service with {}".format(exe))
