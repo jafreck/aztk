@@ -233,7 +233,7 @@ class Client:
         pool, nodes = self.__get_pool_details(cluster_id)
         nodes = [node for node in nodes]
         if internal:
-            cluster_nodes = [models.RemoteLogin(ip_address=node.ip_address, port=None) for node in nodes]
+            cluster_nodes = [models.RemoteLogin(ip_address=node.ip_address, port="22") for node in nodes]
         else:
             cluster_nodes = [self.__get_remote_login_settings(pool.id, node.id) for node in nodes]
         try:
@@ -242,8 +242,7 @@ class Client:
                                                                                   container_name,
                                                                                   'aztk',
                                                                                   cluster_nodes,
-                                                                                  ssh_key=ssh_key.exportKey().decode('utf-8'),
-                                                                                  internal=internal))
+                                                                                  ssh_key=ssh_key.exportKey().decode('utf-8')))
         except OSError as exc:
             raise exc
         finally:
@@ -253,7 +252,7 @@ class Client:
         pool, nodes = self.__get_pool_details(cluster_id)
         nodes = [node for node in nodes]
         if internal:
-            cluster_nodes = [models.RemoteLogin(ip_address=node.ip_address, port=None) for node in nodes]
+            cluster_nodes = [models.RemoteLogin(ip_address=node.ip_address, port="22") for node in nodes]
         else:
             cluster_nodes = [self.__get_remote_login_settings(pool.id, node.id) for node in nodes]
         try:
@@ -263,8 +262,7 @@ class Client:
                                                                           nodes=cluster_nodes,
                                                                           source_path=source_path,
                                                                           destination_path=destination_path,
-                                                                          ssh_key=ssh_key.exportKey().decode('utf-8'),
-                                                                          internal=internal))
+                                                                          ssh_key=ssh_key.exportKey().decode('utf-8')))
             self.__delete_user_on_pool('aztk', pool.id, nodes)
         except (OSError, batch_error.BatchErrorException) as exc:
             raise exc
