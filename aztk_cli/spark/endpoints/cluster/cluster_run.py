@@ -10,6 +10,8 @@ def setup_parser(parser: argparse.ArgumentParser):
                         dest='cluster_id',
                         required=True,
                         help='The unique id of your spark cluster')
+    parser.add_argument('command',
+                        help='The command to run on your spark cluster')
     parser.add_argument('--internal', action='store_true',
                         help='Connect using the local IP of the master node. Only use if using a VPN.')
     parser.set_defaults(internal=False)
