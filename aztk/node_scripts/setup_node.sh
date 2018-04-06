@@ -17,6 +17,9 @@ apt-get -y install ca-certificates
 apt-get -y install software-properties-common
 echo "Done installing pre-reqs"
 
+# Setup hostname
+echo $HOSTNAME $(hostname -I | awk '{print $1}') >> /etc/hosts
+
 # Install docker
 echo "Installing Docker"
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
