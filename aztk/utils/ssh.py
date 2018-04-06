@@ -44,7 +44,6 @@ def node_exec_command(command, container_name, username, hostname, port, ssh_key
     if not port:
         # if port if None, connecting using internal IP using port 22
         port = "22"
-    print("connecting to node using: ", hostname, ":", port)
     client = connect(hostname=hostname, port=port, username=username, password=password, pkey=ssh_key)
     docker_exec = 'sudo docker exec 2>&1 -t {0} /bin/bash -c \'set -e; set -o pipefail; {1}; wait\''.format(container_name, command)
     stdin, stdout, stderr = client.exec_command(docker_exec, get_pty=True)
