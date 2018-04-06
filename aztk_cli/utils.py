@@ -33,7 +33,7 @@ def get_ssh_key_or_prompt(ssh_key, username, password, secrets_config):
             raise error.AztkError("Failed to get valid password, cannot add user to cluster. It is recommended that you provide a ssh public key in .aztk/secrets.yaml. Or provide an ssh-key or password with commnad line parameters (--ssh-key or --password). You may also run the 'aztk spark cluster add-user' command to add a user to this cluster.")
     return ssh_key, password
 
-def print_cluster(client, cluster: models.Cluster):
+def print_cluster(client, cluster: models.Cluster, internal: bool = False):
     node_count = __pretty_node_count(cluster)
 
     log.info("")
@@ -48,18 +48,25 @@ def print_cluster(client, cluster: models.Cluster):
 
     print_format = '|{:^36}| {:^19} | {:^21}| {:^10} | {:^8} |'
     print_format_underline = '|{:-^36}|{:-^21}|{:-^22}|{:-^12}|{:-^10}|'
-    log.info(print_format.format("Nodes", "State", "IP:Port", "Dedicated", "Master"))
+    if internal:
+        log.info(print_format.format("Nodes", "State", "IP", "Dedicated", "Master"))
+    else:
+        log.info(print_format.format("Nodes", "State", "IP:Port", "Dedicated", "Master"))
     log.info(print_format_underline.format('', '', '', '', ''))
 
     if not cluster.nodes:
         return
     for node in cluster.nodes:
         remote_login_settings = client.get_remote_login_settings(cluster.id, node.id)
+        if internal:
+            ip = node.ip_address
+        else:
+            ip ='{}:{}'.format(remote_login_settings.ip_address, remote_login_settings.port)
         log.info(
             print_format.format(
                 node.id,
                 node.state.value,
-                '{}:{}'.format(remote_login_settings.ip_address, remote_login_settings.port),
+                ip,
                 "*" if node.is_dedicated else '',
                 '*' if node.id == cluster.master_node_id else '')
         )
