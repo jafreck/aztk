@@ -25,6 +25,9 @@ apt-get -y update
 apt-get -y install docker-ce
 echo "Done installing Docker"
 
+# Setup hostname
+echo $(hostname -I | awk '{print $1}') $HOSTNAME >> /etc/hosts
+
 if [ $gpu_enabled == "True" ]; then
     echo "running nvidia install"
     sudo apt-get -y install nvidia-384
