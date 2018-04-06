@@ -242,8 +242,8 @@ class Client:
                                                                                   container_name,
                                                                                   'aztk',
                                                                                   cluster_nodes,
-                                                                                  ssh_key=ssh_key.exportKey().decode('utf-8')),
-                                                                                  internal=internal)
+                                                                                  ssh_key=ssh_key.exportKey().decode('utf-8'),
+                                                                                  internal=internal))
         except OSError as exc:
             raise exc
         finally:
@@ -263,7 +263,8 @@ class Client:
                                                                           nodes=cluster_nodes,
                                                                           source_path=source_path,
                                                                           destination_path=destination_path,
-                                                                          ssh_key=ssh_key.exportKey().decode('utf-8')))
+                                                                          ssh_key=ssh_key.exportKey().decode('utf-8'),
+                                                                          internal=internal))
             self.__delete_user_on_pool('aztk', pool.id, nodes)
         except (OSError, batch_error.BatchErrorException) as exc:
             raise exc
