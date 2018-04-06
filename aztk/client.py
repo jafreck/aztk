@@ -229,17 +229,21 @@ class Client:
             concurrent.futures.wait(futures)
 
 
-    def __cluster_run(self, cluster_id, container_name, command):
+    def __cluster_run(self, cluster_id, container_name, command, internal):
         pool, nodes = self.__get_pool_details(cluster_id)
         nodes = [node for node in nodes]
-        cluster_nodes = [self.__get_remote_login_settings(pool.id, node.id) for node in nodes]
+        if internal:
+            cluster_nodes = [models.RemoteLogin(ip_address=node.ip_address, port=None) for node in nodes]
+        else:
+            cluster_nodes = [self.__get_remote_login_settings(pool.id, node.id) for node in nodes]
         try:
             ssh_key = self.__create_user_on_pool('aztk', pool.id, nodes)
             asyncio.get_event_loop().run_until_complete(ssh_lib.clus_exec_command(command,
                                                                                   container_name,
                                                                                   'aztk',
                                                                                   cluster_nodes,
-                                                                                  ssh_key=ssh_key.exportKey().decode('utf-8')))
+                                                                                  ssh_key=ssh_key.exportKey().decode('utf-8')),
+                                                                                  internal=internal)
         except OSError as exc:
             raise exc
         finally:

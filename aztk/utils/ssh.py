@@ -41,6 +41,9 @@ def connect(hostname,
 
 
 def node_exec_command(command, container_name, username, hostname, port, ssh_key=None, password=None):
+    if not port:
+        # if port if None, connecting using internal IP using port 22
+        port = "22"
     client = connect(hostname=hostname, port=port, username=username, password=password, pkey=ssh_key)
     docker_exec = 'sudo docker exec 2>&1 -t {0} /bin/bash -c \'set -e; set -o pipefail; {1}; wait\''.format(container_name, command)
     stdin, stdout, stderr = client.exec_command(docker_exec, get_pty=True)
@@ -48,7 +51,7 @@ def node_exec_command(command, container_name, username, hostname, port, ssh_key
     client.close()
 
 
-async def clus_exec_command(command, container_name, username, nodes, ports=None, ssh_key=None, password=None):
+async def clus_exec_command(command, container_name, username, nodes, ports=None, ssh_key=None, password=None, internal=False):
     await asyncio.wait(
         [asyncio.get_event_loop().run_in_executor(ThreadPoolExecutor(),
                                                   node_exec_command,
@@ -58,7 +61,8 @@ async def clus_exec_command(command, container_name, username, nodes, ports=None
                                                   node.ip_address,
                                                   node.port,
                                                   ssh_key,
-                                                  password) for node in nodes]
+                                                  password,
+                                                  internal) for node in nodes]
     )
 
 
