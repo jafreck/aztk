@@ -19,5 +19,5 @@ def setup_parser(parser: argparse.ArgumentParser):
 
 def execute(args: typing.NamedTuple):
     spark_client = aztk.spark.Client(config.load_aztk_secrets())
-    result = spark_client.cluster_run(args.cluster_id, args.command)
+    result = spark_client.cluster_run(args.cluster_id, args.command, args.internal)
     #TODO: pretty print result
