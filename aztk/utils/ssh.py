@@ -63,7 +63,6 @@ async def clus_exec_command(command, container_name, username, nodes, ports=None
 
 
 def node_copy(container_name, source_path, destination_path, username, hostname, port, ssh_key=None, password=None):
-    print("connecting with ", hostname, ",", port)
     client = connect(hostname=hostname, port=port, username=username, password=password, pkey=ssh_key)
     sftp_client = client.open_sftp()
 
