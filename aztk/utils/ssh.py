@@ -61,8 +61,7 @@ async def clus_exec_command(command, container_name, username, nodes, ports=None
                                                   node.ip_address,
                                                   node.port,
                                                   ssh_key,
-                                                  password,
-                                                  internal) for node in nodes]
+                                                  password) for node in nodes]
     )
 
 
