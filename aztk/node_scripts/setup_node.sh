@@ -25,8 +25,10 @@ apt-get -y update
 apt-get -y install docker-ce
 echo "Done installing Docker"
 
-# Setup hostname
-echo $(hostname -I | awk '{print $1}') $HOSTNAME >> /etc/hosts
+# set hostname in /etc/hosts if dns cannot resolve
+if ! host $HOSTNAME ; then
+    echo $(hostname -I | awk '{print $1}') $HOSTNAME >> /etc/hosts
+fi
 
 if [ $gpu_enabled == "True" ]; then
     echo "running nvidia install"
