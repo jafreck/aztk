@@ -1,11 +1,12 @@
 import argparse
 import typing
-from aztk_cli import log
-from aztk_cli import utils, config
-from aztk_cli.config import SshConfig
-import aztk
+
 import azure.batch.models.batch_error as batch_error
+
+import aztk
 from aztk.models import ClusterConfiguration
+from aztk_cli import config, log, utils
+from aztk_cli.config import SshConfig
 
 
 def setup_parser(parser: argparse.ArgumentParser):
@@ -13,9 +14,6 @@ def setup_parser(parser: argparse.ArgumentParser):
     parser.add_argument('--webui', help='Local port to port spark\'s master UI to')
     parser.add_argument('--jobui', help='Local port to port spark\'s job UI to')
     parser.add_argument('--jobhistoryui', help='Local port to port spark\'s job history UI to')
-    parser.add_argument('--jupyter', help='Local port to port jupyter to')
-    parser.add_argument('--namenodeui', help='Local port to port HDFS NameNode UI to')
-    parser.add_argument('--rstudioserver', help='Local port to port rstudio server to')
     parser.add_argument('-u', '--username', help='Username to spark cluster')
     parser.add_argument('--host', dest="host", action='store_true', help='Connect to the host of the Spark container')
     parser.add_argument(
@@ -43,9 +41,6 @@ def execute(args: typing.NamedTuple):
         job_ui_port=args.jobui,
         job_history_ui_port=args.jobhistoryui,
         web_ui_port=args.webui,
-        jupyter_port=args.jupyter,
-        name_node_ui_port=args.namenodeui,
-        rstudio_server_port=args.rstudioserver,
         host=args.host,
         connect=args.connect)
 
@@ -84,7 +79,6 @@ def execute(args: typing.NamedTuple):
 
 
 def print_plugin_ports(cluster_config: ClusterConfiguration):
-
     if cluster_config and cluster_config.plugins:
         plugins = cluster_config.plugins
         has_ports = False
@@ -95,8 +89,10 @@ def print_plugin_ports(cluster_config: ClusterConfiguration):
                 if port.expose_publicly:
                     has_ports = True
                     plugin_ports[plugin.name].append(port)
+        
         if has_ports:
             log.info("plugins:")
+
         for plugin in plugin_ports:
             if plugin_ports[plugin]:
                 log.info("  " + plugin)
