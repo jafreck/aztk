@@ -11,7 +11,7 @@ def run(spark_client, cluster_id, output_directory):
     run_output = spark_client.cluster_run(cluster_id, ssh_cmd, host=True)
     local_path = os.path.join(os.path.abspath(output_directory), "debug", "debug.zip")
     remote_path = "/tmp/debug.zip"
-    output = spark_client.cluster_copy(cluster_id, remote_path, local_path, host=True, get=True)
+    output = spark_client.cluster_download(cluster_id, remote_path, local_path, host=True)
     # write run output to debug/ directory
     with open(os.path.join(os.path.dirname(local_path), "debug-output.txt"), 'w', encoding="UTF-8") as f:
         [f.write(line + '\n') for node_id, result in run_output for line in result]

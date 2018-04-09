@@ -393,5 +393,8 @@ class Client:
     def cluster_copy(self, cluster_id, source_path, destination_path):
         raise NotImplementedError()
 
+    def cluster_download(self, cluster_id, source_path, destination_path):
+        raise NotImplementedError()
+
     def submit_job(self, job):
         raise NotImplementedError()
