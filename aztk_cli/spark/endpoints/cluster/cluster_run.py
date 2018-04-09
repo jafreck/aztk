@@ -20,8 +20,12 @@ def setup_parser(parser: argparse.ArgumentParser):
 def execute(args: typing.NamedTuple):
     spark_client = aztk.spark.Client(config.load_aztk_secrets())
     results = spark_client.cluster_run(args.cluster_id, args.command, args.internal)
-    for result in results:
-        print("---------------------------") #TODO: replace with nodename
-        for line in result:
-            print(line)
-    #TODO: pretty print result
+    [print_execute_result(node_id, result) for node_id, result in results]
+
+
+def print_execute_result(node_id, result):
+    print("-" * (len(node_id) + 6))
+    print("| ", node_id, " |")
+    print("-" * (len(node_id) + 6))
+    for line in result:
+        print(line)

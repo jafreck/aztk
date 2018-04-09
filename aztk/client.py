@@ -233,9 +233,9 @@ class Client:
         pool, nodes = self.__get_pool_details(cluster_id)
         nodes = [node for node in nodes]
         if internal:
-            cluster_nodes = [models.RemoteLogin(ip_address=node.ip_address, port="22") for node in nodes]
+            cluster_nodes = [(node, models.RemoteLogin(ip_address=node.ip_address, port="22")) for node in nodes]
         else:
-            cluster_nodes = [self.__get_remote_login_settings(pool.id, node.id) for node in nodes]
+            cluster_nodes = [(node, self.__get_remote_login_settings(pool.id, node.id)) for node in nodes]
         try:
             ssh_key = self.__create_user_on_pool('aztk', pool.id, nodes)
             output = asyncio.get_event_loop().run_until_complete(ssh_lib.clus_exec_command(command,

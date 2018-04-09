@@ -40,7 +40,7 @@ def connect(hostname,
     return client
 
 
-def node_exec_command(command, username, hostname, port, ssh_key=None, password=None, container_name=None):
+def node_exec_command(node_id, command, username, hostname, port, ssh_key=None, password=None, container_name=None):
     client = connect(hostname=hostname, port=port, username=username, password=password, pkey=ssh_key)
     if container_name:
         cmd = 'sudo docker exec 2>&1 -t {0} /bin/bash -c \'set -e; set -o pipefail; {1}; wait\''.format(container_name, command)
@@ -49,20 +49,21 @@ def node_exec_command(command, username, hostname, port, ssh_key=None, password=
     stdin, stdout, stderr = client.exec_command(cmd, get_pty=True)
     output = [line.decode('utf-8') for line in stdout.read().splitlines()]
     client.close()
-    return output
+    return (node_id, output)
 
 
 async def clus_exec_command(command, username, nodes, ports=None, ssh_key=None, password=None, container_name=None):
     return await asyncio.gather(
         *[asyncio.get_event_loop().run_in_executor(ThreadPoolExecutor(),
                                                    node_exec_command,
+                                                   node.id,
                                                    command,
                                                    username,
-                                                   node.ip_address,
-                                                   node.port,
+                                                   node_rls.ip_address,
+                                                   node_rls.port,
                                                    ssh_key,
                                                    password,
-                                                   container_name) for node in nodes]
+                                                   container_name) for node, node_rls in nodes]
     )
 
 
@@ -76,15 +77,15 @@ def copy_from_node(node_id, source_path, destination_path, username, hostname, p
             sftp_client.getfo(source_path, f)
             return f
     except (IOError, PermissionError) as e:
-        print(e)
+        raise e
     finally:
         sftp_client.close()
         client.close()
 
+
 def node_copy(node_id, source_path, destination_path, username, hostname, port, ssh_key=None, password=None, container_name=None):
     client = connect(hostname=hostname, port=port, username=username, password=password, pkey=ssh_key)
     sftp_client = client.open_sftp()
-
     try:
         if container_name:
             # put the file in /tmp on the host
@@ -93,21 +94,22 @@ def node_copy(node_id, source_path, destination_path, username, hostname, port, 
             # move to correct destination on container
             docker_command = 'sudo docker cp {0} {1}:{2}'.format(tmp_file, container_name, destination_path)
             _, stdout, _ = client.exec_command(docker_command, get_pty=True)
-            [print(line.decode('utf-8')) for line in stdout.read().splitlines()]
+            output = [line.decode('utf-8') for line in stdout.read().splitlines()]
             # clean up
             sftp_client.remove(tmp_file)
         else:
-            sftp_client.put(source_path, destination_path)
+            output = sftp_client.put(source_path, destination_path).__str__()
     except (IOError, PermissionError) as e:
-        print(e)
-
-    sftp_client.close()
-    client.close()
+        output = e.message
+    finally:
+        sftp_client.close()
+        client.close()
     #TODO: progress bar
+    return output
 
 
 async def clus_copy(username, nodes, source_path, destination_path, ssh_key=None, password=None, container_name=None, get=False):
-    await asyncio.gather(
+    return await asyncio.gather(
         *[asyncio.get_event_loop().run_in_executor(ThreadPoolExecutor(),
                                                    copy_from_node if get else node_copy,
                                                    node.id,
