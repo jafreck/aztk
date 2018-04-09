@@ -228,10 +228,14 @@ class Client:
             futures = [exector.submit(self.__delete_user, pool_id, node.id, username) for node in nodes]
             concurrent.futures.wait(futures)
 
-    def __cluster_run(self, cluster_id, command, container_name=None):
+
+    def __cluster_run(self, cluster_id, command, internal, container_name=None):
         pool, nodes = self.__get_pool_details(cluster_id)
         nodes = [node for node in nodes]
-        cluster_nodes = [self.__get_remote_login_settings(pool.id, node.id) for node in nodes]
+        if internal:
+            cluster_nodes = [models.RemoteLogin(ip_address=node.ip_address, port="22") for node in nodes]
+        else:
+            cluster_nodes = [self.__get_remote_login_settings(pool.id, node.id) for node in nodes]
         try:
             ssh_key = self.__create_user_on_pool('aztk', pool.id, nodes)
             output = asyncio.get_event_loop().run_until_complete(ssh_lib.clus_exec_command(command,
@@ -245,10 +249,13 @@ class Client:
         finally:
             self.__delete_user_on_pool('aztk', pool.id, nodes)
 
-    def __cluster_copy(self, cluster_id, source_path, destination_path, container_name=None, get=False):
+    def __cluster_copy(self, cluster_id, source_path, destination_path, container_name=None, internal=False, get=False):
         pool, nodes = self.__get_pool_details(cluster_id)
         nodes = [node for node in nodes]
-        cluster_nodes = [(node, self.__get_remote_login_settings(pool.id, node.id)) for node in nodes]
+        if internal:
+            cluster_nodes = [(node, models.RemoteLogin(ip_address=node.ip_address, port="22")) for node in nodes]
+        else:
+            cluster_nodes = [(node, self.__get_remote_login_settings(pool.id, node.id)) for node in nodes]
         try:
             ssh_key = self.__create_user_on_pool('aztk', pool.id, nodes)
             asyncio.get_event_loop().run_until_complete(ssh_lib.clus_copy(container_name=container_name,
