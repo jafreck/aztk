@@ -3,7 +3,7 @@ import sys
 import typing
 
 import aztk.spark
-from aztk_cli import config
+from aztk_cli import config, utils
 
 
 def setup_parser(parser: argparse.ArgumentParser):
@@ -23,13 +23,13 @@ def setup_parser(parser: argparse.ArgumentParser):
 
 def execute(args: typing.NamedTuple):
     spark_client = aztk.spark.Client(config.load_aztk_secrets())
-
-    copy_output = spark_client.cluster_copy(
-        cluster_id=args.cluster_id,
-        source_path=args.source_path,
-        destination_path=args.dest_path,
-        internal=args.internal
-    )
+    with utils.Spinner():
+        copy_output = spark_client.cluster_copy(
+            cluster_id=args.cluster_id,
+            source_path=args.source_path,
+            destination_path=args.dest_path,
+            internal=args.internal
+        )
     [print_copy_result(node_id, result, err) for node_id, result, err in copy_output]
     sys.exit(0 if all([result for _, result, _ in copy_output]) else 1)
 

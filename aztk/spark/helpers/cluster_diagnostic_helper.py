@@ -9,12 +9,12 @@ def run(spark_client, cluster_id, output_directory):
     spark_client.cluster_copy(cluster_id, os.path.abspath("./aztk/spark/utils/debug.py"), "/tmp/debug.py", host=True)
     ssh_cmd = _build_diagnostic_ssh_command()
     run_output = spark_client.cluster_run(cluster_id, ssh_cmd, host=True)
-    local_path = os.path.join(os.path.abspath(output_directory), "debug", "debug.zip") #TODO: add timestamp
+    local_path = os.path.join(os.path.abspath(output_directory), "debug", "debug.zip")
     remote_path = "/tmp/debug.zip"
     output = spark_client.cluster_copy(cluster_id, remote_path, local_path, host=True, get=True)
     # write run output to debug/ directory
     with open(os.path.join(os.path.dirname(local_path), "debug-output.txt"), 'w', encoding="UTF-8") as f:
-        [f.write(line + '\n') for node_output in run_output for line in node_output]
+        [f.write(line + '\n') for node_id, result in run_output for line in result]
     return output
 
 
