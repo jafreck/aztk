@@ -10,20 +10,13 @@ repo_name=$3
 docker_run_cmd=$4
 
 echo "Installing pre-reqs"
-apt-get -y install linux-image-extra-$(uname -r) linux-image-extra-virtual
-apt-get -y install apt-transport-https
-apt-get -y install curl
-apt-get -y install ca-certificates
-apt-get -y install software-properties-common
+time(
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -;
+    add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable";
+    apt-get -y update;
+    apt-get -y install linux-image-extra-$(uname -r) linux-image-extra-virtual apt-transport-https curl ca-certificates software-properties-common unzip docker-ce;
+) 2>&1
 echo "Done installing pre-reqs"
-
-# Install docker
-echo "Installing Docker"
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-apt-get -y update
-apt-get -y install docker-ce
-echo "Done installing Docker"
 
 # set hostname in /etc/hosts if dns cannot resolve
 if ! host $HOSTNAME ; then
@@ -51,7 +44,6 @@ echo "Pulling $repo_name"
 (time docker pull $repo_name) 2>&1
 
 # Unzip resource files and set permissions
-apt-get -y install unzip
 chmod 777 $AZ_BATCH_TASK_WORKING_DIR/aztk/node_scripts/docker_main.sh
 
 # Check docker is running
