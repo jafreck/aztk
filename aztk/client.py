@@ -258,16 +258,19 @@ class Client:
             cluster_nodes = [(node, self.__get_remote_login_settings(pool.id, node.id)) for node in nodes]
         try:
             ssh_key = self.__create_user_on_pool('aztk', pool.id, nodes)
-            asyncio.get_event_loop().run_until_complete(ssh_lib.clus_copy(container_name=container_name,
-                                                                          username='aztk',
-                                                                          nodes=cluster_nodes,
-                                                                          source_path=source_path,
-                                                                          destination_path=destination_path,
-                                                                          ssh_key=ssh_key.exportKey().decode('utf-8'),
-                                                                          get=get))
-            self.__delete_user_on_pool('aztk', pool.id, nodes)
+            output = asyncio.get_event_loop().run_until_complete(
+                ssh_lib.clus_copy(container_name=container_name,
+                                  username='aztk',
+                                  nodes=cluster_nodes,
+                                  source_path=source_path,
+                                  destination_path=destination_path,
+                                  ssh_key=ssh_key.exportKey().decode('utf-8'),
+                                  get=get))
+            return output
         except (OSError, batch_error.BatchErrorException) as exc:
             raise exc
+        finally:
+            self.__delete_user_on_pool('aztk', pool.id, nodes)
 
     def __submit_job(self,
                      job_configuration,

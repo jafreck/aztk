@@ -75,9 +75,9 @@ def copy_from_node(node_id, source_path, destination_path, username, hostname, p
         os.makedirs(os.path.dirname(destination_path), exist_ok=True)
         with open(destination_path, 'wb') as f: #SpooledTemporaryFile instead??
             sftp_client.getfo(source_path, f)
-            return f
-    except (IOError, PermissionError) as e:
-        raise e
+            return (node_id, True, None)
+    except OSError as e:
+        return (node_id, False, e)
     finally:
         sftp_client.close()
         client.close()
@@ -97,15 +97,16 @@ def node_copy(node_id, source_path, destination_path, username, hostname, port, 
             output = [line.decode('utf-8') for line in stdout.read().splitlines()]
             # clean up
             sftp_client.remove(tmp_file)
+            return (node_id, True, None)
         else:
             output = sftp_client.put(source_path, destination_path).__str__()
+            return (node_id, True, None)
     except (IOError, PermissionError) as e:
-        output = e.message
+        return (node_id, False, e)
     finally:
         sftp_client.close()
         client.close()
     #TODO: progress bar
-    return output
 
 
 async def clus_copy(username, nodes, source_path, destination_path, ssh_key=None, password=None, container_name=None, get=False):
