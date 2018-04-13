@@ -5,6 +5,7 @@ AZTK ships with a library of default plugins that enable auxillary services to u
 
 Currently the following plugins are supported:
 
+- JupyterLab
 - Jupyter
 - HDFS
 - RStudioServer
@@ -16,6 +17,7 @@ If you are uing the `aztk` CLI and wish to enable a supported plugin, you need t
 Add or uncomment the `plugins` section and set the plugins you desire to enable as follows:
 ```yaml
 plugins:
+    - name: jupyterlab
     - name: jupyter
     - name: hdfs
     - name: spark_ui_proxy

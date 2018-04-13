@@ -30,10 +30,10 @@ docker_repo:
 # Enable plugins
 plugins:
   - name: spark_ui_proxy
+  # - name: jupyterlab
   # - name: jupyter
   # - name: hdfs
   # - name: rstudio_server
-  #   version: 1.1.442
 
 # wait: <true/false>
 wait: false
