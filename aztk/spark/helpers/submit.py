@@ -3,6 +3,7 @@ import os
 from typing import List
 import yaml
 import azure.batch.models as batch_models
+from aztk.error import AztkError
 from aztk.utils import constants, helpers
 from aztk.utils.command_builder import CommandBuilder
 
@@ -81,9 +82,10 @@ def generate_task(spark_client, container_id, application):
     task_cmd.add_option('-e', 'AZ_BATCH_TASK_WORKING_DIR=$AZ_BATCH_TASK_WORKING_DIR')
     task_cmd.add_option('-e', 'STORAGE_LOGS_CONTAINER={0}'.format(container_id))
     task_cmd.add_argument('spark /bin/bash >> output.log 2>&1')
-    task_cmd.add_argument('-c "cd $AZ_BATCH_TASK_WORKING_DIR; ' \
+    task_cmd.add_argument('-c "source ~/.bashrc; '\
+                          'cd $AZ_BATCH_TASK_WORKING_DIR; ' \
                           '\$(pyenv root)/versions/\$AZTK_PYTHON_VERSION/bin/python ' \
-                          '\$DOCKER_WORKING_DIR/submit.py"')
+                          '\$DOCKER_WORKING_DIR/aztk/node_scripts/submit.py"')
 
     # Create task
     task = batch_models.TaskAddParameter(
@@ -103,6 +105,8 @@ def generate_task(spark_client, container_id, application):
 
 def affinitize_task_to_master(spark_client, cluster_id, task):
     cluster = spark_client.get_cluster(cluster_id)
+    if cluster.master_node_id is None:
+        raise AztkError("Master has not yet been selected. Please wait until the cluster is finished provisioning.")
     master_node = spark_client.batch_client.compute_node.get(pool_id=cluster_id, node_id=cluster.master_node_id)
     task.affinity_info = batch_models.AffinityInformation(affinity_id=master_node.affinity_id)
     return task

@@ -12,7 +12,6 @@ class SparkUIProxyPlugin(PluginConfiguration):
             name="spark_ui_proxy",
             ports=[
                 PluginPort(
-                    name="Spark UI",
                     internal=9999,
                     public=True
                 )
