@@ -29,7 +29,7 @@ docker_repo:
 
 # Enable plugins
 plugins:
-  - name: spark_ui_proxy
+  # - name: spark_ui_proxy
   # - name: jupyterlab
   # - name: jupyter
   # - name: hdfs
