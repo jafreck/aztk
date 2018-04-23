@@ -38,6 +38,7 @@ setup(
     ],
     package_data={
         'aztk': find_package_files("", "node_scripts", ".."),
+        'aztk': find_package_files("", "aztk/spark/models/plugins", ".."),
         'aztk_cli': find_package_files("aztk_cli", "config"),
     },
     scripts=[],
