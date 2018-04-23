@@ -74,7 +74,7 @@ def upload_text_to_container(container_name: str,
     blob_name = file_path
     blob_path = application_name + '/' + blob_name  # + '/' + time_stamp + '/' + blob_name
     blob_client.create_container(container_name, fail_on_exist=False)
-    blob_client.create_blob_from_text(container_name, blob_path, content)
+    blob_client.create_blob_from_text(container_name, blob_path, content, timeout=constants.AZURE_BLOB_TIMEOUT)
 
     sas_token = blob_client.generate_blob_shared_access_signature(
         container_name,
@@ -118,7 +118,7 @@ def upload_file_to_container(container_name,
 
     blob_client.create_container(container_name, fail_on_exist=False)
 
-    blob_client.create_blob_from_path(container_name, blob_path, file_path)
+    blob_client.create_blob_from_path(container_name, blob_path, file_path, timeout=constants.AZURE_BLOB_TIMEOUT)
 
     sas_token = blob_client.generate_blob_shared_access_signature(
         container_name,
@@ -259,7 +259,7 @@ def upload_blob_and_create_sas(container_name,
     """
     blob_client.create_container(container_name, fail_on_exist=False)
 
-    blob_client.create_blob_from_path(container_name, blob_name, file_name)
+    blob_client.create_blob_from_path(container_name, blob_name, file_name, timeout=constants.AZURE_BLOB_TIMEOUT)
 
     sas_token = create_sas_token(
         container_name,
@@ -384,7 +384,7 @@ def save_cluster_config(cluster_config, blob_client):
     content = yaml.dump(cluster_config)
     container_name = cluster_config.cluster_id
     blob_client.create_container(container_name, fail_on_exist=False)
-    blob_client.create_blob_from_text(container_name, blob_path, content)
+    blob_client.create_blob_from_text(container_name, blob_path, content, timeout=constants.AZURE_BLOB_TIMEOUT)
 
 
 def read_cluster_config(cluster_id: str, blob_client: blob.BlockBlobService):

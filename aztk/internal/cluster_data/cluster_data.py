@@ -4,6 +4,7 @@ import azure.common
 from azure.storage.blob import BlockBlobService
 from .node_data import NodeData
 from .blob_data import BlobData
+from aztk.utils import constants
 
 
 class ClusterData:
@@ -24,7 +25,7 @@ class ClusterData:
         blob_path = self.CLUSTER_DIR + "/" + self.CLUSTER_CONFIG_FILE
         content = yaml.dump(cluster_config)
         container_name = cluster_config.cluster_id
-        self.blob_client.create_blob_from_text(container_name, blob_path, content)
+        self.blob_client.create_blob_from_text(container_name, blob_path, content, timeout=constants.AZURE_BLOB_TIMEOUT)
 
     def read_cluster_config(self):
         blob_path = self.CLUSTER_DIR + "/" + self.CLUSTER_CONFIG_FILE
@@ -37,7 +38,7 @@ class ClusterData:
             logging.warn("Cluster %s contains invalid cluster configuration in blob", self.cluster_id)
 
     def upload_file(self, blob_path: str, local_path: str) -> BlobData:
-        self.blob_client.create_blob_from_path(self.cluster_id, blob_path, local_path)
+        self.blob_client.create_blob_from_path(self.cluster_id, blob_path, local_path, timeout=constants.AZURE_BLOB_TIMEOUT)
         return BlobData(self.blob_client, self.cluster_id, blob_path)
 
     def upload_cluster_file(self, blob_path: str, local_path: str) -> BlobData:

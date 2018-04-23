@@ -56,6 +56,8 @@ MASTER_NODE_METADATA_KEY = "_spark_master_node"
 """
 WAIT_FOR_MASTER_TIMEOUT = 60 * 20
 
+AZURE_BLOB_TIMEOUT = 60
+
 AZTK_SOFTWARE_METADATA_KEY = "_aztk_software"
 
 AZTK_MODE_METADATA_KEY = "_aztk_mode"

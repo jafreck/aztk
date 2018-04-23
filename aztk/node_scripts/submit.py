@@ -8,6 +8,7 @@ from typing import List
 import azure.storage.blob as blob
 import azure.batch.models as batch_models
 from aztk.utils.command_builder import CommandBuilder
+from aztk.utils import constants
 from core import config
 
 # limit azure.storage logging
@@ -51,7 +52,8 @@ def upload_file_to_container(container_name,
 
     blob_client.create_blob_from_path(container_name,
                                       blob_path,
-                                      file_path)
+                                      file_path,
+                                      timout=constants.AZURE_BLOB_TIMEOUT)
 
     sas_token = blob_client.generate_blob_shared_access_signature(
         container_name,
