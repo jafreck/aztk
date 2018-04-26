@@ -41,10 +41,9 @@ setup(
     license='MIT',
     packages=find_packages(exclude=["tests"]),
     install_requires=[
-        "azure-batch==3.0.0",
+        "azure-batch==4.1.3",
         "azure-mgmt-batch==5.0.0",
         "azure-mgmt-storage==1.5.0",
-        "keying>=12.1.0,<13.0",
         "azure-storage-blob==1.1.0",
         "pyyaml>=3.12",
         "pycryptodome>=3.4",
