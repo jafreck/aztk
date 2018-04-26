@@ -1,4 +1,4 @@
-FROM aztk/staging:v0.1.0-spark2.3.0-gpu
+FROM aztk/spark:v0.1.0-spark2.3.0-gpu
 
 ARG ANACONDA_VERSION=Anaconda3-5.1.0
 

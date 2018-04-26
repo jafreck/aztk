@@ -1,4 +1,4 @@
-FROM aztk/staging:v0.1.0-spark2.3.0-gpu
+FROM aztk/spark:v0.1.0-spark2.3.0-gpu
 
 ARG MINICONDA_VERISON=Miniconda3-4.4.10
 
