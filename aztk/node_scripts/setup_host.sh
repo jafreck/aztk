@@ -81,9 +81,16 @@ else
     python3 --version
 
     # set up aztk python environment
+    export LC_ALL=C.UTF-8
+    export LANG=C.UTF-8
+    python3 -m pip install pipenv
     mkdir -p $AZTK_WORKING_DIR/.aztk-env
-    /usr/bin/python3.5m -m venv $AZTK_WORKING_DIR/.aztk-env/.venv
-    $AZTK_WORKING_DIR/.aztk-env/.venv/bin/pip install --upgrade pip setuptools wheel
+    cp $AZTK_WORKING_DIR/aztk/node_scripts/Pipfile $AZTK_WORKING_DIR/.aztk-env
+    cp $AZTK_WORKING_DIR/aztk/node_scripts/Pipfile.lock $AZTK_WORKING_DIR/.aztk-env
+    cd $AZTK_WORKING_DIR/.aztk-env
+    export PIPENV_VENV_IN_PROJECT=true
+    pipenv install --python /usr/bin/python3.5m
+    pipenv run pip install --upgrade setuptools wheel #TODO: add pip when pipenv is compatible with pip10
 
     # Install python dependencies
     $AZTK_WORKING_DIR/.aztk-env/.venv/bin/pip install -r $(dirname $0)/requirements.txt
