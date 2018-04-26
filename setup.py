@@ -1,16 +1,28 @@
+import fnmatch
 import os
-from setuptools import setup, find_packages
-from aztk_cli import constants
+
+from setuptools import find_packages, setup
+
 from aztk import version
+from aztk_cli import constants
+
 
 data_files = []
 
+
+def _includeFile(filename: str, exclude: [str]) -> bool:
+    for pattern in exclude:
+        if fnmatch.fnmatch(filename, pattern):
+            return False
+
+    return True
 
 def find_package_files(root, directory, dest=""):
     paths = []
     for (path, _, filenames) in os.walk(os.path.join(root, directory)):
         for filename in filenames:
-            paths.append(os.path.relpath(os.path.join(dest, path, filename), root))
+            if _includeFile(filename, exclude=["*.pyc*"]):
+                paths.append(os.path.relpath(os.path.join(dest, path, filename), root))
     return paths
 
 
@@ -32,15 +44,15 @@ setup(
         "azure-batch==3.0.0",
         "azure-mgmt-batch==5.0.0",
         "azure-mgmt-storage==1.5.0",
+        "keying>=12.1.0,<13.0",
         "azure-storage-blob==1.1.0",
         "pyyaml>=3.12",
         "pycryptodome>=3.4",
         "paramiko>=2.4",
     ],
     package_data={
-        'aztk': find_package_files("", "node_scripts", ".."),
-        'aztk': find_package_files("", "spark/models/plugins"),
-        'aztk_cli': find_package_files("aztk_cli", "config"),
+        'aztk': find_package_files("aztk", ""),
+        'aztk_cli': find_package_files("aztk_cli", ""),
     },
     scripts=[],
     entry_points=dict(console_scripts=["{0} = aztk_cli.entrypoint:main".format(constants.CLI_EXE)]),
