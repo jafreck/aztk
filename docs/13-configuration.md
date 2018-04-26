@@ -23,7 +23,7 @@ size: 2
 username: spark
 
 # docker_repo: <name of docker image repo (for more information, see https://github.com/Azure/aztk/blob/master/docs/12-docker-image.md)>
-docker_repo: aztk/base:spark2.2.0
+docker_repo: aztk/base:v0.1.0-spark2.3.0-base
 
 # custom_script: <path to custom script to run on each node> (optional)
 
