@@ -108,6 +108,14 @@ RUN apt-get clean \
                                 "<groupId>com.fasterxml.jackson.core</groupId>" \
                                 "<artifactId>jackson-core</artifactId>" \
                             "</exclusion>" \
+                            "<exclusion>" \
+                                "<groupId>org.apache.commons</groupId>" \
+                                "<artifactId>commons-lang3</artifactId>" \
+                            "</exclusion>" \
+                            "<exclusion>" \
+                                "<groupId>org.slf4j</groupId>" \
+                                "<artifactId>slf4j-api</artifactId>" \
+                            "</exclusion>" \
                         "</exclusions>" \
                     "</dependency>" \
                     "<dependency>" \

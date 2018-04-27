@@ -1,4 +1,4 @@
-FROM aztk/spark:v0.1.0-spark2.1.0-base
+FROM aztk/spark:v0.1.0-spark1.6.3-base
 
 ARG MINICONDA_VERISON=Miniconda3-4.4.10
 

@@ -58,7 +58,7 @@ RUN apt-get clean \
     && cd spark \
     && git checkout tags/v${SPARK_VERSION_KEY} \
     && export MAVEN_OPTS="-Xmx3g -XX:ReservedCodeCacheSize=1024m" \
-    && ./dev/make-distribution.sh --name custom-spark --pip --tgz -Phive -Phive-thriftserver -Dhadoop.version={HADOOP_VERSION} -DskipTests \
+    && ./dev/make-distribution.sh --name custom-spark --pip --tgz -Phive -Phive-thriftserver -Dhadoop.version=${HADOOP_VERSION} -DskipTests \
     && tar -xvzf /spark/spark-${SPARK_VERSION_KEY}-bin-custom-spark.tgz --directory=/home \
     && ln -s "/home/spark-${SPARK_VERSION_KEY}-bin-custom-spark" /home/spark-current \
     && rm -rf /spark \ 
@@ -83,7 +83,7 @@ RUN apt-get clean \
                     "<dependency>" \
                         "<groupId>org.apache.hadoop</groupId>" \
                         "<artifactId>hadoop-azure</artifactId>" \
-                        "<version>{HADOOP_VERSION}</version>" \
+                        "<version>${HADOOP_VERSION}</version>" \
                     "<exclusions>" \
                         "<exclusion>" \
                             "<groupId>org.apache.hadoop</groupId>" \
@@ -108,6 +108,14 @@ RUN apt-get clean \
                             "<exclusion>" \
                                 "<groupId>com.fasterxml.jackson.core</groupId>" \
                                 "<artifactId>jackson-core</artifactId>" \
+                            "</exclusion>" \
+                            "<exclusion>" \
+                                "<groupId>org.apache.commons</groupId>" \
+                                "<artifactId>commons-lang3</artifactId>" \
+                            "</exclusion>" \
+                            "<exclusion>" \
+                                "<groupId>org.slf4j</groupId>" \
+                                "<artifactId>slf4j-api</artifactId>" \
                             "</exclusion>" \
                         "</exclusions>" \
                     "</dependency>" \
