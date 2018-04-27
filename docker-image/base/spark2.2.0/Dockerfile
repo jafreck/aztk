@@ -11,8 +11,6 @@ ENV AZTK_PYTHON_VERSION=3.5.2
 ENV SPARK_VERSION_KEY 2.2.0
 ENV SPARK_FULL_VERSION spark-${SPARK_VERSION_KEY}-bin-without-hadoop
 ENV HADOOP_VERSION 2.8.3
-ENV HADOOP_PREFIX=/opt/hadoop-$HADOOP_VERSION
-ENV HADOOP_CONF_DIR=/etc/hadoop
 ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
 
 # set env vars
@@ -59,84 +57,84 @@ RUN apt-get clean \
     && cd spark \
     && git checkout tags/v${SPARK_VERSION_KEY} \
     && export MAVEN_OPTS="-Xmx3g -XX:ReservedCodeCacheSize=1024m" \
-    && ./dev/make-distribution.sh --name custom-spark --pip --tgz -Phive -Phive-thriftserver -Dhadoop.version=2.8.3 -DskipTests \
+    && ./dev/make-distribution.sh --name custom-spark --pip --tgz -Phive -Phive-thriftserver -Dhadoop.version=${HADOOP_VERSION} -DskipTests \
     && tar -xvzf /spark/spark-${SPARK_VERSION_KEY}-bin-custom-spark.tgz --directory=/home \
     && ln -s "/home/spark-${SPARK_VERSION_KEY}-bin-custom-spark" /home/spark-current \
     && rm -rf /spark \ 
     # copy azure storage jars and dependencies to $SPARK_HOME/jars
-    && echo '<project>' \
-                    '<modelVersion>4.0.0</modelVersion>' \
-                    '<groupId>groupId</groupId>' \
-                    '<artifactId>artifactId</artifactId>' \
-                    '<version>1.0</version>' \
-                '<dependencies>' \
-                    '<dependency>' \
-                        '<groupId>org.apache.hadoop</groupId>' \
-                        '<artifactId>hadoop-azure-datalake</artifactId>' \
-                        '<version>2.8.3</version>' \
-                    '<exclusions>' \
-                        '<exclusion>' \
-                            '<groupId>org.apache.hadoop</groupId>' \
-                            '<artifactId>hadoop-common</artifactId>' \
-                        '</exclusion>' \
-                    '</exclusions> ' \
-                    '</dependency>' \
-                    '<dependency>' \
-                        '<groupId>org.apache.hadoop</groupId>' \
-                        '<artifactId>hadoop-azure</artifactId>' \
-                        '<version>2.8.3</version>' \
-                    '<exclusions>' \
-                        '<exclusion>' \
-                            '<groupId>org.apache.hadoop</groupId>' \
-                            '<artifactId>hadoop-common</artifactId>' \
-                        '</exclusion>' \
-                        '<exclusion>' \
-                            '<groupId>com.fasterxml.jackson.core</groupId>' \
-                            '<artifactId>jackson-core</artifactId>' \
-                        '</exclusion>' \
-                    '</exclusions> ' \
-                    '</dependency>' \
-                    '<dependency>' \
-                        '<groupId>com.microsoft.sqlserver</groupId>' \
-                        '<artifactId>mssql-jdbc</artifactId>' \
-                        '<version>6.4.0.jre8</version>' \
-                    '</dependency>' \
-                    '<dependency>' \
-                        '<groupId>com.microsoft.azure</groupId>' \
-                        '<artifactId>azure-storage</artifactId>' \
-                        '<version>2.2.0</version>' \
-                        '<exclusions>' \
-                            '<exclusion>' \
-                                '<groupId>com.fasterxml.jackson.core</groupId>' \
-                                '<artifactId>jackson-core</artifactId>' \
-                            '</exclusion>' \
-                        '</exclusions>' \
-                    '</dependency>' \
-                    '<dependency>' \
-                        '<groupId>com.microsoft.azure</groupId>' \
-                        '<artifactId>azure-cosmosdb-spark_${SPARK_VERSION_KEY}_2.11</artifactId>' \
-                        '<version>1.1.1</version>' \
-                        '<exclusions>' \
-                            '<exclusion>' \
-                                '<groupId>org.apache.tinkerpop</groupId>' \
-                                '<artifactId>tinkergraph-gremlin</artifactId>' \
-                            '</exclusion>' \
-                            '<exclusion>' \
-                                '<groupId>org.apache.tinkerpop</groupId>' \
-                                '<artifactId>spark-gremlin</artifactId>' \
-                            '</exclusion>' \
-                            '<exclusion>' \
-                                '<groupId>io.netty</groupId>' \
-                                '<artifactId>*</artifactId>' \
-                            '</exclusion>' \
-                            '<exclusion>' \
-                                '<groupId>com.fasterxml.jackson.core</groupId>' \
-                                '<artifactId>jackson-annotations</artifactId>' \
-                            '</exclusion>' \
-                        '</exclusions> ' \
-                    '</dependency>' \
-                '</dependencies>' \
-            '</project>' > /tmp/pom.xml \
+    && echo "<project>" \
+                    "<modelVersion>4.0.0</modelVersion>" \
+                    "<groupId>groupId</groupId>" \
+                    "<artifactId>artifactId</artifactId>" \
+                    "<version>1.0</version>" \
+                "<dependencies>" \
+                    "<dependency>" \
+                        "<groupId>org.apache.hadoop</groupId>" \
+                        "<artifactId>hadoop-azure-datalake</artifactId>" \
+                        "<version>${HADOOP_VERSION}</version>" \
+                    "<exclusions>" \
+                        "<exclusion>" \
+                            "<groupId>org.apache.hadoop</groupId>" \
+                            "<artifactId>hadoop-common</artifactId>" \
+                        "</exclusion>" \
+                    "</exclusions> " \
+                    "</dependency>" \
+                    "<dependency>" \
+                        "<groupId>org.apache.hadoop</groupId>" \
+                        "<artifactId>hadoop-azure</artifactId>" \
+                        "<version>${HADOOP_VERSION}</version>" \
+                    "<exclusions>" \
+                        "<exclusion>" \
+                            "<groupId>org.apache.hadoop</groupId>" \
+                            "<artifactId>hadoop-common</artifactId>" \
+                        "</exclusion>" \
+                        "<exclusion>" \
+                            "<groupId>com.fasterxml.jackson.core</groupId>" \
+                            "<artifactId>jackson-core</artifactId>" \
+                        "</exclusion>" \
+                    "</exclusions> " \
+                    "</dependency>" \
+                    "<dependency>" \
+                        "<groupId>com.microsoft.sqlserver</groupId>" \
+                        "<artifactId>mssql-jdbc</artifactId>" \
+                        "<version>6.4.0.jre8</version>" \
+                    "</dependency>" \
+                    "<dependency>" \
+                        "<groupId>com.microsoft.azure</groupId>" \
+                        "<artifactId>azure-storage</artifactId>" \
+                        "<version>2.2.0</version>" \
+                        "<exclusions>" \
+                            "<exclusion>" \
+                                "<groupId>com.fasterxml.jackson.core</groupId>" \
+                                "<artifactId>jackson-core</artifactId>" \
+                            "</exclusion>" \
+                        "</exclusions>" \
+                    "</dependency>" \
+                    "<dependency>" \
+                        "<groupId>com.microsoft.azure</groupId>" \
+                        "<artifactId>azure-cosmosdb-spark_${SPARK_VERSION_KEY}_2.11</artifactId>" \
+                        "<version>1.1.1</version>" \
+                        "<exclusions>" \
+                            "<exclusion>" \
+                                "<groupId>org.apache.tinkerpop</groupId>" \
+                                "<artifactId>tinkergraph-gremlin</artifactId>" \
+                            "</exclusion>" \
+                            "<exclusion>" \
+                                "<groupId>org.apache.tinkerpop</groupId>" \
+                                "<artifactId>spark-gremlin</artifactId>" \
+                            "</exclusion>" \
+                            "<exclusion>" \
+                                "<groupId>io.netty</groupId>" \
+                                "<artifactId>*</artifactId>" \
+                            "</exclusion>" \
+                            "<exclusion>" \
+                                "<groupId>com.fasterxml.jackson.core</groupId>" \
+                                "<artifactId>jackson-annotations</artifactId>" \
+                            "</exclusion>" \
+                        "</exclusions> " \
+                    "</dependency>" \
+                "</dependencies>" \
+            "</project>" > /tmp/pom.xml \
     && cd /tmp \
     && mvn dependency:copy-dependencies -DoutputDirectory="${SPARK_HOME}/jars/" \
     # cleanup
