@@ -8,7 +8,7 @@ echo '{
 
 service docker restart
 
-mkdir out
+mkdir -p out
 
 # base 1.6.3
 docker build base/spark1.6.3/ --tag aztk/spark:v0.1.0-spark1.6.3-base > out/base-spark1.6.3.out &&
