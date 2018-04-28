@@ -229,7 +229,7 @@ class Client:
             concurrent.futures.wait(futures)
 
 
-    def __cluster_run(self, cluster_id, command, internal, container_name=None):
+    def __cluster_run(self, cluster_id, command, internal, container_name=None, timeout=None):
         pool, nodes = self.__get_pool_details(cluster_id)
         nodes = [node for node in nodes]
         if internal:
@@ -238,11 +238,13 @@ class Client:
             cluster_nodes = [(node, self.__get_remote_login_settings(pool.id, node.id)) for node in nodes]
         try:
             ssh_key = self.__create_user_on_pool('aztk', pool.id, nodes)
+            timeout = timeout or 20
             output = asyncio.get_event_loop().run_until_complete(ssh_lib.clus_exec_command(command,
                                                                                            'aztk',
                                                                                            cluster_nodes,
                                                                                            ssh_key=ssh_key.exportKey().decode('utf-8'),
-                                                                                           container_name=container_name))
+                                                                                           container_name=container_name,
+                                                                                           timeout=timeout))
             return output
         except OSError as exc:
             raise exc
@@ -265,7 +267,8 @@ class Client:
                                   source_path=source_path,
                                   destination_path=destination_path,
                                   ssh_key=ssh_key.exportKey().decode('utf-8'),
-                                  get=get))
+                                  get=get,
+                                  timeout=timeout))
             return output
         except (OSError, batch_error.BatchErrorException) as exc:
             raise exc
