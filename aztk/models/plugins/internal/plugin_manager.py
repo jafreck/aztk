@@ -21,6 +21,7 @@ class PluginManager:
         rstudio_server=plugins.RStudioServerPlugin,
         hdfs=plugins.HDFSPlugin,
         spark_ui_proxy=plugins.SparkUIProxyPlugin,
+        tensorflow_on_spark=plugins.TensorflowOnSparkPlugin
     )
 
     def __init__(self):
