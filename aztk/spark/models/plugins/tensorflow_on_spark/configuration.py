@@ -1,5 +1,5 @@
 import os
-from aztk.models.plugins.plugin_configuration import PluginConfiguration, PluginPort, PluginRunTarget
+from aztk.models.plugins.plugin_configuration import PluginConfiguration, PluginPort, PluginTargetRole
 from aztk.models.plugins.plugin_file import PluginFile
 from aztk.utils import constants
 
@@ -10,7 +10,7 @@ class TensorflowOnSparkPlugin(PluginConfiguration):
     def __init__(self):
         super().__init__(
             name="tensorflow_on_spark",
-            run_on=PluginRunTarget.Master,
+            target_role=PluginTargetRole.Master,
             execute="tensorflow_on_spark.sh",
             files=[
                 PluginFile("tensorflow_on_spark.sh", os.path.join(dir_path, "tensorflow_on_spark.sh")),
