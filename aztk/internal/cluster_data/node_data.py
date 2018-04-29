@@ -1,12 +1,11 @@
 import fnmatch
 import io
-import json
 import os
-import yaml
 import zipfile
 from pathlib import Path
 from typing import List
-from aztk.spark import models
+import yaml
+from aztk import models
 from aztk.utils import constants, file_utils, secure_utils
 from aztk.error import InvalidCustomScriptError
 
@@ -25,9 +24,8 @@ class NodeData:
     """
 
     def __init__(self, cluster_config: models.ClusterConfiguration):
-        self.zip_path = os.path.join(ROOT_PATH, "tmp/node-scripts.zip")
+        self.zip_path = io.BytesIO()
         self.cluster_config = cluster_config
-        file_utils.ensure_dir(self.zip_path)
         self.zipf = zipfile.ZipFile(self.zip_path, "w", zipfile.ZIP_DEFLATED)
 
     def add_core(self):
@@ -62,10 +60,12 @@ class NodeData:
         for file in file_paths:
             self.add_file(file, zip_dir, binary)
 
-    def add_dir(self, path: str, dest: str = None, exclude: List[str] = []):
+    def add_dir(self, path: str, dest: str = None, exclude: List[str] = None):
         """
             Zip all the files in the given directory into the zip file handler
         """
+        exclude = exclude or []
+
         for base, _, files in os.walk(path):
             relative_folder = os.path.relpath(base, path)
             for file in files:
@@ -147,7 +147,8 @@ class NodeData:
                     execute='{0}/{1}'.format(plugin.name, plugin.execute),
                     args=plugin.args,
                     env=plugin.env,
-                    runOn=plugin.run_on.value,
+                    target=plugin.target.value,
+                    target_role=plugin.target_role.value,
                 ))
 
         self.zipf.writestr(os.path.join('plugins', 'plugins-manifest.yaml'), yaml.dump(data))
@@ -156,7 +157,8 @@ class NodeData:
     def _add_node_scripts(self):
         self.add_dir(os.path.join(ROOT_PATH, NODE_SCRIPT_FOLDER), NODE_SCRIPT_FOLDER, exclude=['*.pyc*'])
 
-    def _includeFile(self, filename: str, exclude: List[str] = []) -> bool:
+    def _includeFile(self, filename: str, exclude: List[str]) -> bool:
+        exclude = exclude or []
         for pattern in exclude:
             if fnmatch.fnmatch(filename, pattern):
                 return False

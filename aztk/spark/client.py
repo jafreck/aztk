@@ -12,17 +12,30 @@ from aztk.spark.helpers import get_log as get_log_helper
 from aztk.spark.helpers import cluster_diagnostic_helper
 from aztk.spark.utils import util
 from aztk.internal.cluster_data import NodeData
-import yaml
 
 
 class Client(BaseClient):
+    """
+    Aztk Spark Client
+    This is the main entry point for using aztk for spark
+
+    Args:
+        secrets_config(aztk.spark.models.models.SecretsConfiguration): Configuration with all the needed credentials
+    """
     def __init__(self, secrets_config):
         super().__init__(secrets_config)
 
-    '''
-    Spark client public interface
-    '''
     def create_cluster(self, cluster_conf: models.ClusterConfiguration, wait: bool = False):
+        """
+        Create a new aztk spark cluster
+
+        Args:
+            cluster_conf(aztk.spark.models.models.ClusterConfiguration): Configuration for the the cluster to be created
+            wait(bool): If you should wait for the cluster to be ready before returning
+
+        Returns:
+            aztk.spark.models.Cluster
+        """
         cluster_conf.validate()
         cluster_data = self._get_cluster_data(cluster_conf.cluster_id)
         try:
@@ -202,7 +215,7 @@ class Client(BaseClient):
 
             autoscale_formula = "$TargetDedicatedNodes = {0}; " \
                                 "$TargetLowPriorityNodes = {1}".format(
-                                    job_configuration.max_dedicated_nodes, 
+                                    job_configuration.max_dedicated_nodes,
                                     job_configuration.max_low_pri_nodes)
 
             job = self.__submit_job(
