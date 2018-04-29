@@ -29,8 +29,6 @@ done
 # setup docker container
 echo "Starting setup using Docker"
 
-# $AZTK_WORKING_DIR/.aztk-env/.venv/bin/pip install -r $(dirname $0)/requirements.txt
-$AZTK_WORKING_DIR/.aztk-env/.venv/bin/pip freeze
 export PYTHONPATH=$PYTHONPATH:$AZTK_WORKING_DIR
 echo 'export PYTHONPATH=$PYTHONPATH:$AZTK_WORKING_DIR' >> ~/.bashrc
 

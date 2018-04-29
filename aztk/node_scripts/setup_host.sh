@@ -12,12 +12,12 @@ docker_repo_name=$2
 
 echo "Installing pre-reqs"
 apt-get -y update
-apt-get -y install linux-image-extra-$(uname -r) linux-image-extra-virtual
-apt-get -y install apt-transport-https
-apt-get -y install curl
-apt-get -y install ca-certificates
-apt-get -y install software-properties-common
-apt-get -y install python3-pip python3-venv python-dev build-essential libssl-dev
+apt-get install -y --no-install-recommends linux-image-extra-$(uname -r) linux-image-extra-virtual
+apt-get install -y --no-install-recommends apt-transport-https
+apt-get install -y --no-install-recommends curl
+apt-get install -y --no-install-recommends ca-certificates
+apt-get install -y --no-install-recommends software-properties-common
+apt-get install -y --no-install-recommends python3-pip python3-venv python-dev build-essential libssl-dev
 echo "Done installing pre-reqs"
 
 # Install docker
