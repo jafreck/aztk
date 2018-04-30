@@ -238,7 +238,6 @@ class Client:
             cluster_nodes = [(node, self.__get_remote_login_settings(pool.id, node.id)) for node in nodes]
         try:
             ssh_key = self.__create_user_on_pool('aztk', pool.id, nodes)
-            timeout = timeout or 20
             output = asyncio.get_event_loop().run_until_complete(ssh_lib.clus_exec_command(command,
                                                                                            'aztk',
                                                                                            cluster_nodes,

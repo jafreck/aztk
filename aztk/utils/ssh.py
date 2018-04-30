@@ -23,13 +23,14 @@ def connect(hostname,
     import paramiko
 
     client = paramiko.SSHClient()
-
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
     if pkey:
         ssh_key = paramiko.RSAKey.from_private_key(file_obj=io.StringIO(pkey))
     else:
         ssh_key = None
+
+    timeout = timeout or 20
     try:
         client.connect(hostname, port=port, username=username, password=password, pkey=ssh_key, timeout=timeout)
     except socket.timeout:
