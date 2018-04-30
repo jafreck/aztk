@@ -16,4 +16,3 @@ class TensorflowOnSparkPlugin(PluginConfiguration):
                 PluginFile("tensorflow_on_spark.sh", os.path.join(dir_path, "tensorflow_on_spark.sh")),
             ],
         )
-# NOTE: to run in distributed mode, HDFS must be present and added to LD_LIBRARY_PATH
