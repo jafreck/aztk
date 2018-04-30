@@ -33,11 +33,11 @@ def test_submit_job():
         job_configuration = aztk.spark.models.JobConfiguration(
             id=test_id+base_job_id,
             applications=[app1, app2],
-            vm_size="standard_f1",
+            vm_size="standard_f2",
             spark_configuration=None,
             docker_repo=None,
             max_dedicated_nodes=2,
-            max_low_pri_nodes=None
+            max_low_pri_nodes=0
         )
         job = spark_client.submit_job(job_configuration=job_configuration)
         spark_client.wait_until_job_finished(job_id=job_configuration.id)
@@ -49,7 +49,7 @@ def test_submit_job():
         assert False
 
     finally:
-        spark_client.delete_job(job_configuration.id)
+        clean_up_job(job_configuration.id)
 
 
 def test_list_jobs():
@@ -69,12 +69,12 @@ def test_list_jobs():
         job_configuration = aztk.spark.models.JobConfiguration(
             id=test_id+base_job_id,
             applications=[app1, app2],
-            vm_size="standard_f1",
+            vm_size="standard_f2",
             custom_scripts=None,
             spark_configuration=None,
             docker_repo=None,
             max_dedicated_nodes=1,
-            max_low_pri_nodes=None
+            max_low_pri_nodes=0
         )
         spark_client.submit_job(job_configuration=job_configuration)
         spark_client.wait_until_job_finished(job_configuration.id)
@@ -88,7 +88,7 @@ def test_list_jobs():
         assert False
 
     finally:
-        spark_client.delete_job(job_configuration.id)
+        clean_up_job(job_configuration.id)
 
 
 def test_list_applications():
@@ -108,12 +108,12 @@ def test_list_applications():
         job_configuration = aztk.spark.models.JobConfiguration(
             id=test_id+base_job_id,
             applications=[app1, app2],
-            vm_size="standard_f1",
+            vm_size="standard_f2",
             custom_scripts=None,
             spark_configuration=None,
             docker_repo=None,
             max_dedicated_nodes=2,
-            max_low_pri_nodes=None
+            max_low_pri_nodes=0
         )
         spark_client.submit_job(job_configuration=job_configuration)
         spark_client.wait_until_job_finished(job_configuration.id)
@@ -129,7 +129,7 @@ def test_list_applications():
         assert False
 
     finally:
-        spark_client.delete_job(job_configuration.id)
+        clean_up_job(job_configuration.id)
 
 
 def test_get_job():
@@ -149,12 +149,12 @@ def test_get_job():
         job_configuration = aztk.spark.models.JobConfiguration(
             id=test_id+base_job_id,
             applications=[app1, app2],
-            vm_size="standard_f1",
+            vm_size="standard_f2",
             custom_scripts=None,
             spark_configuration=None,
             docker_repo=None,
-            max_dedicated_nodes=None,
-            max_low_pri_nodes=1
+            max_dedicated_nodes=1,
+            max_low_pri_nodes=0
         )
         spark_client.submit_job(job_configuration=job_configuration)
         spark_client.wait_until_job_finished(job_configuration.id)
@@ -168,7 +168,7 @@ def test_get_job():
         assert False
 
     finally:
-        spark_client.delete_job(job_configuration.id)
+        clean_up_job(job_configuration.id)
 
 
 def test_get_application():
@@ -183,16 +183,16 @@ def test_get_application():
         job_configuration = aztk.spark.models.JobConfiguration(
             id=test_id+base_job_id,
             applications=[app1],
-            vm_size="standard_f1",
+            vm_size="standard_f2",
             custom_scripts=None,
             spark_configuration=None,
             docker_repo=None,
             max_dedicated_nodes=2,
-            max_low_pri_nodes=None
+            max_low_pri_nodes=0
         )
         spark_client.submit_job(job_configuration=job_configuration)
         spark_client.wait_until_job_finished(job_configuration.id)
-        
+
         application = spark_client.get_application(job_id=job_configuration.id, application_name="pipy100")
 
         assert isinstance(application, aztk.spark.models.Application)
@@ -204,7 +204,7 @@ def test_get_application():
         assert False
 
     finally:
-        spark_client.delete_job(job_configuration.id)
+        clean_up_job(job_configuration.id)
 
 
 def test_get_application_log():
@@ -219,12 +219,12 @@ def test_get_application_log():
         job_configuration = aztk.spark.models.JobConfiguration(
             id=test_id+base_job_id,
             applications=[app1],
-            vm_size="standard_f1",
+            vm_size="standard_f2",
             custom_scripts=None,
             spark_configuration=None,
             docker_repo=None,
             max_dedicated_nodes=2,
-            max_low_pri_nodes=None
+            max_low_pri_nodes=0
         )
         spark_client.submit_job(job_configuration=job_configuration)
         spark_client.wait_until_job_finished(job_configuration.id)
@@ -236,12 +236,12 @@ def test_get_application_log():
         assert application_log.exit_code == 0
         assert application_log.name == "pipy100"
         assert application_log.total_bytes != 0
-        
+
     except (AztkError, BatchErrorException):
         assert False
 
     finally:
-        spark_client.delete_job(job_configuration.id)
+        clean_up_job(job_configuration.id)
 
 
 def test_delete_job():
@@ -256,12 +256,12 @@ def test_delete_job():
         job_configuration = aztk.spark.models.JobConfiguration(
             id=test_id+base_job_id,
             applications=[app1],
-            vm_size="standard_f1",
+            vm_size="standard_f2",
             custom_scripts=None,
             spark_configuration=None,
             docker_repo=None,
             max_dedicated_nodes=1,
-            max_low_pri_nodes=None
+            max_low_pri_nodes=0
         )
         spark_client.submit_job(job_configuration=job_configuration)
         spark_client.wait_until_job_finished(job_configuration.id)
@@ -273,12 +273,16 @@ def test_delete_job():
         except AztkError:
             # this should fail
             assert True
-    
+
     except (AztkError, BatchErrorException):
         assert False
 
     finally:
-        try:
-            spark_client.delete_job(job_configuration.id)
-        except Exception:
-            pass
+        clean_up_job(job_configuration.id)
+
+
+def clean_up_job(job_id):
+    try:
+        spark_client.delete_job(job_id)
+    except (BatchErrorException, AztkError):
+        pass
