@@ -4,6 +4,7 @@ from install import pick_master, spark, scripts, create_user, plugins, spark_con
 import wait_until_master_selected
 from aztk.models.plugins import PluginTarget
 from aztk.internal import cluster_data
+from aztk.utils import constants
 
 def read_cluster_config():
     data = cluster_data.ClusterData(config.blob_client, config.cluster_id)
@@ -54,6 +55,14 @@ def setup_spark_container():
     """
     Code run in the main spark container
     """
+    aztk_docker_image_version = os.environ.get("AZTK_DOCKER_IMAGE_VERSION")
+    if aztk_docker_image_version is None:
+        print("Environment Variable $AZTK_DOCKER_IMAGE_VERSION not present. This Docker image may not be compatible.")
+    elif AZTK_DOCKER_IMAGE_VERSION != constants.DOCKER_IMAGE_VERSION:
+        print("ERROR: This version of AZTK requires $AZTK_DOCKER_IMAGE_VERSION of", constants.DOCKER_IMAGE_VERSION,
+              ", but the docker image has $AZTK_DOCKER_IMAGE_VERSION of " aztk_docker_image_version)
+        sys.exit(1)
+
     is_master = os.environ.get("AZTK_IS_MASTER") == "true"
     is_worker = os.environ.get("AZTK_IS_WORKER") == "true"
     print("Setting spark container. Master: ", is_master, ", Worker: ", is_worker)
