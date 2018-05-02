@@ -45,4 +45,4 @@ Please refer to the [the configuration file documentation](https://aztk.readthed
 Custom scripts have been depreciated in favor of Plugins. Plugins have a number of advantages, including the ability to execute on the host (and not in the Spark Docker container). A number of supported plugins are shipped with aztk, please refer to [the plugin documentation to learn more.](https://aztk.readthedocs.io/en/v0.7.0/15-plugins.html)
 
 ## Read the Docs
-[Documentation has migrated to readthedocs](https://aztk.readthedocs.io).
+[Documentation has migrated to readthedocs](https://aztk.readthedocs.io/en/v0.7.0).
