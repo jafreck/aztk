@@ -5,15 +5,15 @@
 
 [AZTK is now published on pip!](https://pypi.org/project/aztk/) [Documentation has migrated to readthedocs](aztk.readthedocs.io)
 
-This release includes a number of breaking changes. [Please follow the migration for upgrading from 0.6.0.](_).
+This release includes a number of breaking changes. [Please follow the migration for upgrading from 0.6.0.](https://aztk.readthedocs.io/en/v0.7.0/80-migration.html).
 
 **Breaking Changes**
 
 - Moved `docker_repo` under a new `toolkit` key. `docker_repo` is now only used for custom Docker images. Use toolkit for supported images.
-- Docker images have been refactored and moved to a different Dockerhub repository. The new supported images are not backwards compatible. See [the documentation on toolkits.](_)
+- Docker images have been refactored and moved to a different Dockerhub repository. The new supported images are not backwards compatible. See [the documentation on configuration files.](https://aztk.readthedocs.io/en/v0.7.0/13-configuration.html#cluster-yaml)
 
 **Deprecated Features**
-- Custom scripts have been removed in favor of Plugins, which are more robust. See, [the documenation on Plugins.](_)
+- Custom scripts have been removed in favor of Plugins, which are more robust. See, [the documenation on Plugins.](https://aztk.readthedocs.io/en/v0.7.0/15-plugins.html)
 
 **Added Features**
 * add internal flag to node commands (#482) ([1eaa1b6](https://github.com/Azure/aztk/commit/1eaa1b6)), closes [#482](https://github.com/Azure/aztk/issues/482)
