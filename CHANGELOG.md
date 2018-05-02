@@ -33,6 +33,7 @@ This release includes a number of breaking changes. [Please follow the migration
 * spark debug tool (#455) ([44a0765](https://github.com/Azure/aztk/commit/44a0765)), closes [#455](https://github.com/Azure/aztk/issues/455)
 * spark ui proxy plugin (#467) ([2e995b4](https://github.com/Azure/aztk/commit/2e995b4)), closes [#467](https://github.com/Azure/aztk/issues/467)
 * Spark vnet custom dns hostname fix (#490) ([61e7c59](https://github.com/Azure/aztk/commit/61e7c59)), closes [#490](https://github.com/Azure/aztk/issues/490)
+* New Toolkit configuration (#507) ([7a7e63c](https://github.com/Azure/aztk/commit/7a7e63c)), closes [#507](https://github.com/Azure/aztk/issues/507)
 
 **Bug Fixes**
 * add gitattributes file (#470) ([82ad029](https://github.com/Azure/aztk/commit/82ad029)), closes [#470](https://github.com/Azure/aztk/issues/470)
