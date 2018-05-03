@@ -23,6 +23,7 @@ class PluginManager:
         hdfs=plugins.HDFSPlugin,
         simple=plugins.SimplePlugin,
         spark_ui_proxy=plugins.SparkUIProxyPlugin,
+        openblas=plugins.OpenBLASPlugin,
     )
 
     def __init__(self):
