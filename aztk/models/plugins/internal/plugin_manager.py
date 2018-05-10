@@ -24,6 +24,7 @@ class PluginManager:
         simple=plugins.SimplePlugin,
         spark_ui_proxy=plugins.SparkUIProxyPlugin,
         openblas=plugins.OpenBLASPlugin,
+        nvblas=plugins.NvBLASPlugin,
     )
 
     def __init__(self):
