@@ -11,6 +11,18 @@ This is the default cluster configuration:
 # id: <id of the cluster to be created>
 id: spark_cluster
 
+# Toolkit configuration [Required] You can use `aztk toolkit` command to find which are the available tookits
+toolkit:
+  software: spark
+  version: 2.2
+  # environment: python
+  # Optional version for the environment
+  # environment_version:
+
+  # Optional docker repository(To bring your custom docker image. Just specify the Toolkit software, version and environemnt if using default images)
+  # docker_repo: <name of docker image repo (for more information, see https://github.com/Azure/aztk/blob/master/docs/12-docker-image.md)>
+
+
 # vm_size: <vm-size, see available options here: https://azure.microsoft.com/pricing/details/batch//>
 vm_size: standard_a2
 
@@ -22,10 +34,16 @@ size: 2
 # username: <username for the linux user to be created> (optional)
 username: spark
 
-# docker_repo: <name of docker image repo (for more information, see https://github.com/Azure/aztk/blob/master/docs/12-docker-image.html)>
-docker_repo: aztk/base:spark2.2.0
+# Enable plugins
+plugins:
+  # - name: spark_ui_proxy
+  # - name: jupyterlab
+  # - name: jupyter
+  # - name: hdfs
+  # - name: rstudio_server
 
-# custom_script: <path to custom script to run on each node> (optional)
+# Allow master node to also be a worker <true/false> (Default: true)
+# worker_on_master: true
 
 # wait: <true/false>
 wait: true
@@ -91,8 +109,6 @@ The following settings available in `spark-defaults.conf` and `spark-env.sh` are
 
 `spark-defaults.conf`:
 - spark.master
-
-Also note that this toolkit pre-loads wasb jars, so loading them elsewhere is not necessary.
 
 ### History Server
 If you want to use Spark's history server, please set the following values in your `.aztk/spark-defaults.conf` file:

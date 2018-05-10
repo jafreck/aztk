@@ -14,6 +14,10 @@ from aztk.spark.utils import util
 from aztk.internal.cluster_data import NodeData
 
 
+DEFAULT_CLUSTER_CONFIG = models.ClusterConfiguration(
+    worker_on_master=True,
+)
+
 class Client(BaseClient):
     """
     Aztk Spark Client
@@ -25,7 +29,7 @@ class Client(BaseClient):
     def __init__(self, secrets_config):
         super().__init__(secrets_config)
 
-    def create_cluster(self, cluster_conf: models.ClusterConfiguration, wait: bool = False):
+    def create_cluster(self, configuration: models.ClusterConfiguration, wait: bool = False):
         """
         Create a new aztk spark cluster
 
@@ -36,6 +40,9 @@ class Client(BaseClient):
         Returns:
             aztk.spark.models.Cluster
         """
+        cluster_conf = models.ClusterConfiguration()
+        cluster_conf.merge(DEFAULT_CLUSTER_CONFIG)
+        cluster_conf.merge(configuration)
         cluster_conf.validate()
         cluster_data = self._get_cluster_data(cluster_conf.cluster_id)
         try:
@@ -45,8 +52,9 @@ class Client(BaseClient):
 
             start_task = create_cluster_helper.generate_cluster_start_task(self,
                                                                            zip_resource_files,
+                                                                           cluster_conf.cluster_id,
                                                                            cluster_conf.gpu_enabled(),
-                                                                           cluster_conf.docker_repo,
+                                                                           cluster_conf.get_docker_repo(),
                                                                            cluster_conf.file_shares,
                                                                            cluster_conf.plugins,
                                                                            cluster_conf.mixed_mode(),
@@ -160,23 +168,39 @@ class Client(BaseClient):
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
 
-    def cluster_run(self, cluster_id: str, command: str, host=False, internal: bool = False):
+    def cluster_run(self, cluster_id: str, command: str, host=False, internal: bool = False, timeout=None):
         try:
-            return self.__cluster_run(cluster_id, command, internal, container_name='spark' if not host else None)
+            return self.__cluster_run(cluster_id,
+                                      command,
+                                      internal,
+                                      container_name='spark' if not host else None,
+                                      timeout=timeout)
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
 
-    def cluster_copy(self, cluster_id: str, source_path: str, destination_path: str, host: bool = False, internal: bool = False):
+    def cluster_copy(self, cluster_id: str, source_path: str, destination_path: str, host: bool = False, internal: bool = False, timeout=None):
         try:
             container_name = None if host else 'spark'
-            return self.__cluster_copy(cluster_id, source_path, destination_path, container_name=container_name, get=False, internal=internal)
+            return self.__cluster_copy(cluster_id,
+                                       source_path,
+                                       destination_path,
+                                       container_name=container_name,
+                                       get=False,
+                                       internal=internal,
+                                       timeout=timeout)
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
 
-    def cluster_download(self, cluster_id: str, source_path: str, destination_path: str, host: bool = False, internal: bool = False):
+    def cluster_download(self, cluster_id: str, source_path: str, destination_path: str, host: bool = False, internal: bool = False, timeout=None):
         try:
             container_name = None if host else 'spark'
-            return self.__cluster_copy(cluster_id, source_path, destination_path, container_name=container_name, get=True, internal=internal)
+            return self.__cluster_copy(cluster_id,
+                                       source_path,
+                                       destination_path,
+                                       container_name=container_name,
+                                       get=True,
+                                       internal=internal,
+                                       timeout=timeout)
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
 
@@ -192,8 +216,9 @@ class Client(BaseClient):
 
             start_task = create_cluster_helper.generate_cluster_start_task(self,
                                                                            zip_resource_files,
+                                                                           job_configuration.id,
                                                                            job_configuration.gpu_enabled,
-                                                                           job_configuration.docker_repo,
+                                                                           job_configuration.get_docker_repo(),
                                                                            mixed_mode=job_configuration.mixed_mode(),
                                                                            worker_on_master=job_configuration.worker_on_master)
 
