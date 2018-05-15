@@ -8,7 +8,7 @@ import uuid
 import yaml
 from azure.common import credentials
 from azure.graphrbac import GraphRbacManagementClient
-from azure.graphrbac.models import ApplicationCreateParameters, PasswordCredential, ServicePrincipalCreateParameters
+from azure.graphrbac.models import ApplicationCreateParameters, ApplicationUpdateParameters, PasswordCredential, ServicePrincipalCreateParameters
 from azure.graphrbac.models.graph_error import GraphErrorException
 from azure.mgmt.authorization import AuthorizationManagementClient
 from azure.mgmt.batch import BatchManagementClient
@@ -210,7 +210,24 @@ def create_aad_user(credentials, tenant_id, **kwargs):
             confirmation_prompt = "Previously created application with name {} found. "\
                                   "Would you like to use it? (y/n): ".format(application.display_name)
             prompt_for_confirmation(confirmation_prompt, e, ValueError("Response not recognized. Please try again."))
-
+            password_credentials = list(graph_rbac_client.applications.list_password_credentials(application_object_id=application.object_id))
+            password_credentials.append(
+                PasswordCredential(
+                    end_date=datetime(2299, 12, 31, 0, 0, 0, 0, tzinfo=timezone.utc),
+                    value=application_credential,
+                    key_id=uuid.uuid4()
+                )
+            )
+            print(password_credentials)
+            print([password.__dict__ for password in password_credentials])
+            graph_rbac_client.applications.patch(
+                application_object_id=application.object_id,
+                parameters=ApplicationUpdateParameters(
+                    password_credentials=password_credentials
+                )
+            )
+            password_credentials = list(graph_rbac_client.applications.list_password_credentials(application_object_id=application.object_id))
+            print(password_credentials)
             service_principal = next(graph_rbac_client.service_principals.list(
                 filter="appId eq '{}'".format(application.app_id)))
         else:
@@ -371,22 +388,22 @@ if __name__ == "__main__":
     }
     print("Creating the Azure resources.")
 
-    # create resource group
-    with Spinner():
-        resource_group_id = create_resource_group(creds, subscription_id, **kwargs)
-        kwargs["resource_group_id"] = resource_group_id
-    print("Created resource group.")
+    # # create resource group
+    # with Spinner():
+    #     resource_group_id = create_resource_group(creds, subscription_id, **kwargs)
+    #     kwargs["resource_group_id"] = resource_group_id
+    # print("Created resource group.")
 
-    # create storage account
-    with Spinner():
-        storage_account_id = create_storage_account(creds, subscription_id, **kwargs)
-        kwargs["storage_account_id"] = storage_account_id
-    print("Created Storage group.")
+    # # create storage account
+    # with Spinner():
+    #     storage_account_id = create_storage_account(creds, subscription_id, **kwargs)
+    #     kwargs["storage_account_id"] = storage_account_id
+    # print("Created Storage group.")
 
-    # create batch account
-    with Spinner():
-        batch_account_id = create_batch_account(creds, subscription_id, **kwargs)
-    print("Created Batch account.")
+    # # create batch account
+    # with Spinner():
+    #     batch_account_id = create_batch_account(creds, subscription_id, **kwargs)
+    # print("Created Batch account.")
 
     # create vnet with a subnet
     # subnet_id = create_vnet(creds, subscription_id)
@@ -401,19 +418,19 @@ if __name__ == "__main__":
         application_id, service_principal_object_id, application_credential = create_aad_user(aad_cred, tenant_id, **kwargs)
     print("Created Azure Active Directory service principal.")
 
-    with Spinner():
-        create_role_assignment(creds, subscription_id, resource_group_id, service_principal_object_id)
-    print("Configured permsisions.")
+    # with Spinner():
+    #     create_role_assignment(creds, subscription_id, resource_group_id, service_principal_object_id)
+    # print("Configured permsisions.")
 
-    secrets = format_secrets(
-        **{
-            "tenant_id": tenant_id,
-            "client_id": application_id,
-            "credential": application_credential,
-            # "subnet_id": subnet_id,
-            "batch_account_resource_id": batch_account_id,
-            "storage_account_resource_id": storage_account_id
-        }
-    )
+    # secrets = format_secrets(
+    #     **{
+    #         "tenant_id": tenant_id,
+    #         "client_id": application_id,
+    #         "credential": application_credential,
+    #         # "subnet_id": subnet_id,
+    #         "batch_account_resource_id": batch_account_id,
+    #         "storage_account_resource_id": storage_account_id
+    #     }
+    # )
 
     print("\n# Copy the following into your .aztk/secrets.yaml file\n{}".format(secrets))
