@@ -5,14 +5,14 @@ from aztk.utils import constants
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
-class NvBLASPlugin(PluginConfiguration):
-    def __init__(self):
-        super().__init__(
-            name="nvblas",
-            ports=[],
-            target_role=PluginTargetRole.All,
-            execute="nvblas.sh",
-            files=[
-                PluginFile("nvblas.sh", os.path.join(dir_path, "nvblas.sh")),
-            ],
-        )
+
+def NvBLASPlugin():
+    return PluginConfiguration(
+        name="nvblas",
+        ports=[],
+        target_role=PluginTargetRole.All,
+        execute="nvblas.sh",
+        files=[
+            PluginFile("nvblas.sh", os.path.join(dir_path, "nvblas.sh")),
+        ]
+    )
