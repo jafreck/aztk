@@ -6,13 +6,12 @@ from aztk.utils import constants
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 
-class TensorflowOnSparkPlugin(PluginConfiguration):
-    def __init__(self):
-        super().__init__(
-            name="tensorflow_on_spark",
-            target_role=PluginTargetRole.Master,
-            execute="tensorflow_on_spark.sh",
-            files=[
-                PluginFile("tensorflow_on_spark.sh", os.path.join(dir_path, "tensorflow_on_spark.sh")),
-            ],
-        )
+def TensorflowOnSparkPlugin():
+    return PluginConfiguration(
+        name="tensorflow_on_spark",
+        target_role=PluginTargetRole.Master,
+        execute="tensorflow_on_spark.sh",
+        files=[
+            PluginFile("tensorflow_on_spark.sh", os.path.join(dir_path, "tensorflow_on_spark.sh")),
+        ],
+    )
