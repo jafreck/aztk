@@ -269,7 +269,7 @@ def create_role_assignment(credentials, subscription_id, scope, principal_id):
 
 def format_secrets(**kwargs):
     '''
-    Retuns the secrets for the created resources to be placed in secrets.yaml
+    Returns the secrets for the created resources to be placed in secrets.yaml
     The following form is returned:
 
         service_principal:
@@ -396,7 +396,7 @@ if __name__ == "__main__":
     with Spinner():
         storage_account_id = create_storage_account(creds, subscription_id, **kwargs)
         kwargs["storage_account_id"] = storage_account_id
-    print("Created Storage group.")
+    print("Created Storage account.")
 
     # create batch account
     with Spinner():
