@@ -14,6 +14,7 @@ Currently the following plugins are supported:
 - HDFS
 - RStudioServer
 - TensorflowOnSpark
+- GATK4
 - OpenBLAS
 - mvBLAS
 

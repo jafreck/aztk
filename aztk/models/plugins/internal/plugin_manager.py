@@ -24,6 +24,7 @@ class PluginManager:
         simple=plugins.SimplePlugin,
         spark_ui_proxy=plugins.SparkUIProxyPlugin,
         tensorflow_on_spark=plugins.TensorflowOnSparkPlugin,
+        gatk4=plugins.GATK4,
         openblas=plugins.OpenBLASPlugin,
         nvblas=plugins.NvBLASPlugin,
     )

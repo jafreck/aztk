@@ -45,6 +45,7 @@ plugins:
   # - name: rstudio_server
   # - name: spark_ui_proxy
   # - name: tensorflow_on_spark
+  # - name: gatk4
   # - name: openblas
   # - name: nvblas
 
