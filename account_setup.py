@@ -220,16 +220,12 @@ def create_aad_user(credentials, tenant_id, **kwargs):
                     key_id=uuid.uuid4()
                 )
             )
-            print(password_credentials)
-            print([password.__dict__ for password in password_credentials])
             graph_rbac_client.applications.patch(
                 application_object_id=application.object_id,
                 parameters=ApplicationUpdateParameters(
                     password_credentials=password_credentials
                 )
             )
-            password_credentials = list(graph_rbac_client.applications.list_password_credentials(application_object_id=application.object_id))
-            print(password_credentials)
             service_principal = next(graph_rbac_client.service_principals.list(
                 filter="appId eq '{}'".format(application.app_id)))
         else:
