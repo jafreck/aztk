@@ -189,6 +189,7 @@ def create_aad_user(credentials, tenant_id, **kwargs):
                 display_name=display_name,
                 password_credentials=[
                     PasswordCredential(
+                        start_date=datetime(2000, 1, 1, 0, 0, 0, 0, tzinfo=timezone.utc),
                         end_date=datetime(2299, 12, 31, 0, 0, 0, 0, tzinfo=timezone.utc),
                         value=application_credential,
                         key_id=uuid.uuid4()
@@ -213,6 +214,7 @@ def create_aad_user(credentials, tenant_id, **kwargs):
             password_credentials = list(graph_rbac_client.applications.list_password_credentials(application_object_id=application.object_id))
             password_credentials.append(
                 PasswordCredential(
+                    start_date=datetime(2000, 1, 1, 0, 0, 0, 0, tzinfo=timezone.utc),
                     end_date=datetime(2299, 12, 31, 0, 0, 0, 0, tzinfo=timezone.utc),
                     value=application_credential,
                     key_id=uuid.uuid4()
@@ -388,22 +390,22 @@ if __name__ == "__main__":
     }
     print("Creating the Azure resources.")
 
-    # # create resource group
-    # with Spinner():
-    #     resource_group_id = create_resource_group(creds, subscription_id, **kwargs)
-    #     kwargs["resource_group_id"] = resource_group_id
-    # print("Created resource group.")
+    # create resource group
+    with Spinner():
+        resource_group_id = create_resource_group(creds, subscription_id, **kwargs)
+        kwargs["resource_group_id"] = resource_group_id
+    print("Created resource group.")
 
-    # # create storage account
-    # with Spinner():
-    #     storage_account_id = create_storage_account(creds, subscription_id, **kwargs)
-    #     kwargs["storage_account_id"] = storage_account_id
-    # print("Created Storage group.")
+    # create storage account
+    with Spinner():
+        storage_account_id = create_storage_account(creds, subscription_id, **kwargs)
+        kwargs["storage_account_id"] = storage_account_id
+    print("Created Storage group.")
 
-    # # create batch account
-    # with Spinner():
-    #     batch_account_id = create_batch_account(creds, subscription_id, **kwargs)
-    # print("Created Batch account.")
+    # create batch account
+    with Spinner():
+        batch_account_id = create_batch_account(creds, subscription_id, **kwargs)
+    print("Created Batch account.")
 
     # create vnet with a subnet
     # subnet_id = create_vnet(creds, subscription_id)
@@ -414,23 +416,23 @@ if __name__ == "__main__":
         aad_cred, subscirption_id, tenant_id = profile.get_login_credentials(
             resource=AZURE_PUBLIC_CLOUD.endpoints.active_directory_graph_resource_id
         )
-
         application_id, service_principal_object_id, application_credential = create_aad_user(aad_cred, tenant_id, **kwargs)
+    
     print("Created Azure Active Directory service principal.")
 
-    # with Spinner():
-    #     create_role_assignment(creds, subscription_id, resource_group_id, service_principal_object_id)
-    # print("Configured permsisions.")
+    with Spinner():
+        create_role_assignment(creds, subscription_id, resource_group_id, service_principal_object_id)
+    print("Configured permsisions.")
 
-    # secrets = format_secrets(
-    #     **{
-    #         "tenant_id": tenant_id,
-    #         "client_id": application_id,
-    #         "credential": application_credential,
-    #         # "subnet_id": subnet_id,
-    #         "batch_account_resource_id": batch_account_id,
-    #         "storage_account_resource_id": storage_account_id
-    #     }
-    # )
+    secrets = format_secrets(
+        **{
+            "tenant_id": tenant_id,
+            "client_id": application_id,
+            "credential": application_credential,
+            # "subnet_id": subnet_id,
+            "batch_account_resource_id": batch_account_id,
+            "storage_account_resource_id": storage_account_id
+        }
+    )
 
     print("\n# Copy the following into your .aztk/secrets.yaml file\n{}".format(secrets))
