@@ -11,6 +11,7 @@ import azure.batch.models.batch_error as batch_error
 import aztk
 from aztk_cli import logger, log, utils, constants
 from aztk_cli.spark.endpoints import spark
+from aztk_cli.gatk.endpoints import gatk
 from . import plugins, toolkit
 
 
@@ -30,12 +31,15 @@ def main():
     subparsers.required = True
     spark_parser = subparsers.add_parser(
         "spark", help="Commands to run spark jobs")
+    gatk_parser = subparsers.add_parser(
+        "gatk", help="Commands to run gatk jobs")
     plugins_parser = subparsers.add_parser(
         "plugins", help="Commands to list and view plugins")
     toolkit_parser = subparsers.add_parser(
         "toolkit", help="List current toolkit information and browse available ones")
 
     spark.setup_parser(spark_parser)
+    gatk.setup_parser(gatk_parser)
     plugins.setup_parser(plugins_parser)
     toolkit.setup_parser(toolkit_parser)
     args = parser.parse_args()
@@ -68,6 +72,7 @@ def parse_common_args(args: NamedTuple):
 def run_software(args: NamedTuple):
     softwares = {}
     softwares[aztk.models.Software.spark] = spark.execute
+    softwares[aztk.models.Software.gatk] = gatk.execute
     softwares["plugins"] = plugins.execute
     softwares["toolkit"] = toolkit.execute
 

@@ -101,7 +101,8 @@ class NodeData:
             return
         self.add_files(
             [
-                spark_configuration.spark_defaults_conf, spark_configuration.spark_env_sh,
+                spark_configuration.spark_defaults_conf,
+                spark_configuration.spark_env_sh,
                 spark_configuration.core_site_xml
             ],
             'conf',
