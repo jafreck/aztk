@@ -252,7 +252,6 @@ class Client:
         finally:
             self.__delete_user(cluster_id, node.id, 'aztk')
 
-
     def __cluster_run(self, cluster_id, command, internal, container_name=None, timeout=None):
         pool, nodes = self.__get_pool_details(cluster_id)
         nodes = [node for node in nodes]
