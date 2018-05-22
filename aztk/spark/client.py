@@ -178,6 +178,17 @@ class Client(BaseClient):
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
 
+    def node_run(self, cluster_id: str, node_id: str, command: str, host=False, internal: bool = False, timeout=None):
+        try:
+            return self.__node_run(cluster_id,
+                                   node_id,
+                                   command,
+                                   internal,
+                                   container_name='spark' if not host else None,
+                                   timeout=timeout)
+        except batch_error.BatchErrorException as e:
+            raise error.AztkError(helpers.format_batch_exception(e))
+
     def cluster_copy(self, cluster_id: str, source_path: str, destination_path: str, host: bool = False, internal: bool = False, timeout=None):
         try:
             container_name = None if host else 'spark'
