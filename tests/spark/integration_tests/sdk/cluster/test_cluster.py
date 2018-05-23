@@ -423,7 +423,7 @@ def test_jupyter_plugin():
         file_shares=None,
         toolkit=aztk.spark.models.SparkToolkit(version="2.3.0"),
         spark_configuration=None,
-        plugins=
+        plugins=aztk.spark.models.plugins.JupyterPlugin()
     )
 
     try:
