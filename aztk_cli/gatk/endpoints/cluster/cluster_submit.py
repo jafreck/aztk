@@ -5,6 +5,7 @@ import typing
 
 import aztk.gatk
 from aztk_cli import config, log, utils
+from aztk_cli.config import SshConfig
 
 
 def setup_parser(parser: argparse.ArgumentParser):
@@ -125,11 +126,18 @@ def execute(args: typing.NamedTuple):
 
     ssh_conf.merge(
         cluster_id=args.cluster_id,
-        username=args.username)
+        username=args.username,
+        job_ui_port=None,
+        job_history_ui_port=None,
+        web_ui_port=None,
+        host=None,
+        connect=None,
+        internal=None)
 
     node_id, output = gatk_client.node_run(
         cluster_id=args.cluster_id,
         node_id=master_node_id,
-        command=args.command,
+        command="docker exec gatk /bin/bash -c 'source /root/.gatkbashrc; echo $PATH; gatk" + args.command,
     )
+
     print(output)

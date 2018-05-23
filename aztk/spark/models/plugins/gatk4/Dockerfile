@@ -39,4 +39,4 @@ RUN . /opt/conda/etc/profile.d/conda.sh \
 
 CMD ["/bin/bash", "--init-file", "/root/.gatkbashrc"]
 
-# sudo docker exec gatk4 /bin/bash -c 'source /root/.bashrc; echo $PATH;'
+# sudo docker exec gatk4 /bin/bash -c 'source /root/.gatkbashrc; echo $PATH;'
