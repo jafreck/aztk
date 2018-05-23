@@ -162,7 +162,7 @@ class Client:
             :param password: password of the user to add
             :param ssh_key: ssh_key of the user to add
         """
-        # Create new ssh user for the master node
+        # Create new ssh user for the given node
         self.batch_client.compute_node.add_user(
             pool_id,
             node_id,
@@ -223,7 +223,8 @@ class Client:
                                        username,
                                        pool_id,
                                        node.id,
-                                       ssh_pub_key): node for node in nodes}
+                                       ssh_pub_key,
+                                       password): node for node in nodes}
             concurrent.futures.wait(futures)
 
     def __delete_user_on_pool(self, username, pool_id, nodes):
