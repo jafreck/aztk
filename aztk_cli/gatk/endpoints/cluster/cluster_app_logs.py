@@ -25,7 +25,7 @@ def setup_parser(parser: argparse.ArgumentParser):
 
 
 def execute(args: typing.NamedTuple):
-    gatk_client = aztk.spark.Client(config.load_aztk_secrets())
+    gatk_client = aztk.gatk.Client(config.load_aztk_secrets())
 
     if args.tail:
         utils.stream_logs(client=gatk_client, cluster_id=args.cluster_id, application_name=args.app_name)

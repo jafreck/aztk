@@ -415,7 +415,7 @@ def get_file_if_exists(file):
 
     return None
 
-
+# TODO: move this to aztk_cli/spark
 def load_aztk_spark_config():
     return aztk.spark.models.SparkConfiguration(
         spark_defaults_conf=get_file_if_exists('spark-defaults.conf'),
@@ -423,6 +423,13 @@ def load_aztk_spark_config():
         spark_env_sh=get_file_if_exists('spark-env.sh'),
         core_site_xml=get_file_if_exists('core-site.xml'))
 
+# TODO: move this to aztk_cli/gatk
+def load_aztk_gatk_config():
+    return aztk.spark.models.SparkConfiguration(
+        spark_defaults_conf=get_file_if_exists('spark-defaults.conf'),
+        jars=load_jars(),
+        spark_env_sh=get_file_if_exists('spark-env.sh'),
+        core_site_xml=get_file_if_exists('core-site.xml'))
 
 def load_jars():
     jars = None

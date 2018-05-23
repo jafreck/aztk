@@ -262,7 +262,7 @@ class Client:
         try:
             ssh_key = self.__create_user_on_pool('aztk', pool.id, nodes)
             output = asyncio.get_event_loop().run_until_complete(
-                ssh_lib.clus_exec_command(
+                ssh_lib.cluster_exec_command(
                     command,
                     'aztk',
                     cluster_nodes,
@@ -286,7 +286,7 @@ class Client:
         try:
             ssh_key = self.__create_user_on_pool('aztk', pool.id, nodes)
             output = asyncio.get_event_loop().run_until_complete(
-                ssh_lib.clus_copy(
+                ssh_lib.cluster_copy(
                     container_name=container_name,
                     username='aztk',
                     nodes=cluster_nodes,

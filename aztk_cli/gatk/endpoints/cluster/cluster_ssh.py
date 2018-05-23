@@ -27,7 +27,7 @@ http_prefix = 'http://localhost:'
 
 
 def execute(args: typing.NamedTuple):
-    gatk_client = aztk.spark.Client(config.load_aztk_secrets())
+    gatk_client = aztk.gatk.Client(config.load_aztk_secrets())
     cluster = gatk_client.get_cluster(args.cluster_id)
     cluster_config = gatk_client.get_cluster_config(args.cluster_id)
     ssh_conf = SshConfig()

@@ -1,11 +1,11 @@
 import argparse
 import typing
 
-import aztk.spark
-from aztk.spark.models import ClusterConfiguration, UserConfiguration
+import aztk.gatk
+from aztk.gatk.models import ClusterConfiguration, UserConfiguration
 from aztk_cli import config, log, utils
-from aztk_cli.config import load_aztk_spark_config
-from aztk.spark.models.plugins import GATK4
+from aztk_cli.config import load_aztk_gatk_config
+from aztk.gatk.models.plugins import GATK4
 
 def setup_parser(parser: argparse.ArgumentParser):
     parser.add_argument('--id', dest='cluster_id',
@@ -33,9 +33,9 @@ def setup_parser(parser: argparse.ArgumentParser):
 
 
 def execute(args: typing.NamedTuple):
-    gatk_client = aztk.spark.Client(config.load_aztk_secrets())
+    gatk_client = aztk.gatk.Client(config.load_aztk_secrets())
     cluster_conf = ClusterConfiguration()
-    cluster_conf.spark_configuration = load_aztk_spark_config()
+    cluster_conf.spark_configuration = load_aztk_gatk_config()
 
     # read cluster.yaml configuartion file, overwrite values with args
     file_config, wait = config.read_cluster_config()
@@ -67,7 +67,7 @@ def execute(args: typing.NamedTuple):
                                                         user_configuration.username,
                                                         user_configuration.password,
                                                         gatk_client.secrets_config)
-        cluster_conf.user_configuration = aztk.spark.models.UserConfiguration(
+        cluster_conf.user_configuration = aztk.gatk.models.UserConfiguration(
             username=user_configuration.username,
             password=password,
             ssh_key=ssh_key

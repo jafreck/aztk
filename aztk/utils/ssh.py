@@ -54,7 +54,7 @@ def node_exec_command(node_id, command, username, hostname, port, ssh_key=None, 
     return (node_id, output)
 
 
-async def clus_exec_command(command, username, nodes, ports=None, ssh_key=None, password=None, container_name=None, timeout=None):
+async def cluster_exec_command(command, username, nodes, ports=None, ssh_key=None, password=None, container_name=None, timeout=None):
     return await asyncio.gather(
         *[asyncio.get_event_loop().run_in_executor(ThreadPoolExecutor(),
                                                    node_exec_command,
@@ -118,7 +118,7 @@ def node_copy(node_id, source_path, destination_path, username, hostname, port, 
     #TODO: progress bar
 
 
-async def clus_copy(username, nodes, source_path, destination_path, ssh_key=None, password=None, container_name=None, get=False, timeout=None):
+async def cluster_copy(username, nodes, source_path, destination_path, ssh_key=None, password=None, container_name=None, get=False, timeout=None):
     return await asyncio.gather(
         *[asyncio.get_event_loop().run_in_executor(ThreadPoolExecutor(),
                                                    copy_from_node if get else node_copy,

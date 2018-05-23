@@ -3,7 +3,7 @@ import os
 import typing
 import time
 
-import aztk.spark
+import aztk.gatk
 from aztk_cli import config, utils
 
 
@@ -16,7 +16,7 @@ def setup_parser(parser: argparse.ArgumentParser):
 
 
 def execute(args: typing.NamedTuple):
-    gatk_client = aztk.spark.Client(config.load_aztk_secrets())
+    gatk_client = aztk.gatk.Client(config.load_aztk_secrets())
     timestr = time.strftime("%Y%m%d-%H%M%S")
 
     if not args.output:

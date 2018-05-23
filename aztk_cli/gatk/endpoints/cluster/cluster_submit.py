@@ -3,7 +3,7 @@ import os
 import sys
 import typing
 
-import aztk.spark
+import aztk.gatk
 from aztk_cli import config, log, utils
 
 
@@ -33,7 +33,7 @@ def execute(args: typing.NamedTuple):
     if not args.wait and args.output:
         raise aztk.error.AztkError("--output flag requires --wait flag")
 
-    gatk_client = aztk.spark.Client(config.load_aztk_secrets())
+    gatk_client = aztk.gatk.Client(config.load_aztk_secrets())
     # jars = []
     # py_files = []
     # files = []
@@ -80,7 +80,7 @@ def execute(args: typing.NamedTuple):
 
     # gatk_client.submit(
     #     cluster_id=args.cluster_id,
-    #     application = aztk.spark.models.ApplicationConfiguration(
+    #     application = aztk.gatk.models.ApplicationConfiguration(
     #         name=args.name,
     #         application=args.app,
     #         application_args=args.app_args,
@@ -127,14 +127,9 @@ def execute(args: typing.NamedTuple):
         cluster_id=args.cluster_id,
         username=args.username)
 
-    node_exec_command(
+    node_id, output = gatk_client.node_run(
+        cluster_id=args.cluster_id,
         node_id=master_node_id,
-        command='/bin/bash -c \'source /root/.gatkbashrc; gatk' + args.command,
-        username=ssh_conf.username,
-        hostname=,
-        port=,
-        ssh_key=,
-        password=,
-        container_name=,
-        timeout=
+        command=args.command,
     )
+    print(output)

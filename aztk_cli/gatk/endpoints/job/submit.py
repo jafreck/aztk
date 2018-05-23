@@ -2,9 +2,9 @@ import argparse
 import time
 import typing
 
-import aztk.spark
+import aztk.gatk
 from aztk_cli import config, log, utils
-from aztk_cli.config import JobConfig, load_aztk_spark_config
+from aztk_cli.config import JobConfig, load_aztk_gatk_config
 
 
 def setup_parser(parser: argparse.ArgumentParser):
@@ -19,13 +19,13 @@ def setup_parser(parser: argparse.ArgumentParser):
 
 
 def execute(args: typing.NamedTuple):
-    gatk_client = aztk.spark.Client(config.load_aztk_secrets())
+    gatk_client = aztk.gatk.Client(config.load_aztk_secrets())
     job_conf = JobConfig()
 
     job_conf.merge(args.job_id, args.job_conf)
 
     # by default, load gatk configuration files in .aztk/
-    spark_configuration = config.load_aztk_spark_config()
+    spark_configuration = config.load_aztk_gatk_config()
     # overwrite with values in job_conf if they exist
     if job_conf.gatk_defaults_conf:
         spark_configuration.gatk_defaults_conf = job_conf.gatk_defaults_conf
@@ -34,7 +34,7 @@ def execute(args: typing.NamedTuple):
     if job_conf.core_site_xml:
         spark_configuration.core_site_xml = job_conf.core_site_xml
 
-    job_configuration = aztk.spark.models.JobConfiguration(
+    job_configuration = aztk.gatk.models.JobConfiguration(
         id=job_conf.id,
         applications=job_conf.applications,
         custom_scripts=job_conf.custom_scripts,

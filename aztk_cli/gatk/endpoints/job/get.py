@@ -2,7 +2,7 @@ import argparse
 import time
 import typing
 
-import aztk.spark
+import aztk.gatk
 from aztk_cli import config, utils
 
 
@@ -14,6 +14,6 @@ def setup_parser(parser: argparse.ArgumentParser):
 
 
 def execute(args: typing.NamedTuple):
-    gatk_client = aztk.spark.Client(config.load_aztk_secrets())
+    gatk_client = aztk.gatk.Client(config.load_aztk_secrets())
 
     utils.print_job(gatk_client, gatk_client.get_job(args.job_id))
