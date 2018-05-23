@@ -15,7 +15,7 @@ Currently the following plugins are supported:
 - RStudioServer
 - TensorflowOnSpark
 - OpenBLAS
-- mvBLAS
+- nvBLAS
 
 ### Enable a plugin using the CLI
 If you are uing the `aztk` CLI and wish to enable a supported plugin, you need to update you `.aztk/cluster.yaml` configuration file.
