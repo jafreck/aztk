@@ -412,7 +412,29 @@ def test_spark_processes_up():
 
 #### PLUGINS:
 def test_jupyter_plugin():
-    pass
+    test_id = "test-jupyter-plugin"
+    cluster_configuration = aztk.spark.models.ClusterConfiguration(
+        cluster_id=test_id+base_cluster_id,
+        vm_count=2,
+        vm_low_pri_count=0,
+        vm_size="standard_f2",
+        subnet_id=None,
+        custom_scripts=None,
+        file_shares=None,
+        toolkit=aztk.spark.models.SparkToolkit(version="2.3.0"),
+        spark_configuration=None,
+        plugins=
+    )
+
+    try:
+        cluster = spark_client.create_cluster(cluster_configuration, wait=True)
+
+    except (AztkError, BatchErrorException):
+        assert False
+
+    finally:
+        clean_up_cluster(cluster_configuration.cluster_id)
+
 def test_jupyterlab_plugin():
     pass
 def test_hdfs_plugin():

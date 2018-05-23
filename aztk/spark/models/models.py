@@ -107,7 +107,8 @@ class ClusterConfiguration(aztk.models.ClusterConfiguration):
             toolkit: SparkToolkit = None,
             user_configuration: UserConfiguration = None,
             spark_configuration: SparkConfiguration = None,
-            worker_on_master: bool = None):
+            worker_on_master: bool = None,
+            plugins: List[PluginConfiguration] = None):
         super().__init__(
             custom_scripts=custom_scripts,
             cluster_id=cluster_id,
@@ -118,6 +119,7 @@ class ClusterConfiguration(aztk.models.ClusterConfiguration):
             subnet_id=subnet_id,
             file_shares=file_shares,
             user_configuration=user_configuration,
+            plugins=plugins
         )
         self.spark_configuration = spark_configuration
         self.worker_on_master = worker_on_master
