@@ -13,11 +13,14 @@ from concurrent.futures import ThreadPoolExecutor
 
 from aztk.error import AztkError
 
+
 g_verbose = True
+
 
 def verbose(s):
     if g_verbose:
         print(s)
+
 
 class ForwardServer(SocketServer.ThreadingTCPServer):
     daemon_threads = True
@@ -25,7 +28,6 @@ class ForwardServer(SocketServer.ThreadingTCPServer):
 
 
 class Handler(SocketServer.BaseRequestHandler):
-
     def handle(self):
         try:
             channel = self.ssh_transport.open_channel('direct-tcpip',
@@ -61,10 +63,8 @@ class Handler(SocketServer.BaseRequestHandler):
         self.request.close()
         verbose('Tunnel closed from %r' % (peername,))
 
+
 def forward_tunnel(local_port, remote_host, remote_port, transport):
-    # this is a little convoluted, but lets me configure things for the Handler
-    # object.  (SocketServer doesn't give Handlers any way to access the outer
-    # server normally.)
     class SubHandler(Handler):
         chain_host = remote_host
         chain_port = remote_port
@@ -73,12 +73,12 @@ def forward_tunnel(local_port, remote_host, remote_port, transport):
     thread.start()
     return thread
 
+
 def connect(hostname,
             port=22,
             username=None,
             password=None,
             pkey=None,
-            port_forward_list=None, #  list of ports to forward: [aztk.models.PortForwardingSpecification]
             timeout=None):
     import paramiko
 
@@ -98,9 +98,10 @@ def connect(hostname,
 
     return client
 
+
 def forward_ports(client, port_forward_list):
+    threads = []
     if port_forward_list:
-        threads = []
         for port_forwarding_specification in port_forward_list:
             threads.append(
                 forward_tunnel(
@@ -111,6 +112,7 @@ def forward_ports(client, port_forward_list):
                 )
             )
     return threads
+
 
 def node_exec_command(node_id, command, username, hostname, port, ssh_key=None, password=None, container_name=None, timeout=None):
     try:

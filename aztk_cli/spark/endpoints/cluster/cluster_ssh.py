@@ -55,11 +55,11 @@ def execute(args: typing.NamedTuple):
     utils.log_property("connect", ssh_conf.connect)
     log.info("-------------------------------------------")
 
-    # TODO: make a determination whether to shell out or use paramiko
-    if True:
-        pure_python_ssh_into_master(spark_client, cluster, ssh_conf.username, args.password)
-    else:
+    try:
         shell_out_ssh(spark_client, ssh_conf)
+    except OSError:
+        # no ssh client is found, falling back to pure python
+        pure_python_ssh_into_master(spark_client, cluster, ssh_conf.username, args.password)
 
 
 def print_plugin_ports(cluster_config: ClusterConfiguration):

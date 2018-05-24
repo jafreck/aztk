@@ -212,6 +212,7 @@ def ssh_in_master(
 
     if connect:
         call(command, shell=True)
+
     return '\n\t{}\n'.format(command)
 
 def print_batch_exception(batch_exception):
