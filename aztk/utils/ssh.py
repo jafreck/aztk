@@ -8,17 +8,77 @@ import select
 import socket
 import socketserver as SocketServer
 import sys
+import threading
 from concurrent.futures import ThreadPoolExecutor
 
 from aztk.error import AztkError
-from . import helpers
 
+g_verbose = True
+
+def verbose(s):
+    if g_verbose:
+        print(s)
+
+class ForwardServer (SocketServer.ThreadingTCPServer):
+    daemon_threads = True
+    allow_reuse_address = True
+
+
+class Handler (SocketServer.BaseRequestHandler):
+
+    def handle(self):
+        try:
+            channel = self.ssh_transport.open_channel('direct-tcpip',
+                                                     (self.chain_host, self.chain_port),
+                                                     self.request.getpeername())
+        except Exception as e:
+            verbose('Incoming request to %s:%d failed: %s' % (self.chain_host,
+                                                              self.chain_port,
+                                                              repr(e)))
+            return
+        if channel is None:
+            verbose('Incoming request to %s:%d was rejected by the SSH server.' %
+                    (self.chain_host, self.chain_port))
+            return
+
+        verbose('Connected!  Tunnel open %r -> %r -> %r' % (self.request.getpeername(),
+                                                            channel.getpeername(), (self.chain_host, self.chain_port)))
+        while True:
+            r, w, x = select.select([self.request, channel], [], [])
+            if self.request in r:
+                data = self.request.recv(1024)
+                if len(data) == 0:
+                    break
+                channel.send(data)
+            if channel in r:
+                data = channel.recv(1024)
+                if len(data) == 0:
+                    break
+                self.request.send(data)
+
+        peername = self.request.getpeername()
+        channel.close()
+        self.request.close()
+        verbose('Tunnel closed from %r' % (peername,))
+
+def forward_tunnel(local_port, remote_host, remote_port, transport):
+    # this is a little convoluted, but lets me configure things for the Handler
+    # object.  (SocketServer doesn't give Handlers any way to access the outer
+    # server normally.)
+    class SubHandler(Handler):
+        chain_host = remote_host
+        chain_port = remote_port
+        ssh_transport = transport
+    thread = threading.Thread(target=ForwardServer(('', local_port), SubHandler).serve_forever, daemon=True)
+    thread.start()
+    return thread
 
 def connect(hostname,
             port=22,
             username=None,
             password=None,
             pkey=None,
+            port_forward_list=None, #  list of ports to forward: [aztk.models.PortForwardingSpecification]
             timeout=None):
     import paramiko
 
@@ -38,6 +98,19 @@ def connect(hostname,
 
     return client
 
+def forward_ports(client, port_forward_list):
+    if port_forward_list:
+        threads = []
+        for port_forwarding_specification in port_forward_list:
+            threads.append(
+                forward_tunnel(
+                    port_forwarding_specification.remote_port,
+                    "127.0.0.1",
+                    port_forwarding_specification.local_port,
+                    client.get_transport()
+                )
+            )
+    return threads
 
 def node_exec_command(node_id, command, username, hostname, port, ssh_key=None, password=None, container_name=None, timeout=None):
     try:
@@ -133,3 +206,25 @@ async def clus_copy(username, nodes, source_path, destination_path, ssh_key=None
                                                    container_name,
                                                    timeout) for node, node_rls in nodes]
     )
+
+
+def node_ssh(username, hostname, port, ssh_key=None, password=None, port_forward_list=None, timeout=None):
+    try:
+        client = connect(
+            hostname=hostname,
+            port=port,
+            username=username,
+            password=password,
+            pkey=ssh_key,
+            timeout=timeout
+        )
+        threads = forward_ports(client=client, port_forward_list=port_forward_list)
+    except AztkError as e:
+        raise e
+
+    try:
+        import time
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        pass

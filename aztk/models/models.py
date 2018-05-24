@@ -160,6 +160,10 @@ class RemoteLogin:
         self.ip_address = ip_address
         self.port = port
 
+class PortForwardingSpecification:
+    def __init__(self, remote_port, local_port):
+        self.remote_port = remote_port
+        self.local_port = local_port
 
 class ServicePrincipalConfiguration(ConfigurationBase):
     """

@@ -48,6 +48,8 @@ class Cluster(aztk.models.Cluster):
 class RemoteLogin(aztk.models.RemoteLogin):
     pass
 
+class PortForwardingSpecification(aztk.models.PortForwardingSpecification):
+    pass
 
 class File(aztk.models.File):
     pass
