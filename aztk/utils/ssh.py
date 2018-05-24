@@ -31,8 +31,8 @@ class Handler(SocketServer.BaseRequestHandler):
     def handle(self):
         try:
             channel = self.ssh_transport.open_channel('direct-tcpip',
-                                                     (self.chain_host, self.chain_port),
-                                                     self.request.getpeername())
+                                                      (self.chain_host, self.chain_port),
+                                                      self.request.getpeername())
         except Exception as e:
             verbose('Incoming request to %s:%d failed: %s' % (self.chain_host,
                                                               self.chain_port,
