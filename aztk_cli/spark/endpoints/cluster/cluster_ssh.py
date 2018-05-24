@@ -8,6 +8,8 @@ from aztk.models import ClusterConfiguration
 from aztk_cli import config, log, utils
 from aztk_cli.config import SshConfig
 
+from aztk.spark.models import PortForwardingSpecification
+
 
 def setup_parser(parser: argparse.ArgumentParser):
     parser.add_argument('--id', dest="cluster_id", help='The unique id of your spark cluster')
@@ -53,43 +55,11 @@ def execute(args: typing.NamedTuple):
     utils.log_property("connect", ssh_conf.connect)
     log.info("-------------------------------------------")
 
-    from aztk.spark.models import PortForwardingSpecification
-    spark_client.cluster_ssh_into_master(
-        args.cluster_id,
-        cluster.master_node_id,
-        args.username,
-        ssh_key=None,
-        password=args.password,
-        port_forward_list=[
-            PortForwardingSpecification(remote_port=8080, local_port=8080),      # web ui
-            PortForwardingSpecification(remote_port=4040, local_port=4040),      # job ui
-            PortForwardingSpecification(remote_port=18080, local_port=18080),    # job history ui
-        ]
-    )
-
-    # get ssh command
-    try:
-        # ssh_cmd = utils.ssh_in_master(
-        #     client=spark_client,
-        #     cluster_id=ssh_conf.cluster_id,
-        #     webui=ssh_conf.web_ui_port,
-        #     jobui=ssh_conf.job_ui_port,
-        #     jobhistoryui=ssh_conf.job_history_ui_port,
-        #     username=ssh_conf.username,
-        #     host=ssh_conf.host,
-        #     connect=ssh_conf.connect,
-        #     internal=ssh_conf.internal)
-
-        if not ssh_conf.connect:
-            log.info("")
-            log.info("Use the following command to connect to your spark head node:")
-            log.info("\t%s", ssh_cmd)
-
-    except batch_error.BatchErrorException as e:
-        if e.error.code == "PoolNotFound":
-            raise aztk.error.AztkError("The cluster you are trying to connect to does not exist.")
-        else:
-            raise
+    # TODO: make a determination whether to shell out or use paramiko
+    if True:
+        pure_python_ssh_into_master(spark_client, cluster, ssh_conf.username, args.password)
+    else:
+        shell_out_ssh(spark_client, ssh_conf)
 
 
 def print_plugin_ports(cluster_config: ClusterConfiguration):
@@ -116,3 +86,53 @@ def print_plugin_ports(cluster_config: ClusterConfiguration):
                         label += " {}".format(port.name)
                     url = "{0}{1}".format(http_prefix, port.public_port)
                     utils.log_property(label, url)
+
+
+def pure_python_ssh_into_master(spark_client, cluster, username, password):
+    configuration = spark_client.get_cluster_config(cluster.id)
+    plugin_ports = []
+    if configuration and configuration.plugins:
+        ports = [
+            PortForwardingSpecification(
+                port.internal,
+                port.public_port) for plugin in configuration.plugins for port in plugin.ports if port.expose_publicly
+        ]
+        plugin_ports.extend(ports)
+
+    spark_client.cluster_ssh_into_master(
+        cluster.id,
+        cluster.master_node_id,
+        username,
+        ssh_key=None,
+        password=password,
+        port_forward_list=[
+            PortForwardingSpecification(remote_port=8080, local_port=8080),      # web ui
+            PortForwardingSpecification(remote_port=4040, local_port=4040),      # job ui
+            PortForwardingSpecification(remote_port=18080, local_port=18080),    # job history ui
+        ] + plugin_ports
+    )
+
+
+def shell_out_ssh(spark_client, ssh_conf):
+    try:
+        ssh_cmd = utils.ssh_in_master(
+            client=spark_client,
+            cluster_id=ssh_conf.cluster_id,
+            webui=ssh_conf.web_ui_port,
+            jobui=ssh_conf.job_ui_port,
+            jobhistoryui=ssh_conf.job_history_ui_port,
+            username=ssh_conf.username,
+            host=ssh_conf.host,
+            connect=ssh_conf.connect,
+            internal=ssh_conf.internal)
+
+        if not ssh_conf.connect:
+            log.info("")
+            log.info("Use the following command to connect to your spark head node:")
+            log.info("\t%s", ssh_cmd)
+
+    except batch_error.BatchErrorException as e:
+        if e.error.code == "PoolNotFound":
+            raise aztk.error.AztkError("The cluster you are trying to connect to does not exist.")
+        else:
+            raise
