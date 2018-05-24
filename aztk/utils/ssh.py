@@ -19,12 +19,12 @@ def verbose(s):
     if g_verbose:
         print(s)
 
-class ForwardServer (SocketServer.ThreadingTCPServer):
+class ForwardServer(SocketServer.ThreadingTCPServer):
     daemon_threads = True
     allow_reuse_address = True
 
 
-class Handler (SocketServer.BaseRequestHandler):
+class Handler(SocketServer.BaseRequestHandler):
 
     def handle(self):
         try:

@@ -271,6 +271,18 @@ class Client:
         finally:
             self.__delete_user_on_pool('aztk', pool.id, nodes)
 
+    def __ssh_into_node(self, pool_id, node_id, username, ssh_key=None, password=None, port_forward_list=None):
+        result = self.batch_client.compute_node.get_remote_login_settings(pool_id, node_id)
+        rls = models.RemoteLogin(ip_address=result.remote_login_ip_address, port=str(result.remote_login_port))
+        ssh_lib.node_ssh(
+            username=username,
+            hostname=rls.ip_address,
+            port=rls.port,
+            ssh_key=ssh_key,
+            password=password,
+            port_forward_list=port_forward_list,
+        )
+
     def __submit_job(self,
                      job_configuration,
                      start_task,

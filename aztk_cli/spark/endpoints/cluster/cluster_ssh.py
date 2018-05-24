@@ -15,6 +15,7 @@ def setup_parser(parser: argparse.ArgumentParser):
     parser.add_argument('--jobui', help='Local port to port spark\'s job UI to')
     parser.add_argument('--jobhistoryui', help='Local port to port spark\'s job history UI to')
     parser.add_argument('-u', '--username', help='Username to spark cluster')
+    parser.add_argument('--password', help='Password for the specified ssh user')
     parser.add_argument('--host', dest="host", action='store_true', help='Connect to the host of the Spark container')
     parser.add_argument('--no-connect', dest="connect", action='store_false',
                         help='Do not create the ssh session. Only print out the command to run.')
@@ -52,18 +53,32 @@ def execute(args: typing.NamedTuple):
     utils.log_property("connect", ssh_conf.connect)
     log.info("-------------------------------------------")
 
+    from aztk.spark.models import PortForwardingSpecification
+    spark_client.cluster_ssh_into_master(
+        args.cluster_id,
+        cluster.master_node_id,
+        args.username,
+        ssh_key=None,
+        password=args.password,
+        port_forward_list=[
+            PortForwardingSpecification(remote_port=8080, local_port=8080),      # web ui
+            PortForwardingSpecification(remote_port=4040, local_port=4040),      # job ui
+            PortForwardingSpecification(remote_port=18080, local_port=18080),    # job history ui
+        ]
+    )
+
     # get ssh command
     try:
-        ssh_cmd = utils.ssh_in_master(
-            client=spark_client,
-            cluster_id=ssh_conf.cluster_id,
-            webui=ssh_conf.web_ui_port,
-            jobui=ssh_conf.job_ui_port,
-            jobhistoryui=ssh_conf.job_history_ui_port,
-            username=ssh_conf.username,
-            host=ssh_conf.host,
-            connect=ssh_conf.connect,
-            internal=ssh_conf.internal)
+        # ssh_cmd = utils.ssh_in_master(
+        #     client=spark_client,
+        #     cluster_id=ssh_conf.cluster_id,
+        #     webui=ssh_conf.web_ui_port,
+        #     jobui=ssh_conf.job_ui_port,
+        #     jobhistoryui=ssh_conf.job_history_ui_port,
+        #     username=ssh_conf.username,
+        #     host=ssh_conf.host,
+        #     connect=ssh_conf.connect,
+        #     internal=ssh_conf.internal)
 
         if not ssh_conf.connect:
             log.info("")
