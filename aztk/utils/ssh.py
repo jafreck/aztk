@@ -26,7 +26,7 @@ class ForwardServer(SocketServer.ThreadingTCPServer):
     daemon_threads = True
     allow_reuse_address = True
 
-
+# pylint: disable=no-member
 class Handler(SocketServer.BaseRequestHandler):
     def handle(self):
         try:
