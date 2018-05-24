@@ -14,7 +14,7 @@ from concurrent.futures import ThreadPoolExecutor
 from aztk.error import AztkError
 
 
-g_verbose = True
+g_verbose = False
 
 
 def verbose(s):

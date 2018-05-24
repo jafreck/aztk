@@ -59,7 +59,7 @@ def execute(args: typing.NamedTuple):
         shell_out_ssh(spark_client, ssh_conf)
     except OSError:
         # no ssh client is found, falling back to pure python
-        pure_python_ssh_into_master(spark_client, cluster, ssh_conf.username, args.password)
+        native_python_ssh_into_master(spark_client, cluster, ssh_conf.username, args.password)
 
 
 def print_plugin_ports(cluster_config: ClusterConfiguration):
@@ -88,7 +88,7 @@ def print_plugin_ports(cluster_config: ClusterConfiguration):
                     utils.log_property(label, url)
 
 
-def pure_python_ssh_into_master(spark_client, cluster, username, password):
+def native_python_ssh_into_master(spark_client, cluster, username, password):
     configuration = spark_client.get_cluster_config(cluster.id)
     plugin_ports = []
     if configuration and configuration.plugins:
