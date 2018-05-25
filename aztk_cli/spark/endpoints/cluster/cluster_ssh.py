@@ -59,7 +59,7 @@ def execute(args: typing.NamedTuple):
         shell_out_ssh(spark_client, ssh_conf)
     except OSError:
         # no ssh client is found, falling back to pure python
-        native_python_ssh_into_master(spark_client, cluster, ssh_conf.username, args.password)
+        native_python_ssh_into_master(spark_client, cluster, ssh_conf, args.password)
 
 
 def print_plugin_ports(cluster_config: ClusterConfiguration):
@@ -73,7 +73,7 @@ def print_plugin_ports(cluster_config: ClusterConfiguration):
                 if port.expose_publicly:
                     has_ports = True
                     plugin_ports[plugin.name].append(port)
-        
+
         if has_ports:
             log.info("plugins:")
 
@@ -88,7 +88,7 @@ def print_plugin_ports(cluster_config: ClusterConfiguration):
                     utils.log_property(label, url)
 
 
-def native_python_ssh_into_master(spark_client, cluster, username, password):
+def native_python_ssh_into_master(spark_client, cluster, ssh_conf, password):
     configuration = spark_client.get_cluster_config(cluster.id)
     plugin_ports = []
     if configuration and configuration.plugins:
@@ -99,17 +99,19 @@ def native_python_ssh_into_master(spark_client, cluster, username, password):
         ]
         plugin_ports.extend(ports)
 
+    print("Press ctrl+c to exit...")
     spark_client.cluster_ssh_into_master(
         cluster.id,
         cluster.master_node_id,
-        username,
+        ssh_conf.username,
         ssh_key=None,
         password=password,
         port_forward_list=[
             PortForwardingSpecification(remote_port=8080, local_port=8080),      # web ui
             PortForwardingSpecification(remote_port=4040, local_port=4040),      # job ui
             PortForwardingSpecification(remote_port=18080, local_port=18080),    # job history ui
-        ] + plugin_ports
+        ] + plugin_ports,
+        internal=ssh_conf.internal
     )
 
 
