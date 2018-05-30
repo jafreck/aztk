@@ -46,6 +46,10 @@ def print_cluster(client, cluster: models.Cluster, internal: bool = False):
     log.info("| Low priority: %s", __pretty_low_pri_node_count(cluster))
     log.info("")
 
+    print_nodes(client, cluster, internal)
+
+
+def print_nodes(client, cluster: models.Cluster, internal: bool):
     print_format = '|{:^36}| {:^19} | {:^21}| {:^10} | {:^8} |'
     print_format_underline = '|{:-^36}|{:-^21}|{:-^22}|{:-^12}|{:-^10}|'
     if internal:
@@ -61,7 +65,7 @@ def print_cluster(client, cluster: models.Cluster, internal: bool = False):
         if internal:
             ip = node.ip_address
         else:
-            ip ='{}:{}'.format(remote_login_settings.ip_address, remote_login_settings.port)
+            ip = '{}:{}'.format(remote_login_settings.ip_address, remote_login_settings.port)
         log.info(
             print_format.format(
                 node.id,
@@ -71,6 +75,12 @@ def print_cluster(client, cluster: models.Cluster, internal: bool = False):
                 '*' if node.id == cluster.master_node_id else '')
         )
     log.info('')
+
+
+def print_node_ids(client, cluster: models.Cluster, internal: bool = False):
+    if cluster.nodes:
+        print(' '.join([node.id for node in cluster.nodes]))
+
 
 def __pretty_node_count(cluster: models.Cluster) -> str:
     if cluster.pool.allocation_state is batch_models.AllocationState.resizing:
