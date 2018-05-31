@@ -101,16 +101,18 @@ def connect(hostname,
 
 def forward_ports(client, port_forward_list):
     threads = []
-    if port_forward_list:
-        for port_forwarding_specification in port_forward_list:
-            threads.append(
-                forward_tunnel(
-                    port_forwarding_specification.remote_port,
-                    "127.0.0.1",
-                    port_forwarding_specification.local_port,
-                    client.get_transport()
-                )
+    if not port_forward_list:
+        return threads
+
+    for port_forwarding_specification in port_forward_list:
+        threads.append(
+            forward_tunnel(
+                port_forwarding_specification.remote_port,
+                "127.0.0.1",
+                port_forwarding_specification.local_port,
+                client.get_transport()
             )
+        )
     return threads
 
 
