@@ -3,23 +3,15 @@
 '''
 import asyncio
 import io
+import logging
 import os
 import select
 import socket
 import socketserver as SocketServer
-import sys
 import threading
 from concurrent.futures import ThreadPoolExecutor
 
 from aztk.error import AztkError
-
-
-g_verbose = False
-
-
-def verbose(s):
-    if g_verbose:
-        print(s)
 
 
 class ForwardServer(SocketServer.ThreadingTCPServer):
@@ -34,17 +26,15 @@ class Handler(SocketServer.BaseRequestHandler):
                                                       (self.chain_host, self.chain_port),
                                                       self.request.getpeername())
         except Exception as e:
-            verbose('Incoming request to %s:%d failed: %s' % (self.chain_host,
+            logging.debug('Incoming request to %s:%d failed: %s', self.chain_host,
                                                               self.chain_port,
-                                                              repr(e)))
+                                                              repr(e))
             return
         if channel is None:
-            verbose('Incoming request to %s:%d was rejected by the SSH server.' %
-                    (self.chain_host, self.chain_port))
+            logging.debug('Incoming request to %s:%d was rejected by the SSH server.', self.chain_host, self.chain_port)
             return
 
-        verbose('Connected!  Tunnel open %r -> %r -> %r' % (self.request.getpeername(),
-                                                            channel.getpeername(), (self.chain_host, self.chain_port)))
+        logging.debug('Connected!  Tunnel open %r -> %r -> %r', self.request.getpeername(), channel.getpeername(), (self.chain_host, self.chain_port))
         while True:
             r, w, x = select.select([self.request, channel], [], [])
             if self.request in r:
@@ -61,7 +51,7 @@ class Handler(SocketServer.BaseRequestHandler):
         peername = self.request.getpeername()
         channel.close()
         self.request.close()
-        verbose('Tunnel closed from %r' % (peername,))
+        logging.debug('Tunnel closed from %r', peername)
 
 
 def forward_tunnel(local_port, remote_host, remote_port, transport):
