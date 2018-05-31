@@ -229,4 +229,5 @@ def node_ssh(username, hostname, port, ssh_key=None, password=None, port_forward
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
+        # catch and ignore so stacktrace isn't printed
         pass
