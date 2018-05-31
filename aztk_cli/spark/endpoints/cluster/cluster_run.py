@@ -23,15 +23,4 @@ def execute(args: typing.NamedTuple):
     spark_client = aztk.spark.Client(config.load_aztk_secrets())
     with utils.Spinner():
         results = spark_client.cluster_run(args.cluster_id, args.command, args.host, args.internal)
-    [print_execute_result(node_id, result) for node_id, result in results]
-
-
-def print_execute_result(node_id, result):
-    print("-" * (len(node_id) + 6))
-    print("| ", node_id, " |")
-    print("-" * (len(node_id) + 6))
-    if isinstance(result, Exception):
-        print(result + "\n")
-    else:
-        for line in result:
-            print(line)
+    [utils.log_execute_result(node_id, result) for node_id, result in results]
