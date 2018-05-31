@@ -7,6 +7,7 @@ import azure.batch.models.batch_error as batch_error
 from azure.batch.models import batch_error as batch_error
 from Cryptodome.PublicKey import RSA
 
+import aztk.error as error
 import aztk.models as models
 import aztk.utils.azure_api as azure_api
 import aztk.utils.constants as constants
@@ -236,9 +237,11 @@ class Client:
 
     def __node_run(self, cluster_id, node_id, command, internal, container_name=None, timeout=None):
         pool, nodes = self.__get_pool_details(cluster_id)
-        node = [node for node in nodes if node.id == node_id]
-        if node:
-            node = node[0]
+        try:
+            node = next(node for node in nodes if node.id == node_id)
+        except StopIteration:
+            raise error.AztkError("Node with id {} not found".format(node_id))
+
         if internal:
             node_rls = models.RemoteLogin(ip_address=node.ip_address, port="22")
         else:
@@ -265,7 +268,7 @@ class Client:
 
     def __cluster_run(self, cluster_id, command, internal, container_name=None, timeout=None):
         pool, nodes = self.__get_pool_details(cluster_id)
-        nodes = [node for node in nodes]
+        nodes = list(nodes)
         if internal:
             cluster_nodes = [(node, models.RemoteLogin(ip_address=node.ip_address, port="22")) for node in nodes]
         else:
@@ -292,7 +295,7 @@ class Client:
 
     def __cluster_copy(self, cluster_id, source_path, destination_path, container_name=None, internal=False, get=False, timeout=None):
         pool, nodes = self.__get_pool_details(cluster_id)
-        nodes = [node for node in nodes]
+        nodes = list(nodes)
         if internal:
             cluster_nodes = [(node, models.RemoteLogin(ip_address=node.ip_address, port="22")) for node in nodes]
         else:
