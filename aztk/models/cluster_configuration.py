@@ -51,22 +51,22 @@ class ClusterConfiguration(Model):
         super().__init__(*args, **kwargs)
 
     @property
-    @deprecated()
+    @deprecated
     def vm_count(self):
         return self.size
 
     @vm_count.setter
-    @deprecated()
+    @deprecated
     def vm_count(self, value):
         self.size = value
 
     @property
-    @deprecated()
+    @deprecated
     def vm_low_pri_count(self):
         return self.size_low_priority
 
     @vm_low_pri_count.setter
-    @deprecated()
+    @deprecated
     def vm_low_pri_count(self, value):
         self.size_low_priority = value
 
