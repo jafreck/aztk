@@ -13,11 +13,6 @@ from aztk.spark.helpers import cluster_diagnostic_helper
 from aztk.spark.utils import util
 from aztk.internal.cluster_data import NodeData
 
-
-DEFAULT_CLUSTER_CONFIG = models.ClusterConfiguration(
-    worker_on_master=True,
-)
-
 class Client(BaseClient):
     """
     Aztk Spark Client
@@ -26,10 +21,8 @@ class Client(BaseClient):
     Args:
         secrets_config(aztk.spark.models.models.SecretsConfiguration): Configuration with all the needed credentials
     """
-    def __init__(self, secrets_config):
-        super().__init__(secrets_config)
 
-    def create_cluster(self, configuration: models.ClusterConfiguration, wait: bool = False):
+    def create_cluster(self, cluster_conf: models.ClusterConfiguration, wait: bool = False):
         """
         Create a new aztk spark cluster
 
@@ -40,10 +33,9 @@ class Client(BaseClient):
         Returns:
             aztk.spark.models.Cluster
         """
-        cluster_conf = models.ClusterConfiguration()
-        cluster_conf.merge(DEFAULT_CLUSTER_CONFIG)
-        cluster_conf.merge(configuration)
+        cluster_conf = _apply_default_for_cluster_config(cluster_conf)
         cluster_conf.validate()
+
         cluster_data = self._get_cluster_data(cluster_conf.cluster_id)
         try:
             zip_resource_files = None
@@ -150,7 +142,7 @@ class Client(BaseClient):
             master_node_id = cluster.master_node_id
             if not master_node_id:
                 raise error.ClusterNotReadyError("The master has not yet been picked, a user cannot be added.")
-            self.__create_user(cluster.id, master_node_id, username, password, ssh_key)
+            self.__create_user_on_pool(username, cluster.id, cluster.nodes, ssh_key, password)
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
 
@@ -213,8 +205,9 @@ class Client(BaseClient):
     '''
         job submission
     '''
-    def submit_job(self, job_configuration):
+    def submit_job(self, job_configuration: models.JobConfiguration):
         try:
+            job_configuration = _apply_default_for_job_config(job_configuration)
             job_configuration.validate()
             cluster_data = self._get_cluster_data(job_configuration.id)
             node_data =  NodeData(job_configuration.to_cluster_config()).add_core().done()
@@ -332,3 +325,23 @@ class Client(BaseClient):
             return output
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
+
+
+def _default_scheduling_target(vm_count: int):
+    if vm_count == 0:
+        return models.SchedulingTarget.Any
+    else:
+        return models.SchedulingTarget.Dedicated
+
+def _apply_default_for_cluster_config(configuration: models.ClusterConfiguration):
+    cluster_conf = models.ClusterConfiguration()
+    cluster_conf.merge(configuration)
+    if cluster_conf.scheduling_target is None:
+        cluster_conf.scheduling_target = _default_scheduling_target(cluster_conf.size)
+    return cluster_conf
+
+def _apply_default_for_job_config(job_conf: models.JobConfiguration):
+    if job_conf.scheduling_target is None:
+        job_conf.scheduling_target = _default_scheduling_target(job_conf.max_dedicated_nodes)
+
+    return job_conf
