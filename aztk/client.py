@@ -208,17 +208,26 @@ class Client:
             except batch_error.BatchErrorException as error:
                 raise error
 
-    def __generate_user_on_pool(self, username, pool_id, nodes):
+    def __generate_user_on_node(self, pool_id, node_id):
+        generated_username = secure_utils.generate_random_string()
+        ssh_key = RSA.generate(2048)
+        ssh_pub_key = ssh_key.publickey().exportKey('OpenSSH').decode('utf-8')
+        self.__create_user_on_node(generated_username, pool_id, node_id, ssh_pub_key)
+        return generated_username, ssh_key
+
+    def __generate_user_on_pool(self, pool_id, nodes):
+        generated_username = secure_utils.generate_random_string()
         ssh_key = RSA.generate(2048)
         ssh_pub_key = ssh_key.publickey().exportKey('OpenSSH').decode('utf-8')
         with concurrent.futures.ThreadPoolExecutor() as executor:
             futures = {executor.submit(self.__create_user_on_node,
-                                       username,
+                                       generated_username,
                                        pool_id,
                                        node.id,
                                        ssh_pub_key): node for node in nodes}
             concurrent.futures.wait(futures)
-        return ssh_key
+        
+        return generated_username, ssh_key
 
     def __create_user_on_pool(self, username, pool_id, nodes, ssh_pub_key=None, password=None):
         with concurrent.futures.ThreadPoolExecutor() as executor:
@@ -247,11 +256,8 @@ class Client:
         else:
             node_rls = self.__get_remote_login_settings(pool.id, node.id)
 
-        generated_username = secure_utils.generate_random_string()
-        ssh_key = RSA.generate(2048)
-        ssh_pub_key = ssh_key.publickey().exportKey('OpenSSH').decode('utf-8')
         try:
-            self.__create_user_on_node(generated_username, pool.id, node.id, ssh_pub_key)
+            generated_username, ssh_key = self.__generate_user_on_node(pool.id, node.id)
             output = ssh_lib.node_exec_command(
                 node.id,
                 command,
@@ -274,9 +280,8 @@ class Client:
         else:
             cluster_nodes = [(node, self.__get_remote_login_settings(pool.id, node.id)) for node in nodes]
 
-        generated_username = secure_utils.generate_random_string()
         try:
-            ssh_key = self.__generate_user_on_pool(generated_username, pool.id, nodes)
+            generated_username, ssh_key = self.__generate_user_on_pool(pool.id, nodes)
             output = asyncio.get_event_loop().run_until_complete(
                 ssh_lib.clus_exec_command(
                     command,
@@ -301,9 +306,8 @@ class Client:
         else:
             cluster_nodes = [(node, self.__get_remote_login_settings(pool.id, node.id)) for node in nodes]
 
-        generated_username = secure_utils.generate_random_string()
         try:
-            ssh_key = self.__generate_user_on_pool(generated_username, pool.id, nodes)
+            generated_username, ssh_key = self.__generate_user_on_pool(pool.id, nodes)
             output = asyncio.get_event_loop().run_until_complete(
                 ssh_lib.clus_copy(
                     container_name=container_name,
