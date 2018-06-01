@@ -79,7 +79,7 @@ def print_plugin_ports(cluster_config: ClusterConfiguration):
 
         for plugin in plugin_ports:
             if plugin_ports[plugin]:
-                log.info("  " + plugin)
+                log.info(" %s ", plugin)
                 for port in plugin_ports[plugin]:
                     label = "    - open"
                     if port.name:
@@ -89,6 +89,10 @@ def print_plugin_ports(cluster_config: ClusterConfiguration):
 
 
 def native_python_ssh_into_master(spark_client, cluster, ssh_conf, password):
+    if not ssh_conf.connect:
+        log.warning("No ssh client found, using pure python connection.")
+        return
+
     configuration = spark_client.get_cluster_config(cluster.id)
     plugin_ports = []
     if configuration and configuration.plugins:
