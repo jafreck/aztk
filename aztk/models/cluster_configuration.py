@@ -3,6 +3,7 @@ from aztk.core.models import Model, fields
 from aztk.utils import deprecated,deprecate, helpers
 
 from .custom_script import CustomScript
+from .data_disk import DataDisk
 from .file_share import FileShare
 from .plugins import PluginConfiguration
 from .toolkit import Toolkit
@@ -36,6 +37,7 @@ class ClusterConfiguration(Model):
     plugins = fields.List(PluginConfiguration)
     custom_scripts = fields.List(CustomScript)
     file_shares = fields.List(FileShare)
+    data_disks = fields.List(DataDisk)
     user_configuration = fields.Model(UserConfiguration, default=None)
     scheduling_target = fields.Enum(SchedulingTarget, default=None)
 
@@ -103,5 +105,5 @@ class ClusterConfiguration(Model):
         if self.custom_scripts:
             deprecate("Custom scripts are DEPRECATED and will be removed in 0.8.0. Use plugins instead See https://aztk.readthedocs.io/en/v0.7.0/15-plugins.html")
 
-        if self.scheduling_target == SchedulingTarget.Dedicated and self.vm_count == 0:
+        if self.scheduling_target == SchedulingTarget.Dedicated and self.size == 0:
             raise error.InvalidModelError("Scheduling target cannot be Dedicated if dedicated vm size is 0")

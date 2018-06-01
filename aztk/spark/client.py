@@ -33,7 +33,7 @@ class Client(BaseClient):
         Returns:
             aztk.spark.models.Cluster
         """
-        cluster_conf = _apply_default_for_cluster_config(cluster_conf)
+        # cluster_conf = _apply_default_for_cluster_config(cluster_conf)
         cluster_conf.validate()
 
         cluster_data = self._get_cluster_data(cluster_conf.cluster_id)
@@ -53,11 +53,11 @@ class Client(BaseClient):
                                                                            cluster_conf.worker_on_master)
 
             software_metadata_key = "spark"
-
             vm_image = models.VmImage(
                 publisher='Canonical',
                 offer='UbuntuServer',
-                sku='16.04')
+                sku='16.04',
+                data_disks=cluster_conf.data_disks)
 
             cluster = self.__create_pool_and_job(
                 cluster_conf, software_metadata_key, start_task, vm_image)
@@ -328,10 +328,13 @@ def _default_scheduling_target(vm_count: int):
         return models.SchedulingTarget.Dedicated
 
 def _apply_default_for_cluster_config(configuration: models.ClusterConfiguration):
+    print("before", configuration.data_disks)
     cluster_conf = models.ClusterConfiguration()
     cluster_conf.merge(configuration)
     if cluster_conf.scheduling_target is None:
         cluster_conf.scheduling_target = _default_scheduling_target(cluster_conf.size)
+    print("after", cluster_conf.data_disks)
+
     return cluster_conf
 
 def _apply_default_for_job_config(job_conf: models.JobConfiguration):

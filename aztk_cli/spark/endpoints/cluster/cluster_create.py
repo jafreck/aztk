@@ -2,7 +2,7 @@ import argparse
 import typing
 
 import aztk.spark
-from aztk.spark.models import ClusterConfiguration, UserConfiguration
+from aztk.spark.models import ClusterConfiguration, UserConfiguration, DataDisk
 from aztk_cli import config, log, utils
 from aztk_cli.config import load_aztk_spark_config
 
@@ -26,6 +26,8 @@ def setup_parser(parser: argparse.ArgumentParser):
                              (<my-username>/<my-repo>:<tag>)')
     parser.add_argument('--subnet-id',
                         help='The subnet in which to create the cluster.')
+    parser.add_argument('--data-disk-size', type=int,
+                        help="Size in GB of additional local disk storage on each node.")
 
     parser.add_argument('--no-wait', dest='wait', action='store_false')
     parser.add_argument('--wait', dest='wait', action='store_true')
@@ -40,16 +42,23 @@ def execute(args: typing.NamedTuple):
     # read cluster.yaml configuartion file, overwrite values with args
     file_config, wait = config.read_cluster_config()
     cluster_conf.merge(file_config)
-    cluster_conf.merge(ClusterConfiguration(
-        cluster_id=args.cluster_id,
-        size=args.size,
-        size_low_priority=args.size_low_priority,
-        vm_size=args.vm_size,
-        subnet_id=args.subnet_id,
-        user_configuration=UserConfiguration(
-            username=args.username,
-            password=args.password,
-        )))
+    cluster_conf.merge(
+        ClusterConfiguration(
+            cluster_id=args.cluster_id,
+            size=args.size,
+            size_low_priority=args.size_low_priority,
+            vm_size=args.vm_size,
+            subnet_id=args.subnet_id,
+            user_configuration=UserConfiguration(
+                username=args.username,
+                password=args.password,
+            ),
+        )
+    )
+
+    if args.data_disk_size:
+        cluster_conf.data_disks.append(DataDisk(disk_size_gb=args.data_disk_size))
+
 
     if args.docker_repo and cluster_conf.toolkit:
         cluster_conf.toolkit.docker_repo = args.docker_repo

@@ -108,6 +108,10 @@ class SecretsConfiguration(aztk.models.SecretsConfiguration):
     pass
 
 
+class DataDisk(aztk.models.DataDisk):
+    pass
+
+
 class VmImage(aztk.models.VmImage):
     pass
 

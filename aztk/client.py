@@ -4,16 +4,17 @@ from datetime import datetime, timedelta, timezone
 
 import azure.batch.models as batch_models
 import azure.batch.models.batch_error as batch_error
+from azure.batch.models import batch_error as batch_error
+from Cryptodome.PublicKey import RSA
+
+import aztk.models as models
 import aztk.utils.azure_api as azure_api
 import aztk.utils.constants as constants
 import aztk.utils.get_ssh_key as get_ssh_key
 import aztk.utils.helpers as helpers
 import aztk.utils.ssh as ssh_lib
-import aztk.models as models
-import azure.batch.models as batch_models
-from azure.batch.models import batch_error
-from Cryptodome.PublicKey import RSA
 from aztk.internal import cluster_data
+
 
 class Client:
     def __init__(self, secrets_config: models.SecretsConfiguration):
@@ -65,14 +66,14 @@ class Client:
 
         return job_exists or pool_exists
 
-    def __create_pool_and_job(self, cluster_conf: models.ClusterConfiguration, software_metadata_key: str, start_task, VmImageModel):
+    def __create_pool_and_job(self, cluster_conf: models.ClusterConfiguration, software_metadata_key: str, start_task, vm_image_model):
         """
             Create a pool and job
             :param cluster_conf: the configuration object used to create the cluster
             :type cluster_conf: aztk.models.ClusterConfiguration
             :parm software_metadata_key: the id of the software being used on the cluster
             :param start_task: the start task for the cluster
-            :param VmImageModel: the type of image to provision for the cluster
+            :param vm_image_model: the type of image to provision for the cluster
             :param wait: wait until the cluster is ready
         """
         self._get_cluster_data(cluster_conf.cluster_id).save_cluster_config(cluster_conf)
@@ -83,7 +84,7 @@ class Client:
         # Get a verified node agent sku
         sku_to_use, image_ref_to_use = \
             helpers.select_latest_verified_vm_image_with_node_agent_sku(
-                VmImageModel.publisher, VmImageModel.offer, VmImageModel.sku, self.batch_client)
+                vm_image_model.publisher, vm_image_model.offer, vm_image_model.sku, self.batch_client)
 
         network_conf = None
         if cluster_conf.subnet_id is not None:
@@ -97,7 +98,11 @@ class Client:
             id=pool_id,
             virtual_machine_configuration=batch_models.VirtualMachineConfiguration(
                 image_reference=image_ref_to_use,
-                node_agent_sku_id=sku_to_use),
+                node_agent_sku_id=sku_to_use,
+                data_disks=[batch_models.DataDisk(
+                    lun=i,
+                    disk_size_gb=data_disk.disk_size_gb
+                ) for i, data_disk in enumerate(vm_image_model.data_disks)]),
             vm_size=cluster_conf.vm_size,
             enable_auto_scale=True,
             auto_scale_formula=auto_scale_formula,
@@ -324,7 +329,11 @@ class Client:
                 display_name=job_configuration.id,
                 virtual_machine_configuration=batch_models.VirtualMachineConfiguration(
                     image_reference=image_ref_to_use,
-                    node_agent_sku_id=sku_to_use),
+                    node_agent_sku_id=sku_to_use,
+                    data_disks=[batch_models.DataDisk(
+                        lun=i,
+                        disk_size_gb=data_disk.disk_size_gb
+                    ) for i, data_disk in enumerate(vm_image_model.data_disks)]),
                 vm_size=job_configuration.vm_size,
                 enable_auto_scale=True,
                 auto_scale_formula=autoscale_formula,
