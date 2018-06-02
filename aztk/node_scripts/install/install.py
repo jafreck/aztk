@@ -18,7 +18,7 @@ def read_cluster_config():
 
 
 def mount_data_disk(device_name, number):
-    p = subprocess.Popen([os.environ["AZTK_WORKING_DIR"] + "/mount_data_disk.sh", device_name, str(number)], shell=True)
+    p = subprocess.Popen([os.environ["AZTK_WORKING_DIR"] + "aztk/node_scripts/install/mount_data_disk.sh", device_name, str(number)], shell=True)
     # output, error = p.communicate()
     # print(output, error)
     return p.returncode
