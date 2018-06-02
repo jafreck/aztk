@@ -1,5 +1,6 @@
 #!/bin/bash
 devicename=$1
+datadisknumber=$2
 parted --script --align optimal ${devicename} mklabel gpt
 parted --script --align optimal ${devicename} mkpart primary ext4 0% 100%
 mkfs.ext4 ${devicename}1

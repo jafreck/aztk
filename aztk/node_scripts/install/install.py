@@ -17,10 +17,10 @@ def read_cluster_config():
     return cluster_config
 
 
-def mount_data_disk(device_name):
-    p = subprocess.Popen([os.environ["AZTK_WORKING_DIR"] + "/mount_data_disk.sh", device_name], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    output, error = p.communicate()
-    print(output, error)
+def mount_data_disk(device_name, number):
+    p = subprocess.Popen([os.environ["AZTK_WORKING_DIR"] + "/mount_data_disk.sh", device_name, str(number)], shell=True)
+    # output, error = p.communicate()
+    # print(output, error)
     return p.returncode
 
 
@@ -29,7 +29,7 @@ def setup_data_disk(number):
     import string
     chars = string.ascii_lowercase[2:]
     for i in range(number):
-        mount_data_disk("/dev/sd" + chars[i])
+        mount_data_disk("/dev/sd" + chars[i], i)
 
 
 def setup_host(docker_repo: str):
