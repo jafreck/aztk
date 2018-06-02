@@ -142,6 +142,15 @@ class List(Field):
             value = []
         super().__set__(instance, value)
 
+    def __get__(self, instance, _):
+        if instance is not None:
+            value = instance._data.get(self)
+            if value is None:
+                return instance._data.setdefault(self, self._default(instance))
+            return value
+
+        return self
+
     def _resolve(self, value):
         result = []
         for item in value:
@@ -158,7 +167,7 @@ class List(Field):
             value = []
 
         if self.merge_strategy == ListMergeStrategy.Append:
-            current = instance._data.get(self)
+            current = instance._data.get(self)          
             if current is None:
                 current = []
             value = current + value

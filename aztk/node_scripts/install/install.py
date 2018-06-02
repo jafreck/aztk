@@ -1,9 +1,12 @@
 import os
-from core import config
-from install import pick_master, spark, scripts, create_user, plugins, spark_container
+import subprocess
+
 import wait_until_master_selected
-from aztk.models.plugins import PluginTarget
 from aztk.internal import cluster_data
+from aztk.models.plugins import PluginTarget
+from core import config
+from install import (create_user, pick_master, plugins, scripts, spark, spark_container)
+
 from .node_scheduling import setup_node_scheduling
 
 
@@ -13,10 +16,32 @@ def read_cluster_config():
     print("Got cluster config", cluster_config)
     return cluster_config
 
+
+def mount_data_disk(device_name):
+    p = subprocess.Popen([os.environ["AZTK_WORKING_DIR"] + "/mount_data_disk.sh", device_name], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    output, error = p.communicate()
+    print(output, error)
+    return p.returncode
+
+
+def setup_data_disk(number):
+    # setup datadisks, starting with sdc
+    import string
+    chars = string.ascii_lowercase[2:]
+    for i in range(number):
+        mount_data_disk("/dev/sd" + chars[i])
+
+
 def setup_host(docker_repo: str):
     """
     Code to be run on the node(NOT in a container)
     """
+    p = subprocess.Popen(["lsblk -lnS --sort name | wc -l"], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    output, _ = p.communicate()
+    output = int(output) - 3    # by default, there are 3 devices on each host: sda, sdb, sr0
+    if output > 2:
+        setup_data_disk(output)
+
     client = config.batch_client
 
     create_user.create_user(batch_client=client)

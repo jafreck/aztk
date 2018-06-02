@@ -294,6 +294,39 @@ def test_merge_nested_model_append_strategy():
     assert obj1.infos[1].age == 38
 
 
+def test_merge_nested_model_append_strategy_initial_not_set():
+    class UserList(Model):
+        infos = fields.List(UserInfo, merge_strategy=ListMergeStrategy.Append)
+
+    obj1 = UserList()
+    obj1.infos.append(UserInfo(
+        name="John",
+        age=29,
+    ))
+
+    obj2 = UserList(
+        infos=[
+            dict(
+                name="Frank",
+                age=38,
+            ),
+        ],
+    )
+
+    assert len(obj1.infos) == 1
+    assert len(obj2.infos) == 1
+    assert obj1.infos[0].name == "John"
+    assert obj1.infos[0].age == 29
+    assert obj2.infos[0].name == "Frank"
+    assert obj2.infos[0].age == 38
+
+    obj1.merge(obj2)
+    assert len(obj1.infos) == 2
+    assert obj1.infos[0].name == "John"
+    assert obj1.infos[0].age == 29
+    assert obj1.infos[1].name == "Frank"
+    assert obj1.infos[1].age == 38
+
 def test_serialize_simple_model_to_yaml():
     info = UserInfo(name="John", age=29)
     output = yaml.dump(info)
