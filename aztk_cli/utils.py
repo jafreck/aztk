@@ -3,14 +3,17 @@ import getpass
 import sys
 import threading
 import time
-import yaml
 from subprocess import call
 from typing import List
+
 import azure.batch.models as batch_models
+import yaml
+
 from aztk import error, utils
-from aztk.utils import get_ssh_key, helpers
 from aztk.models import ClusterConfiguration
 from aztk.spark import models
+from aztk.utils import get_ssh_key, helpers
+
 from . import log
 
 
@@ -127,7 +130,7 @@ def stream_logs(client, cluster_id, application_name):
             application_name=application_name,
             tail=True,
             current_bytes=current_bytes)
-        print(app_logs.log, end="")
+        log.print(app_logs.log)
         if app_logs.application_state == 'completed':
             return app_logs.exit_code
         current_bytes = app_logs.total_bytes

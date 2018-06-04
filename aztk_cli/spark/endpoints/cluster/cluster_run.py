@@ -2,7 +2,7 @@ import argparse
 import typing
 
 import aztk.spark
-from aztk_cli import config, utils
+from aztk_cli import config, log, utils
 
 
 def setup_parser(parser: argparse.ArgumentParser):
@@ -25,11 +25,11 @@ def execute(args: typing.NamedTuple):
 
 
 def print_execute_result(node_id, result):
-    print("-" * (len(node_id) + 6))
-    print("| ", node_id, " |")
-    print("-" * (len(node_id) + 6))
+    log.print("-" * (len(node_id) + 6))
+    log.print("| %s |", node_id)
+    log.print("-" * (len(node_id) + 6))
     if isinstance(result, Exception):
-        print(result + "\n")
+        log.print(result + "\n")
     else:
         for line in result:
-            print(line)
+            log.print(line)
