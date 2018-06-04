@@ -4,7 +4,6 @@ from datetime import datetime, timedelta, timezone
 
 import azure.batch.models as batch_models
 import azure.batch.models.batch_error as batch_error
-from azure.batch.models import batch_error as batch_error
 from Cryptodome.PublicKey import RSA
 
 import aztk.error as error
