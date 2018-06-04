@@ -1,5 +1,6 @@
 import logging
 import platform
+import sys
 
 root = logging.getLogger("aztk")
 
@@ -107,7 +108,7 @@ else:
 def setup_logging(verbose=False):
     if verbose:
         root.setLevel(logging.DEBUG)
-        logging.basicConfig(format=VERBOSE_FORMAT, datefmt="%Y-%m-%d  %H:%M:%S")
+        logging.basicConfig(format=VERBOSE_FORMAT, datefmt="%Y-%m-%d  %H:%M:%S", steam=sys.stdout)
     else:
         root.setLevel(logging.INFO)
-        logging.basicConfig(format=DEFAULT_FORMAT)
+        logging.basicConfig(format=DEFAULT_FORMAT, stream=sys.stdout)
