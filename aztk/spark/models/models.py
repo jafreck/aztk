@@ -196,7 +196,8 @@ class JobConfiguration:
             max_low_pri_nodes=0,
             subnet_id=None,
             scheduling_target: SchedulingTarget = None,
-            worker_on_master=None):
+            worker_on_master: bool = None,
+            data_disks: List[DataDisk] = None):
 
         self.id = id
         self.applications = applications
@@ -212,6 +213,7 @@ class JobConfiguration:
         self.subnet_id = subnet_id
         self.worker_on_master = worker_on_master
         self.scheduling_target = scheduling_target
+        self.data_disks = data_disks
 
     def to_cluster_config(self):
         return ClusterConfiguration(
@@ -225,6 +227,7 @@ class JobConfiguration:
             worker_on_master=self.worker_on_master,
             spark_configuration=self.spark_configuration,
             scheduling_target=self.scheduling_target,
+            data_disks=self.data_disks,
         )
 
     def mixed_mode(self) -> bool:

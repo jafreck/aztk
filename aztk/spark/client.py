@@ -230,7 +230,8 @@ class Client(BaseClient):
             vm_image = models.VmImage(
                 publisher='Canonical',
                 offer='UbuntuServer',
-                sku='16.04')
+                sku='16.04',
+                data_disks=job_configuration.data_disks)
 
             autoscale_formula = "$TargetDedicatedNodes = {0}; " \
                                 "$TargetLowPriorityNodes = {1}".format(
