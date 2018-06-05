@@ -1,15 +1,19 @@
 import datetime
 import getpass
+import subprocess
 import sys
 import threading
 import time
 from subprocess import call
 from typing import List
+
 import azure.batch.models as batch_models
+
 from aztk import error, utils
-from aztk.utils import get_ssh_key, helpers
 from aztk.models import ClusterConfiguration
 from aztk.spark import models
+from aztk.utils import get_ssh_key, helpers
+
 from . import log
 
 
@@ -126,7 +130,7 @@ def stream_logs(client, cluster_id, application_name):
             application_name=application_name,
             tail=True,
             current_bytes=current_bytes)
-        print(app_logs.log, end="")
+        log.print(app_logs.log)
         if app_logs.application_state == 'completed':
             return app_logs.exit_code
         current_bytes = app_logs.total_bytes
@@ -152,6 +156,8 @@ def ssh_in_master(
         :param ports: an list of local and remote ports
         :type ports: [[<local-port>, <remote-port>]]
     """
+    # check if ssh is available, this throws OSError if ssh is not present
+    subprocess.call(["ssh"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
     # Get master node id from task (job and task are both named pool_id)
     cluster = client.get_cluster(cluster_id)
@@ -212,6 +218,7 @@ def ssh_in_master(
 
     if connect:
         call(command, shell=True)
+
     return '\n\t{}\n'.format(command)
 
 def print_batch_exception(batch_exception):
@@ -420,14 +427,12 @@ def utc_to_local(utc_dt):
 
 def print_cluster_conf(cluster_conf: ClusterConfiguration, wait: bool):
     user_configuration = cluster_conf.user_configuration
-
     log.info("-------------------------------------------")
     log.info("cluster id:              %s", cluster_conf.cluster_id)
-    log.info("cluster toolkit:         %s %s", cluster_conf.toolkit.software,  cluster_conf.toolkit.version)
-    log.info("cluster size:            %s",
-             cluster_conf.vm_count + cluster_conf.vm_low_pri_count)
-    log.info(">        dedicated:      %s", cluster_conf.vm_count)
-    log.info(">     low priority:      %s", cluster_conf.vm_low_pri_count)
+    log.info("cluster toolkit:         %s %s", cluster_conf.toolkit.software, cluster_conf.toolkit.version)
+    log.info("cluster size:            %s", cluster_conf.size + cluster_conf.size_low_priority)
+    log.info(">        dedicated:      %s", cluster_conf.size)
+    log.info(">     low priority:      %s", cluster_conf.size_low_priority)
     log.info("cluster vm size:         %s", cluster_conf.vm_size)
     log.info("custom scripts:          %s", len(cluster_conf.custom_scripts) if cluster_conf.custom_scripts else 0)
     log.info("subnet ID:               %s", cluster_conf.subnet_id)
@@ -450,3 +455,14 @@ def print_cluster_conf(cluster_conf: ClusterConfiguration, wait: bool):
 def log_property(label: str, value: str):
     label += ":"
     log.info("{0:30} {1}".format(label, value))
+
+
+def log_execute_result(node_id, result):
+    log.info("-" * (len(node_id) + 4))
+    log.info("| %s |", node_id)
+    log.info("-" * (len(node_id) + 4))
+    if isinstance(result, Exception):
+        log.info("%s\n", result)
+    else:
+        for line in result:
+            log.print(line)

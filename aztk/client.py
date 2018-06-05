@@ -4,16 +4,18 @@ from datetime import datetime, timedelta, timezone
 
 import azure.batch.models as batch_models
 import azure.batch.models.batch_error as batch_error
+from Cryptodome.PublicKey import RSA
+
+import aztk.error as error
+import aztk.models as models
 import aztk.utils.azure_api as azure_api
 import aztk.utils.constants as constants
 import aztk.utils.get_ssh_key as get_ssh_key
 import aztk.utils.helpers as helpers
 import aztk.utils.ssh as ssh_lib
-import aztk.models as models
-import azure.batch.models as batch_models
-from azure.batch.models import batch_error
-from Cryptodome.PublicKey import RSA
 from aztk.internal import cluster_data
+from aztk.utils import secure_utils
+
 
 class Client:
     def __init__(self, secrets_config: models.SecretsConfiguration):
@@ -90,7 +92,7 @@ class Client:
             network_conf = batch_models.NetworkConfiguration(
                 subnet_id=cluster_conf.subnet_id)
         auto_scale_formula = "$TargetDedicatedNodes={0}; $TargetLowPriorityNodes={1}".format(
-            cluster_conf.vm_count, cluster_conf.vm_low_pri_count)
+            cluster_conf.size, cluster_conf.size_low_priority)
 
         # Confiure the pool
         pool = batch_models.PoolAddParameter(
@@ -110,7 +112,7 @@ class Client:
                 batch_models.MetadataItem(
                     name=constants.AZTK_SOFTWARE_METADATA_KEY, value=software_metadata_key),
                 batch_models.MetadataItem(
-                        name=constants.AZTK_MODE_METADATA_KEY, value=constants.AZTK_CLUSTER_MODE_METADATA)
+                    name=constants.AZTK_MODE_METADATA_KEY, value=constants.AZTK_CLUSTER_MODE_METADATA)
             ])
 
         # Create the pool + create user for the pool
@@ -162,7 +164,7 @@ class Client:
             :param password: password of the user to add
             :param ssh_key: ssh_key of the user to add
         """
-        # Create new ssh user for the master node
+        # Create new ssh user for the given node
         self.batch_client.compute_node.add_user(
             pool_id,
             node_id,
@@ -184,7 +186,6 @@ class Client:
         # Delete a user on the given node
         self.batch_client.compute_node.delete_user(pool_id, node_id, username)
 
-
     def __get_remote_login_settings(self, pool_id: str, node_id: str):
         """
         Get the remote_login_settings for node
@@ -196,29 +197,46 @@ class Client:
             pool_id, node_id)
         return models.RemoteLogin(ip_address=result.remote_login_ip_address, port=str(result.remote_login_port))
 
-    def __create_user_on_node(self, username, pool_id, node_id, ssh_key):
+    def __create_user_on_node(self, username, pool_id, node_id, ssh_key=None, password=None):
         try:
-            self.__create_user(pool_id=pool_id, node_id=node_id, username=username, ssh_key=ssh_key)
+            self.__create_user(pool_id=pool_id, node_id=node_id, username=username, ssh_key=ssh_key, password=password)
         except batch_error.BatchErrorException as error:
             try:
                 self.__delete_user(pool_id, node_id, username)
                 self.__create_user(pool_id=pool_id, node_id=node_id, username=username, ssh_key=ssh_key)
             except batch_error.BatchErrorException as error:
-                print(error)
                 raise error
-        return ssh_key
 
-    def __create_user_on_pool(self, username, pool_id, nodes):
+    def __generate_user_on_node(self, pool_id, node_id):
+        generated_username = secure_utils.generate_random_string()
         ssh_key = RSA.generate(2048)
         ssh_pub_key = ssh_key.publickey().exportKey('OpenSSH').decode('utf-8')
+        self.__create_user_on_node(generated_username, pool_id, node_id, ssh_pub_key)
+        return generated_username, ssh_key
+
+    def __generate_user_on_pool(self, pool_id, nodes):
+        generated_username = secure_utils.generate_random_string()
+        ssh_key = RSA.generate(2048)
+        ssh_pub_key = ssh_key.publickey().exportKey('OpenSSH').decode('utf-8')
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            futures = {executor.submit(self.__create_user_on_node,
+                                       generated_username,
+                                       pool_id,
+                                       node.id,
+                                       ssh_pub_key): node for node in nodes}
+            concurrent.futures.wait(futures)
+        
+        return generated_username, ssh_key
+
+    def __create_user_on_pool(self, username, pool_id, nodes, ssh_pub_key=None, password=None):
         with concurrent.futures.ThreadPoolExecutor() as executor:
             futures = {executor.submit(self.__create_user_on_node,
                                        username,
                                        pool_id,
                                        node.id,
-                                       ssh_pub_key): node for node in nodes}
+                                       ssh_pub_key,
+                                       password): node for node in nodes}
             concurrent.futures.wait(futures)
-        return ssh_key
 
     def __delete_user_on_pool(self, username, pool_id, nodes):
         with concurrent.futures.ThreadPoolExecutor() as exector:
@@ -227,21 +245,22 @@ class Client:
 
     def __node_run(self, cluster_id, node_id, command, internal, container_name=None, timeout=None):
         pool, nodes = self.__get_pool_details(cluster_id)
-        node = [node for node in nodes if node.id == node_id]
-        if node:
-            node = node[0]
+        try:
+            node = next(node for node in nodes if node.id == node_id)
+        except StopIteration:
+            raise error.AztkError("Node with id {} not found".format(node_id))
+
         if internal:
             node_rls = models.RemoteLogin(ip_address=node.ip_address, port="22")
         else:
             node_rls = self.__get_remote_login_settings(pool.id, node.id)
-        ssh_key = RSA.generate(2048)
-        ssh_pub_key = ssh_key.publickey().exportKey('OpenSSH').decode('utf-8')
+
         try:
-            self.__create_user_on_node('aztk', pool.id, node.id, ssh_pub_key)
+            generated_username, ssh_key = self.__generate_user_on_node(pool.id, node.id)
             output = ssh_lib.node_exec_command(
                 node.id,
                 command,
-                'aztk',
+                generated_username,
                 node_rls.ip_address,
                 node_rls.port,
                 ssh_key=ssh_key.exportKey().decode('utf-8'),
@@ -250,45 +269,48 @@ class Client:
             )
             return output
         finally:
-            self.__delete_user(cluster_id, node.id, 'aztk')
+            self.__delete_user(cluster_id, node.id, generated_username)
 
     def __cluster_run(self, cluster_id, command, internal, container_name=None, timeout=None):
         pool, nodes = self.__get_pool_details(cluster_id)
-        nodes = [node for node in nodes]
+        nodes = list(nodes)
         if internal:
             cluster_nodes = [(node, models.RemoteLogin(ip_address=node.ip_address, port="22")) for node in nodes]
         else:
             cluster_nodes = [(node, self.__get_remote_login_settings(pool.id, node.id)) for node in nodes]
+
         try:
-            ssh_key = self.__create_user_on_pool('aztk', pool.id, nodes)
+            generated_username, ssh_key = self.__generate_user_on_pool(pool.id, nodes)
             output = asyncio.get_event_loop().run_until_complete(
-                ssh_lib.cluster_exec_command(
+                ssh_lib.clus_exec_command(
                     command,
-                    'aztk',
+                    generated_username,
                     cluster_nodes,
                     ssh_key=ssh_key.exportKey().decode('utf-8'),
                     container_name=container_name,
-                    timeout=timeout)
+                    timeout=timeout
+                )
             )
             return output
         except OSError as exc:
             raise exc
         finally:
-            self.__delete_user_on_pool('aztk', pool.id, nodes)
+            self.__delete_user_on_pool(generated_username, pool.id, nodes)
 
     def __cluster_copy(self, cluster_id, source_path, destination_path, container_name=None, internal=False, get=False, timeout=None):
         pool, nodes = self.__get_pool_details(cluster_id)
-        nodes = [node for node in nodes]
+        nodes = list(nodes)
         if internal:
             cluster_nodes = [(node, models.RemoteLogin(ip_address=node.ip_address, port="22")) for node in nodes]
         else:
             cluster_nodes = [(node, self.__get_remote_login_settings(pool.id, node.id)) for node in nodes]
+
         try:
-            ssh_key = self.__create_user_on_pool('aztk', pool.id, nodes)
+            generated_username, ssh_key = self.__generate_user_on_pool(pool.id, nodes)
             output = asyncio.get_event_loop().run_until_complete(
-                ssh_lib.cluster_copy(
+                ssh_lib.clus_copy(
                     container_name=container_name,
-                    username='aztk',
+                    username=generated_username,
                     nodes=cluster_nodes,
                     source_path=source_path,
                     destination_path=destination_path,
@@ -301,7 +323,24 @@ class Client:
         except (OSError, batch_error.BatchErrorException) as exc:
             raise exc
         finally:
-            self.__delete_user_on_pool('aztk', pool.id, nodes)
+            self.__delete_user_on_pool(generated_username, pool.id, nodes)
+
+    def __ssh_into_node(self, pool_id, node_id, username, ssh_key=None, password=None, port_forward_list=None, internal=False):
+        if internal:
+            result = self.batch_client.compute_node.get(pool_id=pool_id, node_id=node_id)
+            rls = models.RemoteLogin(ip_address=result.ip_address, port="22")
+        else:
+            result = self.batch_client.compute_node.get_remote_login_settings(pool_id, node_id)
+            rls = models.RemoteLogin(ip_address=result.remote_login_ip_address, port=str(result.remote_login_port))
+
+        ssh_lib.node_ssh(
+            username=username,
+            hostname=rls.ip_address,
+            port=rls.port,
+            ssh_key=ssh_key,
+            password=password,
+            port_forward_list=port_forward_list,
+        )
 
     def __submit_job(self,
                      job_configuration,
