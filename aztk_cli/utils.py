@@ -124,7 +124,7 @@ def print_clusters(clusters: List[models.Cluster]):
 
 
 def print_clusters_quiet(clusters: List[models.Cluster]):
-    print('\n'.join([str(cluster.id) for cluster in clusters]))
+    log.print('\n'.join([str(cluster.id) for cluster in clusters]))
 
 
 def stream_logs(client, cluster_id, application_name):
