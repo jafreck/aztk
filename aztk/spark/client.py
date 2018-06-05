@@ -1,17 +1,20 @@
 from typing import List
+
 import azure.batch.models.batch_error as batch_error
+
 import aztk
 from aztk import error
 from aztk.client import Client as BaseClient
+from aztk.internal.cluster_data import NodeData
 from aztk.spark import models
-from aztk.utils import helpers
 from aztk.spark.helpers import create_cluster as create_cluster_helper
-from aztk.spark.helpers import submit as cluster_submit_helper
-from aztk.spark.helpers import job_submission as job_submit_helper
 from aztk.spark.helpers import get_log as get_log_helper
+from aztk.spark.helpers import job_submission as job_submit_helper
+from aztk.spark.helpers import submit as cluster_submit_helper
 from aztk.spark.helpers import cluster_diagnostic_helper
 from aztk.spark.utils import util
-from aztk.internal.cluster_data import NodeData
+from aztk.utils import helpers
+
 
 class Client(BaseClient):
     """
@@ -170,6 +173,17 @@ class Client(BaseClient):
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
 
+    def node_run(self, cluster_id: str, node_id: str, command: str, host=False, internal: bool = False, timeout=None):
+        try:
+            return self.__node_run(cluster_id,
+                                   node_id,
+                                   command,
+                                   internal,
+                                   container_name='spark' if not host else None,
+                                   timeout=timeout)
+        except batch_error.BatchErrorException as e:
+            raise error.AztkError(helpers.format_batch_exception(e))
+
     def cluster_copy(self, cluster_id: str, source_path: str, destination_path: str, host: bool = False, internal: bool = False, timeout=None):
         try:
             container_name = None if host else 'spark'
@@ -193,6 +207,12 @@ class Client(BaseClient):
                                        get=True,
                                        internal=internal,
                                        timeout=timeout)
+        except batch_error.BatchErrorException as e:
+            raise error.AztkError(helpers.format_batch_exception(e))
+
+    def cluster_ssh_into_master(self, cluster_id, node_id, username, ssh_key=None, password=None, port_forward_list=None, internal=False):
+        try:
+            self.__ssh_into_node(cluster_id, node_id, username, ssh_key, password, port_forward_list, internal)
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
 
