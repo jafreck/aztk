@@ -125,7 +125,7 @@ main () {
 
     # Unzip resource files and set permissions
     chmod 777 $AZTK_WORKING_DIR/aztk/node_scripts/docker_main.sh
-    chmod +x $AZTK_WORKING_DIR/aztk/node_scripts/install/mount_data_disk.sh
+    chmod +x $AZTK_WORKING_DIR/aztk/node_scripts/install/setup_data_disk.sh
 
     # Check docker is running
     docker info > /dev/null 2>&1

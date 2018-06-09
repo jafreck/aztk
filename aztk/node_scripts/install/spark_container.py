@@ -7,7 +7,8 @@ def start_spark_container(
         docker_repo: str=None,
         gpu_enabled: bool=False,
         file_mounts=None,
-        plugins=None):
+        plugins=None,
+        data_disks=None):
 
     cmd = DockerCmd(
         name=constants.DOCKER_SPARK_CONTAINER_NAME,
@@ -18,7 +19,8 @@ def start_spark_container(
     if file_mounts:
         for mount in file_mounts:
             cmd.share_folder(mount.mount_path)
-    cmd.share_folder('/mnt')
+    cmd.share_folder('/mnt/batch')
+    [cmd.share_folder(data_disk.mount_path) for data_disk in data_disks]
 
     cmd.pass_env('AZTK_WORKING_DIR')
     cmd.pass_env('AZ_BATCH_ACCOUNT_NAME')

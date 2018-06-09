@@ -28,7 +28,7 @@ class DockerCmd:
         self.cmd.add_option('-e', '{0}'.format(env))
 
     def share_folder(self, folder: str):
-        self.cmd.add_option('-v', '{0}:{0}'.format(folder))
+        self.cmd.add_option('--mount', 'type=bind,src={0},dst={0}'.format(folder))
 
     def open_port(self, port: int):
         self.cmd.add_option('-p', '{0}:{0}'.format(port))       # Spark Master UI

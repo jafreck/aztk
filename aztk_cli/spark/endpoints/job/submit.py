@@ -45,6 +45,7 @@ def execute(args: typing.NamedTuple):
         subnet_id=job_conf.subnet_id,
         worker_on_master=job_conf.worker_on_master,
         scheduling_target=job_conf.scheduling_target,
+        data_disks=job_conf.data_disks,
     )
 
     #TODO: utils.print_job_conf(job_configuration)

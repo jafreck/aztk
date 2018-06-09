@@ -10,6 +10,7 @@ from .toolkit import Toolkit
 from .user_configuration import UserConfiguration
 from .scheduling_target import SchedulingTarget
 
+
 class ClusterConfiguration(Model):
     """
     Cluster configuration model

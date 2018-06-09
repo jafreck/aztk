@@ -1,5 +1,4 @@
 import os
-import subprocess
 
 import wait_until_master_selected
 from aztk.internal import cluster_data
@@ -8,6 +7,7 @@ from core import config
 from install import (create_user, pick_master, plugins, scripts, spark, spark_container)
 
 from .node_scheduling import setup_node_scheduling
+from .setup_data_disks import setup_data_disks
 
 
 def read_cluster_config():
@@ -17,32 +17,12 @@ def read_cluster_config():
     return cluster_config
 
 
-def mount_data_disk(device_name, number):
-    cmd = os.environ["AZTK_WORKING_DIR"] + "/aztk/node_scripts/install/mount_data_disk.sh " + device_name + " " + str(number)
-    print("mount disk cmd:", cmd)
-    p = subprocess.Popen([cmd], shell=True)
-    # output, error = p.communicate()
-    # print(output, error)
-    return p.returncode
-
-
-def setup_data_disk(number):
-    # setup datadisks, starting with sdc
-    import string
-    chars = string.ascii_lowercase[2:]
-    for i in range(number):
-        mount_data_disk("/dev/sd" + chars[i], i)
 
 
 def setup_host(docker_repo: str):
     """
     Code to be run on the node(NOT in a container)
     """
-    p = subprocess.Popen(["lsblk -lnS --sort name | wc -l"], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    output, _ = p.communicate()
-    output = int(output) - 3    # by default, there are 3 devices on each host: sda, sdb, sr0
-    if output > 2:
-        setup_data_disk(output)
 
     client = config.batch_client
 
@@ -70,6 +50,8 @@ def setup_host(docker_repo: str):
 
     cluster_conf = read_cluster_config()
 
+    setup_data_disks(cluster_conf)
+
     setup_node_scheduling(client, cluster_conf, is_master)
 
     #TODO pass azure file shares
@@ -77,6 +59,7 @@ def setup_host(docker_repo: str):
         docker_repo=docker_repo,
         gpu_enabled=os.environ.get("AZTK_GPU_ENABLED") == "true",
         plugins=cluster_conf.plugins,
+        data_disks=cluster_conf.data_disks,
     )
     plugins.setup_plugins(target=PluginTarget.Host, is_master=is_master, is_worker=is_worker)
 

@@ -1,0 +1,10 @@
+class DataDiskFormatType:
+    bfs = "bfs"
+    btrfs = "btrfs"
+    cramfs = "cramfs"
+    ext2 = "ext2"
+    ext3 = "ext3"
+    ext4 = "ext4"
+    fat = "fat"
+    minix = "minix"
+    xfs = "xfs"

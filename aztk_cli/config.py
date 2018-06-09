@@ -5,6 +5,7 @@ from aztk.spark.models import (
     SecretsConfiguration,
     ClusterConfiguration,
     SchedulingTarget,
+    DataDisk,
 )
 from aztk.utils import deprecate
 from aztk.models import Toolkit
@@ -184,6 +185,7 @@ class JobConfig():
         self.subnet_id = None
         self.worker_on_master = None
         self.scheduling_target = None
+        self.data_disks = []
 
     def _merge_dict(self, config):
         config = config.get('job')
@@ -205,7 +207,18 @@ class JobConfig():
             scheduling_target = cluster_configuration.get("scheduling_target")
             if scheduling_target:
                 self.scheduling_target = SchedulingTarget(scheduling_target)
-
+            if cluster_configuration.get("data_disks"):
+                for item in cluster_configuration.get("data_disks"):
+                    data_disk = DataDisk()
+                    print("data_disk", data_disk.to_dict())
+                    sys.exit()
+                    if item.get("disk_size_gb"):
+                        data_disk.disk_size_gb = item.get("disk_size_gb")
+                    if item.get("mount_path"):
+                        data_disk.mount_path = item.get("mount_path")
+                    if item.get("format_type"):
+                        data_disk.format_type = item.get("format_type")
+                    self.data_disks.append(data_disk)
 
         applications = config.get('applications')
         if applications:
