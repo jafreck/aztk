@@ -13,6 +13,7 @@
 * set logger to stdout (#588) ([3f0c8f9](https://github.com/jafreck/aztk/commit/3f0c8f9)), closes [#588](https://github.com/jafreck/aztk/issues/588)
 * switch create user to pool wide (#574) ([49a890a](https://github.com/jafreck/aztk/commit/49a890a)), closes [#574](https://github.com/jafreck/aztk/issues/574)
 * switch from pycryptodome to pycryptodomex (#564) ([19dde42](https://github.com/jafreck/aztk/commit/19dde42)), closes [#564](https://github.com/jafreck/aztk/issues/564)
+* allow cluster config to be printed when no username has been set (#597) ([1cc71c7](https://github.com/jafreck/aztk/commit/1cc71c7)), closes [#597](https://github.com/jafreck/aztk/issues/597)
 
 **Added Features**
 * add cluster list quiet flag, ability to compose with delete (#581) ([88d0419](https://github.com/jafreck/aztk/commit/88d0419)), closes [#581](https://github.com/jafreck/aztk/issues/581)
