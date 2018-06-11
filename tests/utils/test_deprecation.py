@@ -46,8 +46,8 @@ def test_deprecated_field():
 
     with pytest.warns(DeprecationWarning) as deprecation_warning:
         dummy_class = DummyClass(deprecated_field=True)
+        assert dummy_class.deprecated_field is True
 
-    assert dummy_class.deprecated_field is True
     assert dummy_class.non_deprecated_field is True
     assert "deprecated_field is deprecated for DummyClass." in str(deprecation_warning[0].message)
     assert "Please use non_deprecated_field instead." in str(deprecation_warning[0].message)
