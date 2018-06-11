@@ -22,6 +22,7 @@
 * Warnings show stacktrace on verbose (#587) ([b9a863b](https://github.com/jafreck/aztk/commit/b9a863b)), closes [#587](https://github.com/jafreck/aztk/issues/587)
 
 **Bug Fixes**
+* add toolkit to sdk docs and example ([d688c9c](https://github.com/jafreck/aztk/commit/d688c9c))
 * --size-low-pri being ignored (#593) ([fa3ac0e](https://github.com/jafreck/aztk/commit/fa3ac0e)), closes [#593](https://github.com/jafreck/aztk/issues/593)
 * fix typos (#595) ([7d7a814](https://github.com/jafreck/aztk/commit/7d7a814)), closes [#595](https://github.com/jafreck/aztk/issues/595)
 * getting started script reuse aad application (#569) ([3d16cf3](https://github.com/jafreck/aztk/commit/3d16cf3)), closes [#569](https://github.com/jafreck/aztk/issues/569)
