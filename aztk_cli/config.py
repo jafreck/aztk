@@ -24,7 +24,7 @@ def load_aztk_secrets() -> SecretsConfiguration:
     if not global_config and not local_config:
         raise aztk.error.AztkError("There is no secrets.yaml in either ./.aztk/secrets.yaml or .aztk/secrets.yaml")
 
-    if global_config:  # GLobal config is optional
+    if global_config:  # Global config is optional
         _merge_secrets_dict(secrets, global_config)
     if local_config:
         _merge_secrets_dict(secrets, local_config)
@@ -47,7 +47,7 @@ def _load_config_file(path: str):
 
 def _merge_secrets_dict(secrets: SecretsConfiguration, secrets_config):
     if 'default' in secrets_config:
-        deprecate("default key in secrets.yaml is deprecated. Place all child parameters directly at the root")
+        deprecate("0.9.0", "default key in secrets.yaml is deprecated.", "Place all child parameters directly at the root")
         secrets_config = dict(**secrets_config, **secrets_config.pop('default'))
 
     other = SecretsConfiguration.from_dict(secrets_config)

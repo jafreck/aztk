@@ -94,7 +94,7 @@ class Client:
         auto_scale_formula = "$TargetDedicatedNodes={0}; $TargetLowPriorityNodes={1}".format(
             cluster_conf.size, cluster_conf.size_low_priority)
 
-        # Confiure the pool
+        # Configure the pool
         pool = batch_models.PoolAddParameter(
             id=pool_id,
             virtual_machine_configuration=batch_models.VirtualMachineConfiguration(
@@ -229,7 +229,7 @@ class Client:
                                        node.id,
                                        ssh_pub_key): node for node in nodes}
             concurrent.futures.wait(futures)
-        
+
         return generated_username, ssh_key
 
     def __create_user_on_pool(self, username, pool_id, nodes, ssh_pub_key=None, password=None):
@@ -243,8 +243,8 @@ class Client:
             concurrent.futures.wait(futures)
 
     def __delete_user_on_pool(self, username, pool_id, nodes):
-        with concurrent.futures.ThreadPoolExecutor() as exector:
-            futures = [exector.submit(self.__delete_user, pool_id, node.id, username) for node in nodes]
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            futures = [executor.submit(self.__delete_user, pool_id, node.id, username) for node in nodes]
             concurrent.futures.wait(futures)
 
     def __node_run(self, cluster_id, node_id, command, internal, container_name=None, timeout=None):
@@ -329,6 +329,23 @@ class Client:
         finally:
             self.__delete_user_on_pool(generated_username, pool.id, nodes)
 
+    def __ssh_into_node(self, pool_id, node_id, username, ssh_key=None, password=None, port_forward_list=None, internal=False):
+        if internal:
+            result = self.batch_client.compute_node.get(pool_id=pool_id, node_id=node_id)
+            rls = models.RemoteLogin(ip_address=result.ip_address, port="22")
+        else:
+            result = self.batch_client.compute_node.get_remote_login_settings(pool_id, node_id)
+            rls = models.RemoteLogin(ip_address=result.remote_login_ip_address, port=str(result.remote_login_port))
+
+        ssh_lib.node_ssh(
+            username=username,
+            hostname=rls.ip_address,
+            port=rls.port,
+            ssh_key=ssh_key,
+            password=password,
+            port_forward_list=port_forward_list,
+        )
+
     def __submit_job(self,
                      job_configuration,
                      start_task,
@@ -342,7 +359,7 @@ class Client:
             :param job_configuration -> aztk_sdk.spark.models.JobConfiguration
             :param start_task -> batch_models.StartTask
             :param job_manager_task -> batch_models.TaskAddParameter
-            :param autoscale forumula -> str
+            :param autoscale_formula -> str
             :param software_metadata_key -> str
             :param vm_image_model -> aztk_sdk.models.VmImage
             :returns None

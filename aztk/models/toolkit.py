@@ -55,7 +55,7 @@ class Toolkit(Model):
             raise InvalidModelError("Toolkit '{0}' with version '{1}' is not available. Use one of: {2}".format(
                 self.software, self.version, toolkit_def.versions))
         if self.version == "1.6":
-            deprecate("Spark version 1.6 is being deprecated for Aztk. Please use 2.1 and above.")
+            deprecate("0.9.0", "Spark version 1.6 is being deprecated for Aztk.", "Please use 2.1 and above.")
 
         if self.environment:
             if self.environment not in toolkit_def.environments:
@@ -83,7 +83,7 @@ class Toolkit(Model):
 
     def _get_docker_tag(self, gpu: bool):
         environment = self.environment or "base"
-        environment_def = self._get_environent_definition()
+        environment_def = self._get_environment_definition()
         environment_version = self.environment_version or (environment_def and environment_def.default)
 
         array = [
@@ -98,7 +98,7 @@ class Toolkit(Model):
         return '-'.join(array)
 
 
-    def _get_environent_definition(self) -> ToolkitEnvironmentDefinition:
+    def _get_environment_definition(self) -> ToolkitEnvironmentDefinition:
         toolkit = TOOLKIT_MAP.get(self.software)
 
         if toolkit:

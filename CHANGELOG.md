@@ -1,5 +1,40 @@
-
 # Changelog
+
+##  0.8.0 (2018-06-07)
+
+**Deprecated Features**
+* ClusterConfiguration fields vm_count and vm_count_low_pri have been renamed to size and size_low_priority
+* command line flag `--size-low-pri` for `aztk spark cluster create` has been replaced with `--size-low-priority`
+* `default` secrets.yaml block has been deprecated, place all child parameters directly at the root
+* Spark version 1.6 has been deprecated
+
+**Added Features**
+* add cluster list quiet flag, ability to compose with delete (#581) ([88d0419](https://github.com/jafreck/aztk/commit/88d0419)), closes [#581](https://github.com/jafreck/aztk/issues/581)
+* add node run command (#572) ([af449dc](https://github.com/jafreck/aztk/commit/af449dc)), closes [#572](https://github.com/jafreck/aztk/issues/572)
+* Add VSTS CI (#561) ([66037fd](https://github.com/jafreck/aztk/commit/66037fd)), closes [#561](https://github.com/jafreck/aztk/issues/561)
+* Disable scheduling on group of nodes (#540) ([8fea9ce](https://github.com/jafreck/aztk/commit/8fea9ce)), closes [#540](https://github.com/jafreck/aztk/issues/540)
+* New Models design with auto validation, default and merging (#543) ([02f336b](https://github.com/jafreck/aztk/commit/02f336b)), closes [#543](https://github.com/jafreck/aztk/issues/543)
+* nvBLAS and OpenBLAS plugin (#539) ([603a413](https://github.com/jafreck/aztk/commit/603a413)), closes [#539](https://github.com/jafreck/aztk/issues/539)
+* pure python ssh (#577) ([f16aac0](https://github.com/jafreck/aztk/commit/f16aac0)), closes [#577](https://github.com/jafreck/aztk/issues/577)
+* Support passing of remote executables via aztk spark cluster submit (#549) ([f6735cc](https://github.com/jafreck/aztk/commit/f6735cc)), closes [#549](https://github.com/jafreck/aztk/issues/549)
+* TensorflowOnSpark python plugin (#525) ([1527929](https://github.com/jafreck/aztk/commit/1527929)), closes [#525](https://github.com/jafreck/aztk/issues/525)
+* Conda, Apt-Get and Pip Install Plugins (#594) ([fbf1bab](https://github.com/jafreck/aztk/commit/fbf1bab)), closes [#594](https://github.com/jafreck/aztk/issues/594)
+* Warnings show stacktrace on verbose (#587) ([b9a863b](https://github.com/jafreck/aztk/commit/b9a863b)), closes [#587](https://github.com/jafreck/aztk/issues/587)
+
+**Bug Fixes**
+* add toolkit to sdk docs and example ([d688c9c](https://github.com/jafreck/aztk/commit/d688c9c))
+* --size-low-pri being ignored (#593) ([fa3ac0e](https://github.com/jafreck/aztk/commit/fa3ac0e)), closes [#593](https://github.com/jafreck/aztk/issues/593)
+* fix typos (#595) ([7d7a814](https://github.com/jafreck/aztk/commit/7d7a814)), closes [#595](https://github.com/jafreck/aztk/issues/595)
+* getting started script reuse aad application (#569) ([3d16cf3](https://github.com/jafreck/aztk/commit/3d16cf3)), closes [#569](https://github.com/jafreck/aztk/issues/569)
+* models v2 deserialization (#584) ([1eeff23](https://github.com/jafreck/aztk/commit/1eeff23)), closes [#584](https://github.com/jafreck/aztk/issues/584)
+* optimize start task (#582) ([e5e529a](https://github.com/jafreck/aztk/commit/e5e529a)), closes [#582](https://github.com/jafreck/aztk/issues/582)
+* remove deprecated vm_count call (#586) ([dbde8bc](https://github.com/jafreck/aztk/commit/dbde8bc)), closes [#586](https://github.com/jafreck/aztk/issues/586)
+* Remove old spark-defaults.conf jars (#567) ([8b8cd62](https://github.com/jafreck/aztk/commit/8b8cd62)), closes [#567](https://github.com/jafreck/aztk/issues/567)
+* set logger to stdout (#588) ([3f0c8f9](https://github.com/jafreck/aztk/commit/3f0c8f9)), closes [#588](https://github.com/jafreck/aztk/issues/588)
+* switch create user to pool wide (#574) ([49a890a](https://github.com/jafreck/aztk/commit/49a890a)), closes [#574](https://github.com/jafreck/aztk/issues/574)
+* switch from pycryptodome to pycryptodomex (#564) ([19dde42](https://github.com/jafreck/aztk/commit/19dde42)), closes [#564](https://github.com/jafreck/aztk/issues/564)
+* allow cluster config to be printed when no username has been set (#597) ([1cc71c7](https://github.com/jafreck/aztk/commit/1cc71c7)), closes [#597](https://github.com/jafreck/aztk/issues/597)
+
 
 ##  0.7.1 (2018-05-11)
 
@@ -20,7 +55,7 @@ This release includes a number of breaking changes. [Please follow the migration
 - Docker images have been refactored and moved to a different Dockerhub repository. The new supported images are not backwards compatible. See [the documentation on configuration files.](https://aztk.readthedocs.io/en/v0.7.0/13-configuration.html#cluster-yaml)
 
 **Deprecated Features**
-- Custom scripts have been removed in favor of Plugins, which are more robust. See, [the documenation on Plugins.](https://aztk.readthedocs.io/en/v0.7.0/15-plugins.html)
+- Custom scripts have been removed in favor of Plugins, which are more robust. See, [the documentation on Plugins.](https://aztk.readthedocs.io/en/v0.7.0/15-plugins.html)
 
 **Added Features**
 * add internal flag to node commands (#482) ([1eaa1b6](https://github.com/Azure/aztk/commit/1eaa1b6)), closes [#482](https://github.com/Azure/aztk/issues/482)
@@ -33,7 +68,7 @@ This release includes a number of breaking changes. [Please follow the migration
 * match cluster submit exit code in cli (#478) ([8889059](https://github.com/Azure/aztk/commit/8889059)), closes [#478](https://github.com/Azure/aztk/issues/478)
 * Plugin V2: Running plugin on host (#461) ([de78983](https://github.com/Azure/aztk/commit/de78983)), closes [#461](https://github.com/Azure/aztk/issues/461)
 * Plugins (#387) ([c724d94](https://github.com/Azure/aztk/commit/c724d94)), closes [#387](https://github.com/Azure/aztk/issues/387)
-* Pypi auto deployement  (#428) ([c237501](https://github.com/Azure/aztk/commit/c237501)), closes [#428](https://github.com/Azure/aztk/issues/428)
+* Pypi auto deployment  (#428) ([c237501](https://github.com/Azure/aztk/commit/c237501)), closes [#428](https://github.com/Azure/aztk/issues/428)
 * Readthedocs support (#497) ([e361c3b](https://github.com/Azure/aztk/commit/e361c3b)), closes [#497](https://github.com/Azure/aztk/issues/497)
 * refactor docker images (#510) ([779bffb](https://github.com/Azure/aztk/commit/779bffb)), closes [#510](https://github.com/Azure/aztk/issues/510)
 * Spark add output logs flag (#468) ([32de752](https://github.com/Azure/aztk/commit/32de752)), closes [#468](https://github.com/Azure/aztk/issues/468)
@@ -93,7 +128,7 @@ This release includes a number of breaking changes. [Please follow the migration
 **Bug Fixes:**
 - load jars in `.aztk/jars/` in job submission mode
 - replace outdated error in cluster_create
-- fix type error crash if not jars are specificed in job submission
+- fix type error crash if no jars are specified in job submission
 - stop using mutable default parameters
 - print job application code if exit_code is 0
 - job submission crash if executor or driver cores specified

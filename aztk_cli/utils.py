@@ -1,16 +1,19 @@
 import datetime
 import getpass
+import subprocess
 import sys
 import threading
 import time
-import yaml
 from subprocess import call
 from typing import List
+
 import azure.batch.models as batch_models
+
 from aztk import error, utils
-from aztk.utils import get_ssh_key, helpers
 from aztk.models import ClusterConfiguration
 from aztk.spark import models
+from aztk.utils import get_ssh_key, helpers
+
 from . import log
 
 
@@ -18,7 +21,7 @@ def get_ssh_key_or_prompt(ssh_key, username, password, secrets_config):
     ssh_key = get_ssh_key.get_user_public_key(ssh_key, secrets_config)
 
     if username is not None and password is None and ssh_key is None:
-        log.warn("It is reccomended to use an SSH key for user creation instead of a password.")
+        log.warning("It is recommended to use an SSH key for user creation instead of a password.")
         for i in range(3):
             if i > 0:
                 log.error("Please try again.")
@@ -31,7 +34,7 @@ def get_ssh_key_or_prompt(ssh_key, username, password, secrets_config):
             else:
                 break
         else:
-            raise error.AztkError("Failed to get valid password, cannot add user to cluster. It is recommended that you provide a ssh public key in .aztk/secrets.yaml. Or provide an ssh-key or password with commnad line parameters (--ssh-key or --password). You may also run the 'aztk spark cluster add-user' command to add a user to this cluster.")
+            raise error.AztkError("Failed to get valid password, cannot add user to cluster. It is recommended that you provide a ssh public key in .aztk/secrets.yaml. Or provide an ssh-key or password with command line parameters (--ssh-key or --password). You may also run the 'aztk spark cluster add-user' command to add a user to this cluster.")
     return ssh_key, password
 
 def print_cluster(client, cluster: models.Cluster, internal: bool = False):
@@ -119,6 +122,11 @@ def print_clusters(clusters: List[models.Cluster]):
             )
         )
 
+
+def print_clusters_quiet(clusters: List[models.Cluster]):
+    log.print('\n'.join([str(cluster.id) for cluster in clusters]))
+
+
 def stream_logs(client, cluster_id, application_name):
     current_bytes = 0
     while True:
@@ -127,7 +135,7 @@ def stream_logs(client, cluster_id, application_name):
             application_name=application_name,
             tail=True,
             current_bytes=current_bytes)
-        print(app_logs.log, end="")
+        log.print(app_logs.log)
         if app_logs.application_state == 'completed':
             return app_logs.exit_code
         current_bytes = app_logs.total_bytes
@@ -153,6 +161,8 @@ def ssh_in_master(
         :param ports: an list of local and remote ports
         :type ports: [[<local-port>, <remote-port>]]
     """
+    # check if ssh is available, this throws OSError if ssh is not present
+    subprocess.call(["ssh"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
     # Get master node id from task (job and task are both named pool_id)
     cluster = client.get_cluster(cluster_id)
@@ -213,6 +223,7 @@ def ssh_in_master(
 
     if connect:
         call(command, shell=True)
+
     return '\n\t{}\n'.format(command)
 
 def print_batch_exception(batch_exception):
@@ -434,9 +445,10 @@ def print_cluster_conf(cluster_conf: ClusterConfiguration, wait: bool):
     log.info("gpu enabled:             %s", str(cluster_conf.gpu_enabled()))
     log.info("docker repo name:        %s", cluster_conf.get_docker_repo())
     log.info("wait for cluster:        %s", wait)
-    log.info("username:                %s", user_configuration.username)
-    if user_configuration.password:
-        log.info("Password: %s", '*' * len(user_configuration.password))
+    if user_configuration:
+        log.info("username:                %s", user_configuration.username)
+        if user_configuration.password:
+            log.info("Password: %s", '*' * len(user_configuration.password))
     log.info("Plugins:")
     if not cluster_conf.plugins:
         log.info("    None Configured")
@@ -459,4 +471,4 @@ def log_execute_result(node_id, result):
         log.info("%s\n", result)
     else:
         for line in result:
-            print(line)
+            log.print(line)
