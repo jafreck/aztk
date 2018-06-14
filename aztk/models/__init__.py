@@ -14,6 +14,7 @@ from .remote_login import RemoteLogin
 from .ssh_log import SSHLog
 from .vm_image import VmImage
 from .data_disk import DataDisk
+from .data_disk import DataDiskFormatType
 from .software import Software
 from .cluster import Cluster
 from .scheduling_target import SchedulingTarget
