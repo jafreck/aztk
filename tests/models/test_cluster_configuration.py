@@ -1,6 +1,6 @@
 import pytest
 
-from aztk.models import ClusterConfiguration, Toolkit, UserConfiguration, SchedulingTarget
+from aztk.spark.models import ClusterConfiguration, SparkToolkit, SparkConfiguration, UserConfiguration, SchedulingTarget
 from aztk.spark.models.plugins import JupyterPlugin, HDFSPlugin
 from aztk.error import InvalidModelError
 
@@ -63,7 +63,7 @@ def test_cluster_configuration():
 
     config = ClusterConfiguration.from_dict(data)
 
-    assert isinstance(config.toolkit, Toolkit)
+    assert isinstance(config.toolkit, SparkToolkit)
     assert config.toolkit.software == 'spark'
     assert config.toolkit.version == '2.3.0'
     assert config.toolkit.environment == 'anaconda'
@@ -87,7 +87,7 @@ def test_scheduling_target_dedicated_with_no_dedicated_nodes_raise_error():
             vm_size="standard_a2",
             size=0,
             size_low_priority=2,
-            toolkit=Toolkit(software="spark", version="1.6.3"),
+            toolkit=SparkToolkit(version="1.6.3"),
         )
 
         conf.validate()
