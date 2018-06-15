@@ -13,7 +13,7 @@ def test_valid_data_disk():
     assert data_disk.format_type == DataDiskFormatType.ext2
 
 
-def test_uninitialized_data_disk():
+def test_default_data_disk():
     data_disk = DataDisk()
     with pytest.raises(InvalidModelError):
         data_disk.validate()
