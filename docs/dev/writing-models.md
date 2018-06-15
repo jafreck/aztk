@@ -6,7 +6,7 @@ In `aztk/models` create a new file with the name of your model `my_model.py`
 
 In `aztk/models/__init__.py` add `from .my_model import MyModel`
 
-Create a new class `MyModel` that inherit `Modle`
+Create a new class `MyModel` that inherit `Module`
 ```python
 from aztk.core.models import Model, fields
 
