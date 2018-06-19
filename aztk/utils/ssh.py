@@ -12,7 +12,7 @@ import threading
 from concurrent.futures import ThreadPoolExecutor
 
 from aztk.error import AztkError
-
+from aztk.models import NodeOutput
 
 class ForwardServer(SocketServer.ThreadingTCPServer):
     daemon_threads = True
@@ -110,7 +110,7 @@ def node_exec_command(node_id, command, username, hostname, port, ssh_key=None, 
     try:
         client = connect(hostname=hostname, port=port, username=username, password=password, pkey=ssh_key, timeout=timeout)
     except AztkError as e:
-        return (node_id, e)
+        return NodeOutput(node_id, e)
     if container_name:
         cmd = 'sudo docker exec 2>&1 -t {0} /bin/bash -c \'set -e; set -o pipefail; {1}; wait\''.format(container_name, command)
     else:
@@ -118,7 +118,7 @@ def node_exec_command(node_id, command, username, hostname, port, ssh_key=None, 
     stdin, stdout, stderr = client.exec_command(cmd, get_pty=True)
     output = [line.decode('utf-8') for line in stdout.read().splitlines()]
     client.close()
-    return (node_id, output)
+    return NodeOutput(node_id, output, None)
 
 
 async def clus_exec_command(command, username, nodes, ports=None, ssh_key=None, password=None, container_name=None, timeout=None):
@@ -141,16 +141,23 @@ def copy_from_node(node_id, source_path, destination_path, username, hostname, p
     try:
         client = connect(hostname=hostname, port=port, username=username, password=password, pkey=ssh_key, timeout=timeout)
     except AztkError as e:
-        return (node_id, False, e)
+        return NodeOutput(node_id, False, e)
     sftp_client = client.open_sftp()
     try:
-        destination_path = os.path.join(os.path.dirname(destination_path), node_id, os.path.basename(destination_path))
-        os.makedirs(os.path.dirname(destination_path), exist_ok=True)
-        with open(destination_path, 'wb') as f: #SpooledTemporaryFile instead??
+        if destination_path:
+            destination_path = os.path.join(os.path.dirname(destination_path), node_id, os.path.basename(destination_path))
+            os.makedirs(os.path.dirname(destination_path), exist_ok=True)
+            with open(destination_path, 'wb') as f:
+                sftp_client.getfo(source_path, f)
+        else:
+            import tempfile
+            # create 2mb temporary file
+            f = tempfile.SpooledTemporaryFile(2*1024**3)
             sftp_client.getfo(source_path, f)
-            return (node_id, True, None)
+
+        return NodeOutput(node_id, f, None)
     except OSError as e:
-        return (node_id, False, e)
+        return (node_id, None, e)
     finally:
         sftp_client.close()
         client.close()
@@ -160,7 +167,7 @@ def node_copy(node_id, source_path, destination_path, username, hostname, port, 
     try:
         client = connect(hostname=hostname, port=port, username=username, password=password, pkey=ssh_key, timeout=timeout)
     except AztkError as e:
-        return (node_id, False, e)
+        return NodeOutput(node_id, None, e)
     sftp_client = client.open_sftp()
     try:
         if container_name:
@@ -173,12 +180,13 @@ def node_copy(node_id, source_path, destination_path, username, hostname, port, 
             output = [line.decode('utf-8') for line in stdout.read().splitlines()]
             # clean up
             sftp_client.remove(tmp_file)
-            return (node_id, True, None)
+            return NodeOutput(node_id, output, None)
         else:
             output = sftp_client.put(source_path, destination_path).__str__()
-            return (node_id, True, None)
+            return NodeOutput(node_id, output, None)
     except (IOError, PermissionError) as e:
-        return (node_id, False, e)
+        raise e
+        return NodeOutput(node_id, None, e)
     finally:
         sftp_client.close()
         client.close()
