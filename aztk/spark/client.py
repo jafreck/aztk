@@ -50,6 +50,7 @@ class Client(BaseClient):
                                                                            cluster_conf.cluster_id,
                                                                            cluster_conf.gpu_enabled(),
                                                                            cluster_conf.get_docker_repo(),
+                                                                           cluster_conf.get_docker_run_options(),
                                                                            cluster_conf.file_shares,
                                                                            cluster_conf.plugins,
                                                                            cluster_conf.mixed_mode(),
@@ -224,7 +225,7 @@ class Client(BaseClient):
             job_configuration = _apply_default_for_job_config(job_configuration)
             job_configuration.validate()
             cluster_data = self._get_cluster_data(job_configuration.id)
-            node_data =  NodeData(job_configuration.to_cluster_config()).add_core().done()
+            node_data = NodeData(job_configuration.to_cluster_config()).add_core().done()
             zip_resource_files = cluster_data.upload_node_data(node_data).to_resource_file()
 
             start_task = create_cluster_helper.generate_cluster_start_task(self,
@@ -232,6 +233,7 @@ class Client(BaseClient):
                                                                            job_configuration.id,
                                                                            job_configuration.gpu_enabled,
                                                                            job_configuration.get_docker_repo(),
+                                                                           job_configuration.get_docker_run_options(),
                                                                            mixed_mode=job_configuration.mixed_mode(),
                                                                            worker_on_master=job_configuration.worker_on_master)
 
