@@ -420,8 +420,8 @@ def test_debug_tool():
     test_id = "debug-tool-"
     cluster_configuration = aztk.spark.models.ClusterConfiguration(
         cluster_id=test_id+base_cluster_id,
-        vm_count=2,
-        vm_low_pri_count=0,
+        size=2,
+        size_low_priority=0,
         vm_size="standard_f2",
         subnet_id=None,
         custom_scripts=None,
@@ -441,12 +441,13 @@ def test_debug_tool():
     ]
     try:
         cluster = spark_client.create_cluster(cluster_configuration, wait=True)
-        wait_for_all_nodes(cluster.id, cluster.nodes)
-        cluster_output = spark_client.run_cluster_diagnostics(cluster_id=cluster.cluster_id)
+        nodes = [node for node in cluster.nodes]
+        wait_for_all_nodes(cluster.id, nodes)
+        cluster_output = spark_client.run_cluster_diagnostics(cluster_id=cluster.id)
         for node_output in cluster_output:
             node_output.output.seek(0) # tempfile requires seek 0 before reading
-            debug_zip = ZipFile(node_output.output.read())
-            assert node_output.id in cluster.nodes
+            debug_zip = ZipFile(node_output.output)
+            assert node_output.id in [node.id for node in nodes]
             assert node_output.error is None
             assert any(member in name for name in debug_zip.namelist() for member in expected_members)
     except (AztkError, BatchErrorException):
