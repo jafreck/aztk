@@ -141,8 +141,9 @@ def filter_members(members):
     skip_extensions = [".pyc", ".zip"]
     skip_directories = [".venv"]
     for tarinfo in members:
-        if (not any(directory in skip_directories for directory in os.path.normpath(tarinfo.name).split(os.sep)) and
-                os.path.basename(tarinfo.name) not in skip_files
+        member_path = os.path.normpath(tarinfo.name).split(os.sep)
+        if (not any(directory in skip_directories for directory in member_path)
+                and os.path.basename(tarinfo.name) not in skip_files
                 and os.path.splitext(tarinfo.name)[1] not in skip_extensions):
             yield tarinfo
 
