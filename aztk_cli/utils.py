@@ -464,7 +464,6 @@ def log_property(label: str, value: str):
 
 
 def log_node_output(node_output):
-    print("NodeOutput", node_output.output)
     log.info("-" * (len(node_output.id) + 4))
     log.info("| %s |", node_output.id)
     log.info("-" * (len(node_output.id) + 4))
