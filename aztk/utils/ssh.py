@@ -116,7 +116,7 @@ def node_exec_command(node_id, command, username, hostname, port, ssh_key=None, 
     else:
         cmd = '/bin/bash 2>&1 -c \'set -e; set -o pipefail; {0}; wait\''.format(command)
     stdin, stdout, stderr = client.exec_command(cmd, get_pty=True)
-    output = [line.decode('utf-8') for line in stdout.read().splitlines()]
+    output = stdout.read().decode("utf-8")
     client.close()
     return NodeOutput(node_id, output, None)
 
@@ -177,7 +177,7 @@ def node_copy(node_id, source_path, destination_path, username, hostname, port, 
             # move to correct destination on container
             docker_command = 'sudo docker cp {0} {1}:{2}'.format(tmp_file, container_name, destination_path)
             _, stdout, _ = client.exec_command(docker_command, get_pty=True)
-            output = [line.decode('utf-8') for line in stdout.read().splitlines()]
+            output = stdout.read().decode('utf-8')
             # clean up
             sftp_client.remove(tmp_file)
             return NodeOutput(node_id, output, None)
