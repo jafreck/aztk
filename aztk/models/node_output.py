@@ -1,10 +1,3 @@
-# from aztk.core.models import Model, fields
-
-# class NodeOutput:
-#     id = fields.String()
-#     output = fields.Field()
-#     error = fields.Field()
-
 from tempfile import SpooledTemporaryFile
 from  typing import Union
 
