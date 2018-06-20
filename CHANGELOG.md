@@ -9,7 +9,7 @@
 * Suppress msrest warnings (#611) ([883980d](https://github.com/Azure/aztk/commit/883980d)), closes [#611](https://github.com/Azure/aztk/issues/611)
 
 
-##  0.8.0 (2018-06-07)
+##  0.8.0 (2018-06-12)
 
 **Deprecated Features**
 * ClusterConfiguration fields vm_count and vm_count_low_pri have been renamed to size and size_low_priority
