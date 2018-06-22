@@ -1,6 +1,6 @@
 # Changelog
 
-##  0.8.1 (2018-06-20)
+##  0.8.1 (2018-06-21)
 
 **Bug Fixes**
 * docs links version (#614) ([a8f8e92](https://github.com/Azure/aztk/commit/a8f8e92)), closes [#614](https://github.com/Azure/aztk/issues/614)
