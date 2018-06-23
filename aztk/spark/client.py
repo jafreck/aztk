@@ -110,6 +110,8 @@ class Client(BaseClient):
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
 
+########################################### CURRENT PROGRESS #####################################################
+
     def submit_all_applications(self, cluster_id: str, applications):
         for application in applications:
             self.submit(cluster_id, application)
