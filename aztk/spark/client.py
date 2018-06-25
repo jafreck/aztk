@@ -75,7 +75,7 @@ class Client(BaseClient):
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
 
-    def create_clusters_in_parallel(self, cluster_confs):
+    def create_clusters_in_parallel(self, cluster_confs): # NOT IMPLEMENTED
         for cluster_conf in cluster_confs:
             self.create_cluster(cluster_conf)
 
@@ -98,7 +98,7 @@ class Client(BaseClient):
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
 
-    def get_remote_login_settings(self, cluster_id: str, node_id: str):
+    def get_remote_login_settings(self, cluster_id: str, node_id: str): # NOT IMPLEMENTED
         try:
             return self.__get_remote_login_settings(cluster_id, node_id)
         except batch_error.BatchErrorException as e:
@@ -110,25 +110,25 @@ class Client(BaseClient):
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
 
-########################################### CURRENT PROGRESS #####################################################
 
-    def submit_all_applications(self, cluster_id: str, applications):
+    def submit_all_applications(self, cluster_id: str, applications): # NOT IMPLEMENTED
         for application in applications:
             self.submit(cluster_id, application)
 
-    def wait_until_application_done(self, cluster_id: str, task_id: str):
+
+    def wait_until_application_done(self, cluster_id: str, task_id: str): # NOT IMPLEMENTED
         try:
             helpers.wait_for_task_to_complete(job_id=cluster_id, task_id=task_id, batch_client=self.batch_client)
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
 
-    def wait_until_applications_done(self, cluster_id: str):
+    def wait_until_applications_done(self, cluster_id: str): # NOT IMPLEMENTED
         try:
             helpers.wait_for_tasks_to_complete(job_id=cluster_id, batch_client=self.batch_client)
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
 
-    def wait_until_cluster_is_ready(self, cluster_id: str):
+    def wait_until_cluster_is_ready(self, cluster_id: str): # NOT IMPLEMENTED
         try:
             util.wait_for_master_to_be_ready(self, cluster_id)
             pool = self.batch_client.pool.get(cluster_id)
@@ -137,9 +137,10 @@ class Client(BaseClient):
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
 
-    def wait_until_all_clusters_are_ready(self, clusters: List[str]):
+    def wait_until_all_clusters_are_ready(self, clusters: List[str]): # NOT IMPLEMENTED
         for cluster_id in clusters:
             self.wait_until_cluster_is_ready(cluster_id)
+
 
     def create_user(self, cluster_id: str, username: str, password: str = None, ssh_key: str = None) -> str:
         try:
@@ -151,6 +152,7 @@ class Client(BaseClient):
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
 
+
     def get_application_log(self, cluster_id: str, application_name: str, tail=False, current_bytes: int = 0):
         try:
             return get_log_helper.get_log(self.batch_client, self.blob_client,
@@ -158,12 +160,14 @@ class Client(BaseClient):
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
 
+
     def get_application_status(self, cluster_id: str, app_name: str):
         try:
             task = self.batch_client.task.get(cluster_id, app_name)
             return task.state._value_
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
+
 
     def cluster_run(self, cluster_id: str, command: str, host=False, internal: bool = False, timeout=None):
         try:
@@ -185,6 +189,9 @@ class Client(BaseClient):
                                    timeout=timeout)
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
+
+########################################### CURRENT PROGRESS #####################################################
+
 
     def cluster_copy(self, cluster_id: str, source_path: str, destination_path: str, host: bool = False, internal: bool = False, timeout: int = None):
         try:
@@ -319,23 +326,23 @@ class Client(BaseClient):
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
 
-    def stop_job_app(self, job_id, application_name):
+    def stop_job_app(self, job_id, application_name):  # NOT IMPLEMENTED
         try:
             return job_submit_helper.stop_app(self, job_id, application_name)
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
 
-    def wait_until_job_finished(self, job_id):
+    def wait_until_job_finished(self, job_id):  # NOT IMPLEMENTED
         try:
             job_submit_helper.wait_until_job_finished(self, job_id)
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
 
-    def wait_until_all_jobs_finished(self, jobs):
+    def wait_until_all_jobs_finished(self, jobs):  # NOT IMPLEMENTED
         for job in jobs:
             self.wait_until_job_finished(job)
 
-    def run_cluster_diagnostics(self, cluster_id, output_directory=None):
+    def run_cluster_diagnostics(self, cluster_id, output_directory=None):  # NOT IMPLEMENTED
         try:
             output = cluster_diagnostic_helper.run(self, cluster_id, output_directory)
             return output
