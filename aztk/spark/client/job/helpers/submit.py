@@ -96,7 +96,7 @@ def submit_job(spark_job_client, job_configuration: models.JobConfiguration):
                                 job_configuration.max_dedicated_nodes,
                                 job_configuration.max_low_pri_nodes)
 
-        job = spark_job_client.__submit_job(
+        job = spark_job_client.__submit(
             job_configuration=job_configuration,
             start_task=start_task,
             job_manager_task=job_manager_task,

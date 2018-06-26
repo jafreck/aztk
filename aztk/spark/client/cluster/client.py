@@ -1,12 +1,11 @@
 from aztk.spark import models
-from aztk.spark.client.base import SparkBaseClient
 
 from .helpers import (copy, create, create_user, delete, get,
                       get_application_log, get_application_status, list,
                       node_run, run, submit)
 
 
-class Client(SparkBaseClient):
+class Client:
     def create(self, cluster_configuration: models.ClusterConfiguration, wait: bool = False):
         return create.create_cluster(self, cluster_configuration, wait)
 

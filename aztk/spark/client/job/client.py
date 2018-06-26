@@ -1,11 +1,10 @@
 from aztk.spark import models
-from aztk.spark.client.base import SparkBaseClient
 
 from .helpers import (delete, get, get_application, get_application_log, list,
                       list_applications, stop, submit)
 
 
-class Client(SparkBaseClient):
+class Client:
     def list(self):
         return list.list_jobs(self)
 

@@ -12,8 +12,7 @@ def submit_job(
         autoscale_formula,
         software_metadata_key: str,
         vm_image_model,
-        application_metadata,
-):
+        application_metadata):
     """
             Job Submission
             :param job_configuration -> aztk_sdk.spark.models.JobConfiguration

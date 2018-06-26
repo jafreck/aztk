@@ -8,6 +8,6 @@ from aztk.spark import helpers
 
 def list_clusters(spark_cluster_client):
     try:
-        return [models.Cluster(pool) for pool in spark_cluster_client.__list_clusters(aztk.models.Software.spark)]
+        return [models.Cluster(pool) for pool in spark_cluster_client.list(aztk.models.Software.spark)]
     except batch_error.BatchErrorException as e:
         raise error.AztkError(helpers.format_batch_exception(e))
