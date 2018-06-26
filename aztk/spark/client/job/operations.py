@@ -1,10 +1,10 @@
 from aztk.spark import models
+from aztk.spark.client.base import SparkBaseOperations
 
-from .helpers import (delete, get, get_application, get_application_log, list,
-                      list_applications, stop, submit)
+from .helpers import (delete, get, get_application, get_application_log, list, list_applications, stop, submit)
 
 
-class Client:
+class JobOperations(SparkBaseOperations):
     def list(self):
         return list.list_jobs(self)
 

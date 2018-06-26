@@ -7,8 +7,8 @@ from aztk.utils import ssh as ssh_lib
 
 
 def cluster_copy(cluster_client, cluster_id, source_path, destination_path=None, container_name=None, internal=False, get=False, timeout=None):
-    pool, nodes = cluster_client.__get_pool_details(cluster_id)
-    nodes = list(nodes)
+    cluster = cluster_client.get(cluster_id)
+    pool, nodes = cluster.pool, list(cluster.nodes)
     if internal:
         cluster_nodes = [(node, models.RemoteLogin(ip_address=node.ip_address, port="22")) for node in nodes]
     else:

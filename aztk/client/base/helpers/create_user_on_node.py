@@ -1,5 +1,4 @@
-import datetime
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 
 import azure.batch.models as batch_models
 import azure.batch.models.batch_error as batch_error
@@ -25,18 +24,19 @@ def __create_user(self, pool_id: str, node_id: str, username: str, password: str
             name=username,
             is_admin=True,
             password=password,
-            ssh_public_key=get_ssh_key.get_user_public_key(ssh_key, self.secrets_config),
-            expiry_time=datetime.now(datetime.timezone.utc) + datetime.timedelta(days=365),
+            ssh_public_key=get_ssh_key.get_user_public_key(ssh_key, self.secrets_configuration),
+            expiry_time=datetime.now(timezone.utc) + timedelta(days=365),
         ),
     )
 
 
 def create_user_on_node(base_client, username, pool_id, node_id, ssh_key=None, password=None):
     try:
-        __create_user(base_client, pool_id=pool_id, node_id=node_id, username=username, ssh_key=ssh_key, password=password)
+        __create_user(
+            base_client, pool_id=pool_id, node_id=node_id, username=username, ssh_key=ssh_key, password=password)
     except batch_error.BatchErrorException as error:
         try:
-            base_client.__delete_user(pool_id, node_id, username)
-            base_client.__create_user(pool_id=pool_id, node_id=node_id, username=username, ssh_key=ssh_key)
+            base_client.delete_user_on_node(pool_id, node_id, username)
+            base_client.create_user_on_node(pool_id=pool_id, node_id=node_id, username=username, ssh_key=ssh_key)
         except batch_error.BatchErrorException as error:
             raise error

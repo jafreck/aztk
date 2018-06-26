@@ -3,9 +3,9 @@ import asyncio
 import aztk.models as models
 from aztk.utils import ssh as ssh_lib
 
-def __cluster_run(base_client, cluster_id, command, internal, container_name=None, timeout=None):
-    pool, nodes = base_client.get_pool_details(cluster_id)
-    nodes = list(nodes)
+def cluster_run(base_client, cluster_id, command, internal, container_name=None, timeout=None):
+    cluster = base_client.get(cluster_id)
+    pool, nodes = cluster.pool, list(cluster.nodes)
     if internal:
         cluster_nodes = [(node, models.RemoteLogin(ip_address=node.ip_address, port="22")) for node in nodes]
     else:

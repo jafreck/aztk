@@ -1,11 +1,12 @@
 from aztk.spark import models
+from aztk.spark.client.base import SparkBaseOperations
+from aztk.client.cluster import CoreClusterOperations
 
-from .helpers import (copy, create, create_user, delete, get,
-                      get_application_log, get_application_status, list,
+from .helpers import (copy, create, create_user, delete, get, get_application_log, get_application_status, list,
                       node_run, run, submit)
 
 
-class Client:
+class ClusterOperations(CoreClusterOperations, SparkBaseOperations):
     def create(self, cluster_configuration: models.ClusterConfiguration, wait: bool = False):
         return create.create_cluster(self, cluster_configuration, wait)
 
@@ -38,7 +39,7 @@ class Client:
         return run.cluster_run(self, cluster_id, command, host, internal, timeout)
 
     def node_run(self, cluster_id: str, node_id: str, command: str, host=False, internal: bool = False, timeout=None):
-        return node_run.node_run(cluster_id, node_id, command, host, internal, timeout)
+        return node_run.node_run(self, cluster_id, node_id, command, host, internal, timeout)
 
     def copy(self,
              cluster_id: str,

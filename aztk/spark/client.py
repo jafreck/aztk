@@ -98,7 +98,7 @@ class Client(BaseClient):
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
 
-    def get_remote_login_settings(self, cluster_id: str, node_id: str): # NOT IMPLEMENTED
+    def get_remote_login_settings(self, cluster_id: str, node_id: str):
         try:
             return self.__get_remote_login_settings(cluster_id, node_id)
         except batch_error.BatchErrorException as e:

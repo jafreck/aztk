@@ -1,1 +1,1 @@
-from .client import Client
+from .operations import CoreClusterOperations

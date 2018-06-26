@@ -4,7 +4,8 @@ from aztk.utils import ssh as ssh_lib
 
 
 def node_run(base_client, cluster_id, node_id, command, internal, container_name=None, timeout=None):
-    pool, nodes = base_client.get_pool_details(cluster_id)
+    cluster = base_client.get(cluster_id)
+    pool, nodes = cluster.pool, list(cluster.nodes)
     try:
         node = next(node for node in nodes if node.id == node_id)
     except StopIteration:
@@ -26,4 +27,4 @@ def node_run(base_client, cluster_id, node_id, command, internal, container_name
             timeout=timeout)
         return output
     finally:
-        base_client.delete_user(cluster_id, node.id, generated_username)
+        base_client.delete_user_on_node(cluster_id, node.id, generated_username)

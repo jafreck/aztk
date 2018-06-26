@@ -2,13 +2,13 @@ from typing import List
 
 import azure.batch.models as batch_models
 
-from aztk.client.base import BaseClient as CoreBaseClient
+from aztk.client.base import BaseOperations as CoreBaseOperations
 from aztk.spark import models
 
 from .helpers import generate_cluster_start_task, generate_application_task
 
 
-class SparkBaseClient(CoreBaseClient):
+class SparkBaseOperations(CoreBaseOperations):
     def __generate_cluster_start_task(self,
                                       zip_resource_file: batch_models.ResourceFile,
                                       cluster_id: str,

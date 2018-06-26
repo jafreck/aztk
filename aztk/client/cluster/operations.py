@@ -1,16 +1,16 @@
-from aztk.client.base import BaseClient
+from aztk.client.base import BaseOperations
 from aztk.models import ClusterConfiguration
 
 from .helpers import copy, create, delete, get, list
 
 
-class Client(BaseClient):
+class CoreClusterOperations(BaseOperations):
     def create(self, cluster_configuration: ClusterConfiguration, software_metadata_key: str, start_task,
                vm_image_model):
-        create.create_pool_and_job(self, cluster_configuration, software_metadata_key, start_task, vm_image_model)
+        return create.create_pool_and_job(self, cluster_configuration, software_metadata_key, start_task, vm_image_model)
 
     def get(self, cluster_id: str):
-        get.get_pool_details(self, cluster_id)
+        return get.get_pool_details(self, cluster_id)
 
     def copy(self,
              cluster_id,

@@ -1,24 +1,22 @@
 import aztk.models as models
 from aztk.internal import cluster_data
 from aztk.utils import ssh as ssh_lib
-from aztk.utils import azure_api
 
-from .helpers import (create_user_on_node, create_user_on_pool,
-                      delete_user_on_node, generate_user_on_node,
-                      generate_user_on_pool, ssh_into_node)
+from .helpers import (run, create_user_on_node, create_user_on_pool,
+                      delete_user_on_node, delete_user_on_pool,
+                      generate_user_on_node, generate_user_on_pool,
+                      get_remote_login_settings, node_run, ssh_into_node)
 
 
-class BaseClient:
+class BaseOperations:
     '''
-        Base client that all other clients inherit from
+        Base operations that all other operations inherit from
     '''
 
-    def __init__(self, secrets_config: models.SecretsConfiguration):
-        self.secrets_config = secrets_config
-
-        azure_api.validate_secrets(secrets_config)
-        self.batch_client = azure_api.make_batch_client(secrets_config)
-        self.blob_client = azure_api.make_blob_client(secrets_config)
+    def __init__(self, context):
+        self.batch_client = context['batch_client']
+        self.blob_client = context['blob_client']
+        self.secrets_configuration = context['secrets_configuration']
 
     def get_cluster_config(self, cluster_id: str) -> models.ClusterConfiguration:
         return self.get_cluster_data(cluster_id).read_cluster_config()
@@ -56,3 +54,15 @@ class BaseClient:
 
     def delete_user_on_node(self, pool_id: str, node_id: str, username: str) -> str:
         return delete_user_on_node.delete_user(self, pool_id, node_id, username)
+
+    def delete_user_on_pool(self, username, pool_id, nodes):    #TODO: change from pool_id, nodes to cluster_id
+        return delete_user_on_pool.delete_user_on_pool(self, username, pool_id, nodes)
+
+    def node_run(self, cluster_id, node_id, command, internal, container_name=None, timeout=None):
+        return node_run.node_run(self, cluster_id, node_id, command, internal, container_name, timeout)
+
+    def get_remote_login_settings(self, cluster_id: str, node_id: str):
+        return get_remote_login_settings.get_remote_login_settings(self, cluster_id, node_id)
+
+    def run(self, cluster_id, command, internal, container_name=None, timeout=None):
+        return run.cluster_run(self, cluster_id, command, internal, container_name, timeout)

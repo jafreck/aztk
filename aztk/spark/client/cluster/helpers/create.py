@@ -57,12 +57,12 @@ def create_cluster(spark_cluster_client, cluster_conf: models.ClusterConfigurati
 
         vm_image = models.VmImage(publisher='Canonical', offer='UbuntuServer', sku='16.04')
 
-        cluster = spark_cluster_client.create_pool_and_job(cluster_conf, software_metadata_key, start_task, vm_image)
+        cluster = super(type(spark_cluster_client), spark_cluster_client).create(cluster_conf, software_metadata_key, start_task, vm_image)
 
         # Wait for the master to be ready
         if wait:
             util.wait_for_master_to_be_ready(spark_cluster_client, cluster.id)
-            cluster = spark_cluster_client.get_cluster(cluster.id)
+            cluster = spark_cluster_client.get(cluster.id)
 
         return cluster
 
