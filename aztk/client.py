@@ -83,9 +83,15 @@ class Client:
         job_id = cluster_conf.cluster_id
 
         # Get a verified node agent sku
-        sku_to_use, image_ref_to_use = \
-            helpers.select_latest_verified_vm_image_with_node_agent_sku(
-                VmImageModel.publisher, VmImageModel.offer, VmImageModel.sku, self.batch_client)
+        # sku_to_use, image_ref_to_use = \
+        #     helpers.select_latest_verified_vm_image_with_node_agent_sku(
+        #         VmImageModel.publisher, VmImageModel.offer, VmImageModel.sku, self.batch_client)
+        image_ref_to_use = batch_models.ImageReference(
+            publisher='microsoft-azure-batch',
+            offer='ubuntu-server-container',
+            sku='16-04-lts',
+            version='latest')
+        node_agent_sku_id='batch.node.ubuntu 16.04'
 
         network_conf = None
         if cluster_conf.subnet_id is not None:
@@ -94,12 +100,21 @@ class Client:
         auto_scale_formula = "$TargetDedicatedNodes={0}; $TargetLowPriorityNodes={1}".format(
             cluster_conf.size, cluster_conf.size_low_priority)
 
+
+        POOL_ADMIN_USER_IDENTITY = batch_models.UserIdentity(
+            auto_user=batch_models.AutoUserSpecification(
+                scope=batch_models.AutoUserScope.pool,
+                elevation_level=batch_models.ElevationLevel.admin))
+
         # Configure the pool
         pool = batch_models.PoolAddParameter(
             id=pool_id,
             virtual_machine_configuration=batch_models.VirtualMachineConfiguration(
                 image_reference=image_ref_to_use,
-                node_agent_sku_id=sku_to_use),
+                node_agent_sku_id=node_agent_sku_id,
+                container_configuration=batch_models.ContainerConfiguration(
+                    container_image_names=["centos", "aztk/spark:v0.1.0-spark2.1.0-base"]
+                )),
             vm_size=cluster_conf.vm_size,
             enable_auto_scale=True,
             auto_scale_formula=auto_scale_formula,

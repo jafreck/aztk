@@ -58,9 +58,9 @@ class Client(BaseClient):
             software_metadata_key = "spark"
 
             vm_image = models.VmImage(
-                publisher='Canonical',
-                offer='UbuntuServer',
-                sku='16.04')
+                publisher='microsoft-azure-batch',
+                offer='ubuntu-server-container',
+                sku='16.04-lts')
 
             cluster = self.__create_pool_and_job(
                 cluster_conf, software_metadata_key, start_task, vm_image)
