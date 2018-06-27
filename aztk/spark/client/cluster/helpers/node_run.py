@@ -4,7 +4,7 @@ from aztk import error
 from aztk.spark import helpers
 
 
-def node_run(spark_cluster_client,
+def node_run(spark_cluster_operations,
              cluster_id: str,
              node_id: str,
              command: str,
@@ -12,7 +12,7 @@ def node_run(spark_cluster_client,
              internal: bool = False,
              timeout=None):
     try:
-        return super(type(spark_cluster_client), spark_cluster_client).node_run(
+        return super(type(spark_cluster_operations), spark_cluster_operations).node_run(
             cluster_id, node_id, command, internal, container_name='spark' if not host else None, timeout=timeout)
     except batch_error.BatchErrorException as e:
         raise error.AztkError(helpers.format_batch_exception(e))

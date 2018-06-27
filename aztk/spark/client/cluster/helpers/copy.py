@@ -4,9 +4,9 @@ from aztk import error
 from aztk.spark import helpers
 
 
-def cluster_copy(spark_cluster_client, cluster_id: str, source_path: str, destination_path: str, host: bool = False, internal: bool = False, timeout: int = None):
+def cluster_copy(spark_cluster_operations, cluster_id: str, source_path: str, destination_path: str, host: bool = False, internal: bool = False, timeout: int = None):
     try:
         container_name = None if host else 'spark'
-        return spark_cluster_client.cluster_copy(cluster_id, source_path, destination_path=destination_path, container_name=container_name, get=False, internal=internal, timeout=timeout)
+        return spark_cluster_operations.copy(cluster_id, source_path, destination_path=destination_path, container_name=container_name, get=False, internal=internal, timeout=timeout)
     except batch_error.BatchErrorException as e:
         raise error.AztkError(helpers.format_batch_exception(e))

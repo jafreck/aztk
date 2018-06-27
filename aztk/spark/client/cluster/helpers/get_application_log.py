@@ -102,13 +102,13 @@ def get_log(batch_client, blob_client, cluster_id: str, application_name: str, t
             exit_code=task.execution_info.exit_code)
 
 
-def get_application_log(spark_cluster_client,
+def get_application_log(spark_cluster_operations,
                         cluster_id: str,
                         application_name: str,
                         tail=False,
                         current_bytes: int = 0):
     try:
-        return get_log(spark_cluster_client.batch_client, spark_cluster_client.blob_client, cluster_id,
+        return get_log(spark_cluster_operations.batch_client, spark_cluster_operations.blob_client, cluster_id,
                        application_name, tail, current_bytes)
     except batch_error.BatchErrorException as e:
         raise error.AztkError(helpers.format_batch_exception(e))

@@ -5,9 +5,9 @@ from aztk.spark import models
 from aztk.spark import helpers
 
 
-def get_cluster(spark_cluster_client , cluster_id: str):
+def get_cluster(spark_cluster_operations, cluster_id: str):
     try:
-        pool, nodes = super(type(spark_cluster_client), spark_cluster_client).get(cluster_id)
+        pool, nodes = super(type(spark_cluster_operations), spark_cluster_operations).get(cluster_id)
         return models.Cluster(pool, nodes)
     except batch_error.BatchErrorException as e:
         raise error.AztkError(helpers.format_batch_exception(e))
