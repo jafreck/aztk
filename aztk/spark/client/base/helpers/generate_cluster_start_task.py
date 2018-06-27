@@ -25,7 +25,7 @@ def _get_aztk_environment(cluster_id, worker_on_master, mixed_mode):
 
 def __get_docker_credentials(spark_client):
     creds = []
-    docker = spark_client.secrets_config.docker
+    docker = spark_client.secrets_configuration.docker
     if docker:
         if docker.endpoint:
             creds.append(batch_models.EnvironmentSetting(name="DOCKER_ENDPOINT", value=docker.endpoint))
@@ -38,8 +38,8 @@ def __get_docker_credentials(spark_client):
 
 
 def __get_secrets_env(spark_client):
-    shared_key = spark_client.secrets_config.shared_key
-    service_principal = spark_client.secrets_config.service_principal
+    shared_key = spark_client.secrets_configuration.shared_key
+    service_principal = spark_client.secrets_configuration.service_principal
     if shared_key:
         return [
             batch_models.EnvironmentSetting(name="BATCH_SERVICE_URL", value=shared_key.batch_service_url),

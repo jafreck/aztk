@@ -42,13 +42,13 @@ def create_cluster(spark_cluster_client, cluster_conf: models.ClusterConfigurati
     cluster_conf = _apply_default_for_cluster_config(cluster_conf)
     cluster_conf.validate()
 
-    cluster_data = spark_cluster_client._get_cluster_data(cluster_conf.cluster_id)
+    cluster_data = spark_cluster_client.get_cluster_data(cluster_conf.cluster_id)
     try:
         zip_resource_files = None
         node_data = NodeData(cluster_conf).add_core().done()
         zip_resource_files = cluster_data.upload_node_data(node_data).to_resource_file()
 
-        start_task = spark_cluster_client.__generate_cluster_start_task(spark_cluster_client, zip_resource_files, cluster_conf.cluster_id,
+        start_task = spark_cluster_client.generate_cluster_start_task(zip_resource_files, cluster_conf.cluster_id,
                                                  cluster_conf.gpu_enabled(), cluster_conf.get_docker_repo(),
                                                  cluster_conf.file_shares, cluster_conf.plugins,
                                                  cluster_conf.mixed_mode(), cluster_conf.worker_on_master)

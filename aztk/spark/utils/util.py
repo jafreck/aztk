@@ -23,7 +23,7 @@ def wait_for_master_to_be_ready(client, cluster_id: str):
     start_time = datetime.datetime.now()
     while True:
         if not master_node_id:
-            master_node_id = client.get_cluster(cluster_id).master_node_id
+            master_node_id = client.get(cluster_id).master_node_id
             if not master_node_id:
                 time.sleep(5)
                 continue
