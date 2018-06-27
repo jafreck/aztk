@@ -7,39 +7,11 @@ from azure.batch.models import BatchErrorException
 import aztk.spark
 from aztk.error import AztkError
 from aztk_cli import config
-
-dt = datetime.now()
-time = dt.microsecond
-base_job_id = "job-{}".format(time)
+from tests.integration_tests.spark.sdk.get_client import get_spark_client, get_test_suffix
 
 
-# load secrets
-# note: this assumes secrets are set up in .aztk/secrets
-tenant_id = os.environ.get("TENANT_ID")
-client_id = os.environ.get("CLIENT_ID")
-credential = os.environ.get("CREDENTIAL")
-batch_account_resource_id = os.environ.get("BATCH_ACCOUNT_RESOURCE_ID")
-storage_account_resource_id = os.environ.get("STORAGE_ACCOUNT_RESOURCE_ID")
-ssh_pub_key = os.environ.get("ID_RSA_PUB")
-ssh_priv_key = os.environ.get("ID_RSA")
-keys = [tenant_id, client_id, credential, batch_account_resource_id,
-        storage_account_resource_id, ssh_priv_key, ssh_pub_key]
-
-if all(keys):
-    spark_client = aztk.spark.Client(
-        aztk.spark.models.SecretsConfiguration(
-            service_principal=aztk.spark.models.ServicePrincipalConfiguration(
-                tenant_id=tenant_id,
-                client_id=client_id,
-                credential=credential,
-                batch_account_resource_id=batch_account_resource_id,
-                storage_account_resource_id=storage_account_resource_id
-            )
-        )
-    )
-else:
-    # fallback to local secrets if environment variables don't exist
-    spark_client = aztk.spark.Client(config.load_aztk_secrets())
+base_job_id = get_test_suffix("job")
+spark_client = get_spark_client()
 
 
 def test_submit_job():

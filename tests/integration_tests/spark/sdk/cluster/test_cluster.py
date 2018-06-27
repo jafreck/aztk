@@ -1,53 +1,22 @@
-import subprocess
 import os
+import subprocess
 import time
 from datetime import datetime
 from zipfile import ZipFile
 
 import azure.batch.models as batch_models
+import pytest
 from azure.batch.models import BatchErrorException
 
 import aztk.spark
-import pytest
-from aztk.utils import constants
 from aztk.error import AztkError
+from aztk.utils import constants
 from aztk_cli import config
+from tests.integration_tests.spark.sdk.get_client import get_spark_client, get_test_suffix
 
 
-# base cluster name
-dt = datetime.now()
-current_time = dt.microsecond
-base_cluster_id = "cluster-{}".format(current_time)
-
-# load secrets
-# note: this assumes secrets are set up in .aztk/secrets
-tenant_id = os.environ.get("TENANT_ID")
-client_id = os.environ.get("CLIENT_ID")
-credential = os.environ.get("CREDENTIAL")
-batch_account_resource_id = os.environ.get("BATCH_ACCOUNT_RESOURCE_ID")
-storage_account_resource_id = os.environ.get("STORAGE_ACCOUNT_RESOURCE_ID")
-ssh_pub_key = os.environ.get("ID_RSA_PUB")
-ssh_priv_key = os.environ.get("ID_RSA")
-keys = [tenant_id, client_id, credential, batch_account_resource_id,
-        storage_account_resource_id, ssh_priv_key, ssh_pub_key]
-
-if all(keys):
-    spark_client = aztk.spark.Client(
-        aztk.spark.models.SecretsConfiguration(
-            service_principal=aztk.spark.models.ServicePrincipalConfiguration(
-                tenant_id=tenant_id,
-                client_id=client_id,
-                credential=credential,
-                batch_account_resource_id=batch_account_resource_id,
-                storage_account_resource_id=storage_account_resource_id
-            ),
-            ssh_pub_key=ssh_pub_key,
-            ssh_priv_key=ssh_priv_key
-        )
-    )
-else:
-    # fallback to local secrets if environment variables don't exist
-    spark_client = aztk.spark.Client(config.load_aztk_secrets())
+base_cluster_id = get_test_suffix("cluster")
+spark_client = get_spark_client()
 
 
 def clean_up_cluster(cluster_id):
@@ -87,7 +56,7 @@ def ensure_spark_processes(cluster_id):
 def wait_for_all_nodes(cluster_id, nodes):
     while True:
         for node in nodes:
-            if node.state not in [batch_models.ComputeNodeState.idle,  batch_models.ComputeNodeState.running]:
+            if node.state not in [batch_models.ComputeNodeState.idle, batch_models.ComputeNodeState.running]:
                 break
         else:
             nodes = spark_client.get_cluster(cluster_id).nodes
@@ -99,7 +68,7 @@ def test_create_cluster():
     test_id = "test-create-"
     # TODO: make Cluster Configuration more robust, test each value
     cluster_configuration = aztk.spark.models.ClusterConfiguration(
-        cluster_id=test_id+base_cluster_id,
+        cluster_id=test_id + base_cluster_id,
         vm_count=2,
         vm_low_pri_count=0,
         vm_size="standard_f2",
@@ -107,8 +76,7 @@ def test_create_cluster():
         custom_scripts=None,
         file_shares=None,
         toolkit=aztk.spark.models.SparkToolkit(version="2.3.0"),
-        spark_configuration=None
-    )
+        spark_configuration=None)
     try:
         cluster = spark_client.create_cluster(cluster_configuration, wait=True)
 
@@ -127,10 +95,11 @@ def test_create_cluster():
     finally:
         clean_up_cluster(cluster_configuration.cluster_id)
 
+
 def test_get_cluster():
     test_id = "test-get-"
     cluster_configuration = aztk.spark.models.ClusterConfiguration(
-        cluster_id=test_id+base_cluster_id,
+        cluster_id=test_id + base_cluster_id,
         vm_count=2,
         vm_low_pri_count=0,
         vm_size="standard_f2",
@@ -138,8 +107,7 @@ def test_get_cluster():
         custom_scripts=None,
         file_shares=None,
         toolkit=aztk.spark.models.SparkToolkit(version="2.3.0"),
-        spark_configuration=None
-    )
+        spark_configuration=None)
     try:
         spark_client.create_cluster(cluster_configuration, wait=True)
         cluster = spark_client.get_cluster(cluster_id=cluster_configuration.cluster_id)
@@ -163,7 +131,7 @@ def test_get_cluster():
 def test_list_clusters():
     test_id = "test-list-"
     cluster_configuration = aztk.spark.models.ClusterConfiguration(
-        cluster_id=test_id+base_cluster_id,
+        cluster_id=test_id + base_cluster_id,
         vm_count=2,
         vm_low_pri_count=0,
         vm_size="standard_f2",
@@ -171,8 +139,7 @@ def test_list_clusters():
         custom_scripts=None,
         file_shares=None,
         toolkit=aztk.spark.models.SparkToolkit(version="2.3.0"),
-        spark_configuration=None
-    )
+        spark_configuration=None)
     try:
         spark_client.create_cluster(cluster_configuration, wait=True)
         clusters = spark_client.list_clusters()
@@ -189,7 +156,7 @@ def test_list_clusters():
 def test_get_remote_login_settings():
     test_id = "test-get-remote-login-"
     cluster_configuration = aztk.spark.models.ClusterConfiguration(
-        cluster_id=test_id+base_cluster_id,
+        cluster_id=test_id + base_cluster_id,
         vm_count=2,
         vm_low_pri_count=0,
         vm_size="standard_f2",
@@ -197,8 +164,7 @@ def test_get_remote_login_settings():
         custom_scripts=None,
         file_shares=None,
         toolkit=aztk.spark.models.SparkToolkit(version="2.3.0"),
-        spark_configuration=None
-    )
+        spark_configuration=None)
     try:
         spark_client.create_cluster(cluster_configuration, wait=True)
         cluster = spark_client.get_cluster(cluster_id=cluster_configuration.cluster_id)
@@ -218,7 +184,7 @@ def test_get_remote_login_settings():
 def test_submit():
     test_id = "test-submit-"
     cluster_configuration = aztk.spark.models.ClusterConfiguration(
-        cluster_id=test_id+base_cluster_id,
+        cluster_id=test_id + base_cluster_id,
         vm_count=2,
         vm_low_pri_count=0,
         vm_size="standard_f2",
@@ -226,8 +192,7 @@ def test_submit():
         custom_scripts=None,
         file_shares=None,
         toolkit=aztk.spark.models.SparkToolkit(version="2.3.0"),
-        spark_configuration=None
-    )
+        spark_configuration=None)
     application_configuration = aztk.spark.models.ApplicationConfiguration(
         name="pipy100",
         application="./examples/src/main/python/pi.py",
@@ -242,12 +207,12 @@ def test_submit():
         driver_cores=None,
         executor_memory=None,
         executor_cores=None,
-        max_retry_count=None
-    )
+        max_retry_count=None)
     try:
         spark_client.create_cluster(cluster_configuration, wait=True)
 
-        spark_client.submit(cluster_id=cluster_configuration.cluster_id, application=application_configuration, wait=True)
+        spark_client.submit(
+            cluster_id=cluster_configuration.cluster_id, application=application_configuration, wait=True)
         assert True
 
     except (AztkError, BatchErrorException):
@@ -260,7 +225,7 @@ def test_submit():
 def test_get_application_log():
     test_id = "test-get-app-log-"
     cluster_configuration = aztk.spark.models.ClusterConfiguration(
-        cluster_id=test_id+base_cluster_id,
+        cluster_id=test_id + base_cluster_id,
         vm_count=2,
         vm_low_pri_count=0,
         vm_size="standard_f2",
@@ -268,8 +233,7 @@ def test_get_application_log():
         custom_scripts=None,
         file_shares=None,
         toolkit=aztk.spark.models.SparkToolkit(version="2.3.0"),
-        spark_configuration=None
-    )
+        spark_configuration=None)
     application_configuration = aztk.spark.models.ApplicationConfiguration(
         name="pipy100",
         application="./examples/src/main/python/pi.py",
@@ -284,16 +248,17 @@ def test_get_application_log():
         driver_cores=None,
         executor_memory=None,
         executor_cores=None,
-        max_retry_count=None
-    )
+        max_retry_count=None)
     try:
         spark_client.create_cluster(cluster_configuration, wait=True)
 
-        spark_client.submit(cluster_id=cluster_configuration.cluster_id, application=application_configuration, wait=True)
-        application_log = spark_client.get_application_log(cluster_id=cluster_configuration.cluster_id,
-                                                        application_name=application_configuration.name,
-                                                        tail=False,
-                                                        current_bytes=0)
+        spark_client.submit(
+            cluster_id=cluster_configuration.cluster_id, application=application_configuration, wait=True)
+        application_log = spark_client.get_application_log(
+            cluster_id=cluster_configuration.cluster_id,
+            application_name=application_configuration.name,
+            tail=False,
+            current_bytes=0)
 
         assert application_log.exit_code == 0
         assert application_log.name == application_configuration.name == "pipy100"
@@ -321,7 +286,7 @@ def test_create_user_ssh_key():
 def test_get_application_status_complete():
     test_id = "test-app-status-complete-"
     cluster_configuration = aztk.spark.models.ClusterConfiguration(
-        cluster_id=test_id+base_cluster_id,
+        cluster_id=test_id + base_cluster_id,
         vm_count=2,
         vm_low_pri_count=0,
         vm_size="standard_f2",
@@ -329,8 +294,7 @@ def test_get_application_status_complete():
         custom_scripts=None,
         file_shares=None,
         toolkit=aztk.spark.models.SparkToolkit(version="2.3.0"),
-        spark_configuration=None
-    )
+        spark_configuration=None)
     application_configuration = aztk.spark.models.ApplicationConfiguration(
         name="pipy100",
         application="./examples/src/main/python/pi.py",
@@ -345,13 +309,14 @@ def test_get_application_status_complete():
         driver_cores=None,
         executor_memory=None,
         executor_cores=None,
-        max_retry_count=None
-    )
+        max_retry_count=None)
     try:
         spark_client.create_cluster(cluster_configuration, wait=True)
 
-        spark_client.submit(cluster_id=cluster_configuration.cluster_id, application=application_configuration, wait=True)
-        status = spark_client.get_application_status(cluster_id=cluster_configuration.cluster_id, app_name=application_configuration.name)
+        spark_client.submit(
+            cluster_id=cluster_configuration.cluster_id, application=application_configuration, wait=True)
+        status = spark_client.get_application_status(
+            cluster_id=cluster_configuration.cluster_id, app_name=application_configuration.name)
 
         assert status == "completed"
 
@@ -365,7 +330,7 @@ def test_get_application_status_complete():
 def test_delete_cluster():
     test_id = "test-delete-"
     cluster_configuration = aztk.spark.models.ClusterConfiguration(
-        cluster_id=test_id+base_cluster_id,
+        cluster_id=test_id + base_cluster_id,
         vm_count=2,
         vm_low_pri_count=0,
         vm_size="standard_f2",
@@ -373,8 +338,7 @@ def test_delete_cluster():
         custom_scripts=None,
         file_shares=None,
         toolkit=aztk.spark.models.SparkToolkit(version="2.3.0"),
-        spark_configuration=None
-    )
+        spark_configuration=None)
 
     try:
         spark_client.create_cluster(cluster_configuration, wait=True)
@@ -388,10 +352,11 @@ def test_delete_cluster():
     finally:
         clean_up_cluster(cluster_configuration.cluster_id)
 
+
 def test_spark_processes_up():
     test_id = "test-spark-processes-up-"
     cluster_configuration = aztk.spark.models.ClusterConfiguration(
-        cluster_id=test_id+base_cluster_id,
+        cluster_id=test_id + base_cluster_id,
         vm_count=2,
         vm_low_pri_count=0,
         vm_size="standard_f2",
@@ -399,8 +364,7 @@ def test_spark_processes_up():
         custom_scripts=None,
         file_shares=None,
         toolkit=aztk.spark.models.SparkToolkit(version="2.3.0"),
-        spark_configuration=None
-    )
+        spark_configuration=None)
 
     try:
         cluster = spark_client.create_cluster(cluster_configuration, wait=True)
@@ -419,7 +383,7 @@ def test_spark_processes_up():
 def test_debug_tool():
     test_id = "debug-tool-"
     cluster_configuration = aztk.spark.models.ClusterConfiguration(
-        cluster_id=test_id+base_cluster_id,
+        cluster_id=test_id + base_cluster_id,
         size=2,
         size_low_priority=0,
         vm_size="standard_f2",
@@ -427,17 +391,10 @@ def test_debug_tool():
         custom_scripts=None,
         file_shares=None,
         toolkit=aztk.spark.models.SparkToolkit(version="2.3.0"),
-        spark_configuration=None
-    )
+        spark_configuration=None)
     expected_members = [
-        "df.txt",
-        "hostname.txt",
-        "docker-images.txt",
-        "docker-containers.txt",
-        "spark/docker.log",
-        "spark/ps_aux.txt",
-        "spark/logs",
-        "spark/wd"
+        "df.txt", "hostname.txt", "docker-images.txt", "docker-containers.txt", "spark/docker.log", "spark/ps_aux.txt",
+        "spark/logs", "spark/wd"
     ]
     try:
         cluster = spark_client.create_cluster(cluster_configuration, wait=True)
@@ -445,7 +402,7 @@ def test_debug_tool():
         wait_for_all_nodes(cluster.id, nodes)
         cluster_output = spark_client.run_cluster_diagnostics(cluster_id=cluster.id)
         for node_output in cluster_output:
-            node_output.output.seek(0) # tempfile requires seek 0 before reading
+            node_output.output.seek(0)    # tempfile requires seek 0 before reading
             debug_zip = ZipFile(node_output.output)
             assert node_output.id in [node.id for node in nodes]
             assert node_output.error is None
