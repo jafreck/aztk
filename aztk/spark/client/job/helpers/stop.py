@@ -7,12 +7,12 @@ from aztk.utils import helpers
 from .get_recent_job import get_recent_job
 
 
-def _stop(spark_client, job_id):
+def _stop(spark_job_operations, job_id):
     # terminate currently running job and tasks
-    recent_run_job = get_recent_job(spark_client, job_id)
-    spark_client.batch_client.job.terminate(recent_run_job.id)
+    recent_run_job = get_recent_job(spark_job_operations, job_id)
+    spark_job_operations.batch_client.job.terminate(recent_run_job.id)
     # terminate job_schedule
-    spark_client.batch_client.job_schedule.terminate(job_id)
+    spark_job_operations.batch_client.job_schedule.terminate(job_id)
 
 
 def stop(self, job_id):

@@ -5,8 +5,8 @@ from aztk import error
 from aztk.spark import helpers, models
 
 
-def _list_jobs(spark_client):
-    return [cloud_job_schedule for cloud_job_schedule in spark_client.batch_client.job_schedule.list()]
+def _list_jobs(spark_job_operations):
+    return [cloud_job_schedule for cloud_job_schedule in spark_job_operations.batch_client.job_schedule.list()]
 
 
 def list_jobs(self):
