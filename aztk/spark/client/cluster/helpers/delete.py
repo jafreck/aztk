@@ -1,6 +1,7 @@
-from aztk import error
 import azure.batch.models.batch_error as batch_error
-from aztk.spark import helpers
+
+from aztk import error
+from aztk.utils import helpers
 
 
 def delete_cluster(spark_cluster_client, cluster_id: str, keep_logs: bool = False):
