@@ -1,9 +1,9 @@
+from aztk.client.cluster import CoreClusterOperations
 from aztk.spark import models
 from aztk.spark.client.base import SparkBaseOperations
-from aztk.client.cluster import CoreClusterOperations
 
-from .helpers import (copy, create, create_user, delete, get, get_application_log, get_application_status, list,
-                      node_run, run, submit, diagnostics)
+from .helpers import (copy, create, create_user, delete, diagnostics, download, get, get_application_log,
+                      get_application_status, list, node_run, run, submit)
 
 
 class ClusterOperations(CoreClusterOperations, SparkBaseOperations):
@@ -49,6 +49,15 @@ class ClusterOperations(CoreClusterOperations, SparkBaseOperations):
              internal: bool = False,
              timeout: int = None):
         return copy.cluster_copy(self, cluster_id, source_path, destination_path, host, internal, timeout)
+
+    def download(self,
+                 cluster_id: str,
+                 source_path: str,
+                 destination_path: str = None,
+                 host: bool = False,
+                 internal: bool = False,
+                 timeout: int = None):
+        return download.cluster_download(self, cluster_id, source_path, destination_path, host, internal, timeout)
 
     def diagnostics(self, cluster_id, output_directory=None):
         return diagnostics.run_cluster_diagnostics(self, cluster_id, output_directory)

@@ -6,16 +6,16 @@ import aztk.models as models
 from aztk.utils import ssh as ssh_lib
 
 
-def cluster_copy(cluster_client, cluster_id, source_path, destination_path=None, container_name=None, internal=False, get=False, timeout=None):
-    cluster = cluster_client.get(cluster_id)
+def cluster_copy(cluster_operations, cluster_id, source_path, destination_path=None, container_name=None, internal=False, get=False, timeout=None):
+    cluster = cluster_operations.get(cluster_id)
     pool, nodes = cluster.pool, list(cluster.nodes)
     if internal:
         cluster_nodes = [(node, models.RemoteLogin(ip_address=node.ip_address, port="22")) for node in nodes]
     else:
-        cluster_nodes = [(node, cluster_client.__get_remote_login_settings(pool.id, node.id)) for node in nodes]
+        cluster_nodes = [(node, cluster_operations.get_remote_login_settings(pool.id, node.id)) for node in nodes]
 
     try:
-        generated_username, ssh_key = cluster_client.generate_user_on_pool(pool.id, nodes)
+        generated_username, ssh_key = cluster_operations.generate_user_on_pool(pool.id, nodes)
         output = asyncio.get_event_loop().run_until_complete(
             ssh_lib.clus_copy(
                 container_name=container_name,
@@ -32,4 +32,4 @@ def cluster_copy(cluster_client, cluster_id, source_path, destination_path=None,
     except (OSError, batch_error.BatchErrorException) as exc:
         raise exc
     finally:
-        cluster_client.__delete_user_on_pool(generated_username, pool.id, nodes)
+        cluster_operations.delete_user_on_pool(generated_username, pool.id, nodes)
