@@ -2,10 +2,9 @@ import aztk.models as models
 from aztk.internal import cluster_data
 from aztk.utils import ssh as ssh_lib
 
-from .helpers import (run, create_user_on_node, create_user_on_pool,
-                      delete_user_on_node, delete_user_on_pool,
-                      generate_user_on_node, generate_user_on_pool,
-                      get_remote_login_settings, node_run, ssh_into_node)
+from .helpers import (create_user_on_node, create_user_on_pool, delete_user_on_node, delete_user_on_pool,
+                      generate_user_on_node, generate_user_on_pool, get_application_log, get_remote_login_settings,
+                      node_run, run, ssh_into_node)
 
 
 class BaseOperations:
@@ -66,3 +65,6 @@ class BaseOperations:
 
     def run(self, cluster_id, command, internal, container_name=None, timeout=None):
         return run.cluster_run(self, cluster_id, command, internal, container_name, timeout)
+
+    def get_application_log(self, cluster_id: str, application_name: str, tail=False, current_bytes: int = 0):
+        return get_application_log.get_application_log(self, cluster_id, application_name, tail, current_bytes)

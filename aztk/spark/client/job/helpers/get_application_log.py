@@ -29,7 +29,7 @@ def _get_application_log(spark_job_operations, job_id, application_name):
                           batch_models.TaskState.preparing):
             raise error.AztkError("The application {0} has not yet finished executing.".format(application_name))
 
-        return spark_job_operations.get_application_log(job_id, application_name)
+        return super(type(spark_job_operations), spark_job_operations).get_application_log(job_id, application_name)
 
 
 def get_job_application_log(spark_job_operations, job_id, application_name):

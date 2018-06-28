@@ -332,7 +332,7 @@ class Client(BaseClient):
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
 
-    def wait_until_job_finished(self, job_id):  # NOT IMPLEMENTED
+    def wait_until_job_finished(self, job_id):
         try:
             job_submit_helper.wait_until_job_finished(self, job_id)
         except batch_error.BatchErrorException as e:
@@ -342,7 +342,7 @@ class Client(BaseClient):
         for job in jobs:
             self.wait_until_job_finished(job)
 
-    def run_cluster_diagnostics(self, cluster_id, output_directory=None):  # NOT IMPLEMENTED
+    def run_cluster_diagnostics(self, cluster_id, output_directory=None):
         try:
             output = cluster_diagnostic_helper.run(self, cluster_id, output_directory)
             return output

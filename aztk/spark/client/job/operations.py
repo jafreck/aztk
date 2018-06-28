@@ -1,10 +1,12 @@
+from aztk.client.job import CoreJobOperations
 from aztk.spark import models
 from aztk.spark.client.base import SparkBaseOperations
 
-from .helpers import (delete, get, get_application, get_application_log, list, list_applications, stop, submit)
+from .helpers import (delete, get, get_application, get_application_log, list, list_applications, stop, submit,
+                      wait_until_complete)
 
 
-class JobOperations(SparkBaseOperations):
+class JobOperations(CoreJobOperations, SparkBaseOperations):
     def list(self):
         return list.list_jobs(self)
 
@@ -28,3 +30,6 @@ class JobOperations(SparkBaseOperations):
 
     def submit(self, job_configuration: models.JobConfiguration):
         return submit.submit_job(self, job_configuration)
+
+    def wait_until_job_finished(self, id):    #TODO: rename to something better
+        wait_until_complete.wait_until_job_finished(self, id)
