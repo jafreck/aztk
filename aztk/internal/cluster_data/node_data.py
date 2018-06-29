@@ -32,7 +32,7 @@ class NodeData:
         self._add_node_scripts()
         self._add_custom_scripts()
         self._add_plugins()
-        self._add_spark_configuration()
+        # self._add_spark_configuration()
         self._add_user_conf()
         return self
 

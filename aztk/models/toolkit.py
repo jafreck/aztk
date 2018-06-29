@@ -22,6 +22,12 @@ TOOLKIT_MAP = dict(
             anaconda=ToolkitEnvironmentDefinition(),
         )
     ),
+    hadoop=ToolkitDefinition(
+        versions=["3.1.0"],
+        environments=dict(
+            base=ToolkitEnvironmentDefinition(),
+        )
+    ),
 )
 
 

@@ -9,6 +9,14 @@ DEFAULT_SPARK_PYTHON_DOCKER_REPO = "aztk/spark:v0.1.0-spark2.3.0-miniconda-base"
 DEFAULT_SPARK_R_BASE_DOCKER_REPO = "aztk/spark:v0.1.0-spark2.3.0-r-base"
 DOCKER_SPARK_CONTAINER_NAME = "spark"
 
+#DOCKER HADOOP 
+DEFAULT_DOCKER_HADOOP_IMAGE = "aztk/staging:v0.1.0-hadoop3.1.0-base"
+DEFAULT_DOCKER_HADOOP_IMAGE = "aztk/staging:hadoop3.1.0"
+DOCKER_HADOOP_WEB_UI_PORT = 8088
+HADOOP_SUBMIT_LOGS_FILE = "output.log"
+DOCKER_HADOOP_CONTAINER_NAME = "hadoop"
+
+
 # DOCKER SPARK
 DOCKER_SPARK_WEB_UI_PORT = 8080
 DOCKER_SPARK_WORKER_UI_PORT = 8081
@@ -50,7 +58,7 @@ GLOBAL_INIT_DIRECTORY_DEST = os.path.join(HOME_DIRECTORY_PATH, '.aztk')
 """
     Key of the metadata entry for the pool that is used to store the master node id
 """
-MASTER_NODE_METADATA_KEY = "_spark_master_node"
+MASTER_NODE_METADATA_KEY = "_master_node"
 """
     Timeout in seconds to wait for the master to be ready
     Value: 20 minutes

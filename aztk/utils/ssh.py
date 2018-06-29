@@ -95,6 +95,7 @@ def forward_ports(client, port_forward_list):
         return threads
 
     for port_forwarding_specification in port_forward_list:
+        print("forwarding remote port {} to local port {}".format(port_forwarding_specification.remote_port, port_forwarding_specification.local_port))
         threads.append(
             forward_tunnel(
                 port_forwarding_specification.remote_port,
