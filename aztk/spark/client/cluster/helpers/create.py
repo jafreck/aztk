@@ -1,5 +1,3 @@
-from typing import List
-
 import azure.batch.models as batch_models
 import azure.batch.models.batch_error as batch_error
 
@@ -7,7 +5,7 @@ from aztk import error
 from aztk.internal.cluster_data import NodeData
 from aztk.spark import models
 from aztk.spark.utils import util
-from aztk.utils import constants, helpers
+from aztk.utils import helpers
 
 POOL_ADMIN_USER_IDENTITY = batch_models.UserIdentity(
     auto_user=batch_models.AutoUserSpecification(

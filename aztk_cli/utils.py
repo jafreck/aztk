@@ -61,7 +61,7 @@ def print_cluster(client, cluster: models.Cluster, internal: bool = False):
     if not cluster.nodes:
         return
     for node in cluster.nodes:
-        remote_login_settings = client.get_remote_login_settings(cluster.id, node.id)
+        remote_login_settings = client.cluster.get_remote_login_settings(cluster.id, node.id)
         if internal:
             ip = node.ip_address
         else:
@@ -130,8 +130,8 @@ def print_clusters_quiet(clusters: List[models.Cluster]):
 def stream_logs(client, cluster_id, application_name):
     current_bytes = 0
     while True:
-        app_logs = client.get_application_log(
-            cluster_id=cluster_id,
+        app_logs = client.cluster.get_application_log(
+            id=cluster_id,
             application_name=application_name,
             tail=True,
             current_bytes=current_bytes)
@@ -140,6 +140,7 @@ def stream_logs(client, cluster_id, application_name):
             return app_logs.exit_code
         current_bytes = app_logs.total_bytes
         time.sleep(3)
+
 
 def ssh_in_master(
         client,
@@ -165,7 +166,7 @@ def ssh_in_master(
     subprocess.call(["ssh"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
     # Get master node id from task (job and task are both named pool_id)
-    cluster = client.get_cluster(cluster_id)
+    cluster = client.cluster.get(cluster_id)
     configuration = client.get_cluster_config(cluster_id)
 
     master_node_id = cluster.master_node_id
@@ -174,7 +175,7 @@ def ssh_in_master(
         raise error.ClusterNotReadyError("Master node has not yet been picked!")
 
     # get remote login settings for the user
-    remote_login_settings = client.get_remote_login_settings(cluster.id, master_node_id)
+    remote_login_settings = client.cluster.get_remote_login_settings(cluster.id, master_node_id)
     master_internal_node_ip = [node.ip_address for node in cluster.nodes if node.id == master_node_id][0]
     master_node_ip = remote_login_settings.ip_address
     master_node_port = remote_login_settings.port
@@ -288,7 +289,7 @@ def print_job(client, job: models.Job):
     if job.applications:
         application_summary(job.applications)
     else:
-        application_summary(client.list_applications(job.id))
+        application_summary(client.job.list_applications(job.id))
     log.info("")
 
 

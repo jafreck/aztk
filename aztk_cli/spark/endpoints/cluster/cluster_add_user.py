@@ -34,8 +34,8 @@ def execute(args: typing.NamedTuple):
 
     ssh_key, password = utils.get_ssh_key_or_prompt(ssh_key, args.username, args.password, spark_client.secrets_config)
 
-    spark_client.create_user(
-        cluster_id=args.cluster_id,
+    spark_client.cluster.create_user(
+        id=args.cluster_id,
         username=args.username,
         password=password,
         ssh_key=ssh_key

@@ -82,8 +82,8 @@ def execute(args: typing.NamedTuple):
     utils.print_cluster_conf(cluster_conf, wait)
     with utils.Spinner():
         # create spark cluster
-        cluster = spark_client.create_cluster(
-            cluster_conf,
+        cluster = spark_client.cluster.create(
+            cluster_configuration=cluster_conf,
             wait=wait
         )
 

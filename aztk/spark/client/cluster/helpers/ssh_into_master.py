@@ -2,7 +2,7 @@
 import azure.batch.models.batch_error as batch_error
 
 from aztk import error
-from aztk.spark import helpers
+from aztk.utils import helpers
 
 
 def cluster_ssh_into_master(spark_cluster_operations, cluster_id, node_id, username, ssh_key=None, password=None, port_forward_list=None, internal=False):

@@ -23,7 +23,7 @@ def setup_parser(parser: argparse.ArgumentParser):
 def execute(args: typing.NamedTuple):
     spark_client = aztk.spark.Client(config.load_aztk_secrets())
     cluster_id = args.cluster_id
-    cluster = spark_client.get_cluster(cluster_id)
+    cluster = spark_client.cluster.get(cluster_id)
     utils.print_cluster(spark_client, cluster, args.internal)
 
     configuration = spark_client.get_cluster_config(cluster_id)

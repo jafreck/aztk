@@ -1,7 +1,7 @@
 import azure.batch.models.batch_error as batch_error
 
 from aztk import error
-from aztk.spark import helpers
+from aztk.utils import helpers
 
 
 def node_run(spark_cluster_operations,

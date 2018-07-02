@@ -104,7 +104,7 @@ def native_python_ssh_into_master(spark_client, cluster, ssh_conf, password):
         plugin_ports.extend(ports)
 
     print("Press ctrl+c to exit...")
-    spark_client.cluster_ssh_into_master(
+    spark_client.cluster.ssh_into_master(
         cluster.id,
         cluster.master_node_id,
         ssh_conf.username,

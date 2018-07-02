@@ -1,7 +1,7 @@
 import azure.batch.models.batch_error as batch_error
 
 from aztk import error
-from aztk.spark import helpers
+from aztk.utils import helpers
 
 
 def get_application_status(spark_cluster_operations, cluster_id: str, app_name: str):

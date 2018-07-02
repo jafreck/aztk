@@ -4,7 +4,7 @@ import azure.batch.models.batch_error as batch_error
 
 import aztk
 from aztk import error
-from aztk.client import Client as BaseClient
+from aztk.client import CoreClient as BaseClient
 from aztk.internal.cluster_data import NodeData
 from aztk.spark import models
 from aztk.spark.helpers import create_cluster as create_cluster_helper

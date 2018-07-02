@@ -3,7 +3,9 @@ import asyncio
 import azure.batch.models.batch_error as batch_error
 
 import aztk.models as models
+from aztk import error
 from aztk.utils import ssh as ssh_lib
+from aztk.utils import helpers
 
 
 def cluster_copy(cluster_operations, cluster_id, source_path, destination_path=None, container_name=None, internal=False, get=False, timeout=None):
@@ -16,6 +18,10 @@ def cluster_copy(cluster_operations, cluster_id, source_path, destination_path=N
 
     try:
         generated_username, ssh_key = cluster_operations.generate_user_on_pool(pool.id, nodes)
+    except batch_error.BatchErrorException as e:
+        raise error.AztkError(helpers.format_batch_exception(e))
+
+    try:
         output = asyncio.get_event_loop().run_until_complete(
             ssh_lib.clus_copy(
                 container_name=container_name,

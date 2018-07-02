@@ -1,7 +1,7 @@
 import azure.batch.models.batch_error as batch_error
 
 from aztk import error
-from aztk.spark import helpers
+from aztk.utils import helpers
 
 
 def create_user(spark_cluster_operations, cluster_id: str, username: str, password: str = None, ssh_key: str = None) -> str:
