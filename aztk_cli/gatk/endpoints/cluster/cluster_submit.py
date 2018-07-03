@@ -12,8 +12,8 @@ def setup_parser(parser: argparse.ArgumentParser):
     parser.add_argument('--id', dest='cluster_id', required=True,
                         help='The unique id of your gatk cluster')
 
-    parser.add_argument('--name', required=True,
-                        help='a name for your application')
+    # parser.add_argument('--name', required=True,
+    #                     help='a name for your application')
     parser.add_argument('-u', '--username', help='Username to gatk cluster')
 
     parser.add_argument('--wait', dest='wait', action='store_true',
@@ -134,10 +134,16 @@ def execute(args: typing.NamedTuple):
         connect=None,
         internal=None)
 
+    cmd ="sudo docker exec gatk /bin/bash -c \"source /root/.gatkbashrc; {}\"".format(''.join(args.command))
+
     node_id, output = gatk_client.node_run(
         cluster_id=args.cluster_id,
         node_id=master_node_id,
-        command="docker exec gatk /bin/bash -c 'source /root/.gatkbashrc; echo $PATH; gatk" + args.command,
+        host=True,
+        command=cmd,
     )
 
-    print(output)
+    # print('\n'.join(output.decode('utf-8')))
+    print(output.decode('unicode_escape'))
+
+    # print(u''.join(output.decode('unicode_escape')))

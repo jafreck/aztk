@@ -116,7 +116,7 @@ def node_exec_command(node_id, command, username, hostname, port, ssh_key=None, 
     else:
         cmd = '/bin/bash 2>&1 -c \'set -e; set -o pipefail; {0}; wait\''.format(command)
     stdin, stdout, stderr = client.exec_command(cmd, get_pty=True)
-    output = [line.decode('utf-8') for line in stdout.read().splitlines()]
+    output = stdout.read()
     client.close()
     return (node_id, output)
 

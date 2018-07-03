@@ -305,7 +305,7 @@ def load_aztk_spark_config():
 
 # TODO: move this to aztk_cli/gatk
 def load_aztk_gatk_config():
-    return aztk.spark.models.SparkConfiguration(
+    return aztk.gatk.models.SparkConfiguration(
         spark_defaults_conf=get_file_if_exists('spark-defaults.conf'),
         jars=load_jars(),
         spark_env_sh=get_file_if_exists('spark-env.sh'),

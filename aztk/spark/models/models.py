@@ -104,7 +104,7 @@ class PluginConfiguration(aztk.models.PluginConfiguration):
 SchedulingTarget = aztk.models.SchedulingTarget
 
 class ClusterConfiguration(aztk.models.ClusterConfiguration):
-    spark_configuration = fields.Model(SparkConfiguration, default=None)
+    spark_configuration = fields.Model(SparkConfiguration, default=SparkConfiguration())
     worker_on_master = fields.Boolean(default=True)
 
 class SecretsConfiguration(aztk.models.SecretsConfiguration):

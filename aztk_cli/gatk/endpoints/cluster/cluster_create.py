@@ -2,7 +2,7 @@ import argparse
 import typing
 
 import aztk.gatk
-from aztk.gatk.models import ClusterConfiguration, UserConfiguration
+from aztk.gatk.models import ClusterConfiguration, UserConfiguration, SparkConfiguration
 from aztk_cli import config, log, utils
 from aztk_cli.config import load_aztk_gatk_config
 from aztk.gatk.models.plugins import GATK4
@@ -39,21 +39,33 @@ def execute(args: typing.NamedTuple):
 
     # read cluster.yaml configuartion file, overwrite values with args
     file_config, wait = config.read_cluster_config()
-    cluster_conf.merge(file_config)
-    cluster_conf.merge(
-        ClusterConfiguration(
-            cluster_id=args.cluster_id,
-            vm_count=args.size,
-            vm_low_pri_count=args.size_low_pri,
-            vm_size=args.vm_size,
-            subnet_id=args.subnet_id,
-            user_configuration=UserConfiguration(
-                username=args.username,
-                password=args.password,
-            ),
-            plugins=[GATK4()]
-        )
+    # type conversion
+    file_config = ClusterConfiguration(
+        **file_config.to_dict()
     )
+    # type conversion
+    file_config.spark_configuration = SparkConfiguration(
+        core_site_xml=file_config.spark_configuration.core_site_xml,
+        spark_defaults_conf=file_config.spark_configuration.spark_defaults_conf,
+        spark_env_sh=file_config.spark_configuration.spark_env_sh,
+    )
+
+    cluster_conf.merge(file_config)
+
+    args_conf = ClusterConfiguration(
+        cluster_id=args.cluster_id,
+        vm_count=args.size,
+        vm_low_pri_count=args.size_low_pri,
+        vm_size=args.vm_size,
+        subnet_id=args.subnet_id,
+        user_configuration=UserConfiguration(
+            username=args.username,
+            password=args.password,
+        ),
+        plugins=[GATK4()]
+    )
+
+    cluster_conf.merge(args_conf)
 
     if args.docker_repo and cluster_conf.toolkit:
         cluster_conf.toolkit.docker_repo = args.docker_repo
