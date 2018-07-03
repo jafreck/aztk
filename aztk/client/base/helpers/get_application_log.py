@@ -5,7 +5,7 @@ import azure.batch.models as batch_models
 import azure.batch.models.batch_error as batch_error
 
 from aztk import error
-from aztk.spark import models
+from aztk import models
 from aztk.utils import constants, helpers
 
 output_file = constants.TASK_WORKING_DIR + \

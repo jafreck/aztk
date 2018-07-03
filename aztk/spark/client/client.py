@@ -46,7 +46,7 @@ class Client(CoreClient):
     @deprecated("0.10.0")
     def create_clusters_in_parallel(self, cluster_confs):    # NOT IMPLEMENTED
         for cluster_conf in cluster_confs:
-            self.cluster.create_cluster(cluster_conf)
+            self.cluster.create(cluster_conf)
 
     @deprecated("0.10.0")
     def delete_cluster(self, cluster_id: str, keep_logs: bool = False):

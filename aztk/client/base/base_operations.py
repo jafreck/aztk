@@ -1,10 +1,12 @@
-import aztk.models as models
+from aztk import models
 from aztk.internal import cluster_data
 from aztk.utils import ssh as ssh_lib
 
-from .helpers import (create_user_on_node, create_user_on_pool, delete_user_on_node, delete_user_on_pool,
-                      generate_user_on_node, generate_user_on_pool, get_application_log, get_remote_login_settings,
-                      node_run, run, ssh_into_node)
+from .helpers import (create_user_on_node, create_user_on_pool,
+                      delete_user_on_node, delete_user_on_pool,
+                      generate_user_on_node, generate_user_on_pool,
+                      get_application_log, get_remote_login_settings, node_run,
+                      run, ssh_into_node)
 
 
 class BaseOperations:

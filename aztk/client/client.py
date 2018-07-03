@@ -21,6 +21,7 @@ from aztk.utils import deprecated, secure_utils
 
 class CoreClient:
     def __init__(self, secrets_configuration: models.SecretsConfiguration): # make accept secrets_config and secrets_configuration
+        self.secrets_configuration = None
         context = self.get_context(secrets_configuration)
         self.cluster = CoreClusterOperations(context)
         self.job = CoreJobOperations(context)
@@ -188,7 +189,7 @@ class CoreClient:
                 is_admin=True,
                 password=password,
                 ssh_public_key=get_ssh_key.get_user_public_key(
-                    ssh_key, self.secrets_config),
+                    ssh_key, self.secrets_configuration),
                 expiry_time=datetime.now(timezone.utc) + timedelta(days=365)))
 
     def __delete_user(self, pool_id: str, node_id: str, username: str) -> str:

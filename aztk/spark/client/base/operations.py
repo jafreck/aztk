@@ -5,7 +5,7 @@ import azure.batch.models as batch_models
 from aztk.client.base import BaseOperations as CoreBaseOperations
 from aztk.spark import models
 
-from .helpers import generate_cluster_start_task, generate_application_task
+from .helpers import generate_cluster_start_task, generate_application_task, get_application_log
 
 
 class SparkBaseOperations(CoreBaseOperations):
@@ -24,3 +24,6 @@ class SparkBaseOperations(CoreBaseOperations):
 
     def generate_application_task(self, container_id, application, remote=False):
         return generate_application_task.generate_application_task(self, container_id, application, remote)
+
+    def get_application_log(self, cluster_id: str, application_name: str, tail=False, current_bytes: int = 0):
+        return get_application_log.get_application_log(self, cluster_id, application_name, tail, current_bytes)

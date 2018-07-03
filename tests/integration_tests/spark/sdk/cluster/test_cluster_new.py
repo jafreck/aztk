@@ -20,7 +20,7 @@ spark_client = get_spark_client()
 
 def clean_up_cluster(cluster_id):
     try:
-        spark_client.cluster.delete(cluster_id=cluster_id)
+        spark_client.cluster.delete(id=cluster_id)
     except (BatchErrorException, AztkError):
         # pass in the event that the cluster does not exist
         pass
@@ -134,8 +134,8 @@ def test_get_remote_login_settings():
         spark_configuration=None)
     try:
         spark_client.cluster.create(cluster_configuration, wait=True)
-        cluster = spark_client.cluster.get(cluster_id=cluster_configuration.cluster_id)
-        rls = spark_client.cluster.get_remote_login_settings(cluster_id=cluster.id, node_id=cluster.master_node_id)
+        cluster = spark_client.cluster.get(id=cluster_configuration.cluster_id)
+        rls = spark_client.cluster.get_remote_login_settings(id=cluster.id, node_id=cluster.master_node_id)
 
         assert rls.ip_address is not None
         assert rls.port is not None
@@ -179,7 +179,7 @@ def test_submit():
         spark_client.cluster.create(cluster_configuration, wait=True)
 
         spark_client.cluster.submit(
-            cluster_id=cluster_configuration.cluster_id, application=application_configuration, wait=True)
+            id=cluster_configuration.cluster_id, application=application_configuration, wait=True)
         assert True
 
     except (AztkError, BatchErrorException):
@@ -220,9 +220,9 @@ def test_get_application_log():
         spark_client.cluster.create(cluster_configuration, wait=True)
 
         spark_client.cluster.submit(
-            cluster_id=cluster_configuration.cluster_id, application=application_configuration, wait=True)
+            id=cluster_configuration.cluster_id, application=application_configuration, wait=True)
         application_log = spark_client.cluster.get_application_log(
-            cluster_id=cluster_configuration.cluster_id,
+            id=cluster_configuration.cluster_id,
             application_name=application_configuration.name,
             tail=False,
             current_bytes=0)
@@ -281,9 +281,9 @@ def test_get_application_status_complete():
         spark_client.cluster.create(cluster_configuration, wait=True)
 
         spark_client.cluster.submit(
-            cluster_id=cluster_configuration.cluster_id, application=application_configuration, wait=True)
+            id=cluster_configuration.cluster_id, application=application_configuration, wait=True)
         status = spark_client.cluster.get_application_status(
-            cluster_id=cluster_configuration.cluster_id, application_name=application_configuration.name)
+            id=cluster_configuration.cluster_id, application_name=application_configuration.name)
 
         assert status == "completed"
 
@@ -309,7 +309,7 @@ def test_delete_cluster():
 
     try:
         spark_client.cluster.create(cluster_configuration, wait=True)
-        success = spark_client.cluster.delete(cluster_id=cluster_configuration.cluster_id)
+        success = spark_client.cluster.delete(id=cluster_configuration.cluster_id)
 
         assert success is True
 
@@ -336,7 +336,7 @@ def test_spark_processes_up():
     try:
         cluster = spark_client.cluster.create(cluster_configuration, wait=True)
         wait_for_all_nodes(cluster.id, cluster.nodes)
-        success = spark_client.cluster.delete(cluster_id=cluster_configuration.cluster_id)
+        success = spark_client.cluster.delete(id=cluster_configuration.cluster_id)
 
         assert success is True
 
@@ -367,7 +367,7 @@ def test_debug_tool():
         cluster = spark_client.cluster.create(cluster_configuration, wait=True)
         nodes = [node for node in cluster.nodes]
         wait_for_all_nodes(cluster.id, nodes)
-        cluster_output = spark_client.cluster.diagnostics(cluster_id=cluster.id)
+        cluster_output = spark_client.cluster.diagnostics(id=cluster.id)
         for node_output in cluster_output:
             node_output.output.seek(0)    # tempfile requires seek 0 before reading
             debug_zip = ZipFile(node_output.output)
