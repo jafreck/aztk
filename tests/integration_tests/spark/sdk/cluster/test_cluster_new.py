@@ -55,6 +55,8 @@ def ensure_spark_processes(cluster_id):
 def wait_for_all_nodes(cluster_id, nodes):
     while True:
         for node in nodes:
+            if node.state in [batch_models.ComputeNodeState.unusable, batch_models.ComputeNodeState.start_task_failed]:
+                raise AztkError("Node {} in failed state.".format(node.id))
             if node.state not in [batch_models.ComputeNodeState.idle, batch_models.ComputeNodeState.running]:
                 break
         else:

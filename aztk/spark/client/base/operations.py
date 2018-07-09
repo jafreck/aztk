@@ -25,5 +25,5 @@ class SparkBaseOperations(CoreBaseOperations):
     def generate_application_task(self, container_id, application, remote=False):
         return generate_application_task.generate_application_task(self, container_id, application, remote)
 
-    def get_application_log(self, cluster_id: str, application_name: str, tail=False, current_bytes: int = 0):
-        return get_application_log.get_application_log(self, cluster_id, application_name, tail, current_bytes)
+    def get_application_log(self, id: str, application_name: str, tail=False, current_bytes: int = 0):
+        return get_application_log.get_application_log(SparkBaseOperations, self, id, application_name, tail, current_bytes)

@@ -62,8 +62,8 @@ class BaseOperations:
     def node_run(self, cluster_id, node_id, command, internal, container_name=None, timeout=None):
         return node_run.node_run(self, cluster_id, node_id, command, internal, container_name, timeout)
 
-    def get_remote_login_settings(self, cluster_id: str, node_id: str):
-        return get_remote_login_settings.get_remote_login_settings(self, cluster_id, node_id)
+    def get_remote_login_settings(self, id: str, node_id: str):
+        return get_remote_login_settings.get_remote_login_settings(self, id, node_id)
 
     def run(self, cluster_id, command, internal, container_name=None, timeout=None):
         return run.cluster_run(self, cluster_id, command, internal, container_name, timeout)
