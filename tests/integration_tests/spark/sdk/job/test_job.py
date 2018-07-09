@@ -36,8 +36,8 @@ def test_submit_job():
         max_low_pri_nodes=0
     )
     try:
-        job = spark_client.submit_job(job_configuration=job_configuration)
-        spark_client.wait_until_job_finished(job_id=job_configuration.id)
+        job = spark_client.job.submit(job_configuration=job_configuration)
+        spark_client.job.wait_until_job_finished(id=job_configuration.id)
 
         assert job.id == job_configuration.id
         assert job.state is not None
@@ -73,10 +73,10 @@ def test_list_jobs():
         worker_on_master=True
     )
     try:
-        spark_client.submit_job(job_configuration=job_configuration)
-        spark_client.wait_until_job_finished(job_configuration.id)
+        spark_client.job.submit(job_configuration=job_configuration)
+        spark_client.job.wait_until_job_finished(job_configuration.id)
 
-        jobs = spark_client.list_jobs()
+        jobs = spark_client.job.list()
 
         assert jobs is not None
         assert job_configuration.id in [job.id for job in jobs]
@@ -111,10 +111,10 @@ def test_list_applications():
         max_low_pri_nodes=0
     )
     try:
-        spark_client.submit_job(job_configuration=job_configuration)
-        spark_client.wait_until_job_finished(job_configuration.id)
+        spark_client.job.submit(job_configuration=job_configuration)
+        spark_client.job.wait_until_job_finished(job_configuration.id)
 
-        applications = spark_client.list_applications(job_id=job_configuration.id)
+        applications = spark_client.job.list_applications(id=job_configuration.id)
 
         assert applications not in (None, [])
         assert len(applications) == 2
@@ -152,10 +152,10 @@ def test_get_job():
         worker_on_master=True
     )
     try:
-        spark_client.submit_job(job_configuration=job_configuration)
-        spark_client.wait_until_job_finished(job_configuration.id)
+        spark_client.job.submit(job_configuration=job_configuration)
+        spark_client.job.wait_until_job_finished(job_configuration.id)
 
-        job = spark_client.get_job(job_id=job_configuration.id)
+        job = spark_client.job.get(id=job_configuration.id)
         assert job.id == job_configuration.id
         assert app1.name in [app.name for app in job.applications]
         assert app2.name in [app.name for app in job.applications]
@@ -185,9 +185,9 @@ def test_get_application():
         max_low_pri_nodes=0
     )
     try:
-        spark_client.submit_job(job_configuration=job_configuration)
-        spark_client.wait_until_job_finished(job_configuration.id)
-        application = spark_client.get_application(job_id=job_configuration.id, application_name=app1.name)
+        spark_client.job.submit(job_configuration=job_configuration)
+        spark_client.job.wait_until_job_finished(job_configuration.id)
+        application = spark_client.job.get_application(id=job_configuration.id, application_name=app1.name)
         assert isinstance(application, aztk.spark.models.Application)
         assert application.exit_code == 0
         assert application.state == "completed"
@@ -216,10 +216,10 @@ def test_get_application_log():
         max_low_pri_nodes=0
     )
     try:
-        spark_client.submit_job(job_configuration=job_configuration)
-        spark_client.wait_until_job_finished(job_configuration.id)
+        spark_client.job.submit(job_configuration=job_configuration)
+        spark_client.job.wait_until_job_finished(job_configuration.id)
 
-        application_log = spark_client.get_job_application_log(job_id=job_configuration.id, application_name=app1.name)
+        application_log = spark_client.job.get_application_log(id=job_configuration.id, application_name=app1.name)
 
         assert isinstance(application_log, aztk.spark.models.ApplicationLog)
         assert application_log.log is not None
@@ -253,12 +253,12 @@ def test_delete_job():
         worker_on_master=True
     )
     try:
-        spark_client.submit_job(job_configuration=job_configuration)
-        spark_client.wait_until_job_finished(job_configuration.id)
-        spark_client.delete_job(job_configuration.id)
-        assert job_configuration.id not in spark_client.list_jobs()
+        spark_client.job.submit(job_configuration=job_configuration)
+        spark_client.job.wait_until_job_finished(job_configuration.id)
+        spark_client.job.delete(job_configuration.id)
+        assert job_configuration.id not in spark_client.job.list()
         try:
-            spark_client.get_job(job_configuration.id)
+            spark_client.job.get(job_configuration.id)
         except AztkError:
             # this should fail
             assert True
@@ -270,6 +270,6 @@ def test_delete_job():
 
 def clean_up_job(job_id):
     try:
-        spark_client.delete_job(job_id)
+        spark_client.job.delete(job_id)
     except (BatchErrorException, AztkError):
         pass
