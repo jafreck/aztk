@@ -8,16 +8,16 @@ from .helpers import copy, create, delete, get, list
 class CoreClusterOperations(BaseOperations):
     def create(self, cluster_configuration: ClusterConfiguration, software_metadata_key: str, start_task,
                vm_image_model):
-        """Create a cluster
+        """Create a cluster.
 
         Args:
-            cluster_configuration (:obj:`ClusterConfiguration`): Configuration for the cluster to be created
+            cluster_configuration (:obj:`aztk.models.ClusterConfiguration`): Configuration for the cluster to be created
             software_metadata_key (:obj:`str`): the key for the primary software that will be run on the cluster
             start_task (:obj:`azure.batch.models.StartTask`): Batch StartTask defintion to configure the Batch Pool
             vm_image_model (:obj:`azure.batch.models.VirtualMachineConfiguration`): Configuration of the virtual machine image and settings
 
         Returns:
-            Cluster: An aztk.models.Cluster object representing the state and configuration of the cluster.
+            :obj:`aztk.models.Cluster`: A Cluster object representing the state and configuration of the cluster.
         """
         return create.create_pool_and_job(self, cluster_configuration, software_metadata_key, start_task, vm_image_model)
 
@@ -29,7 +29,7 @@ class CoreClusterOperations(BaseOperations):
             cluster_id (:obj:`str`): the id of the cluster to get.
 
         Returns:
-            Cluster: An aztk.models.Cluster object representing the state and configuration of the cluster.
+            :obj:`aztk.models.Cluster`: A Cluster object representing the state and configuration of the cluster.
         """
         return get.get_pool_details(self, cluster_id)
 
@@ -60,7 +60,7 @@ class CoreClusterOperations(BaseOperations):
                 Defaults to None.
 
         Returns:
-            List[NodeOutput]: A list of NodeOutput objects representing the output of the copy command.
+            :obj:`List[aztk.models.NodeOutput]`: A list of NodeOutput objects representing the output of the copy command.
         """
         return copy.cluster_copy(self, cluster_id, source_path, destination_path, container_name, internal, get,
                                  timeout)
@@ -75,7 +75,7 @@ class CoreClusterOperations(BaseOperations):
                 Defaults to False.
 
         Returns:
-            List[NodeOutput]: A list of NodeOutput objects representing the output of the copy command.
+            :obj:`List[aztk.models.NodeOutput]`: A list of NodeOutput objects representing the output of the copy command.
         """
         return delete.delete_pool_and_job(self, pool_id, keep_logs)
 
@@ -87,6 +87,6 @@ class CoreClusterOperations(BaseOperations):
                 This filters out non-aztk clusters and aztk clusters running other software.
 
         Returns:
-            List[Cluster]: list of clusters running the software defined by software_metadata_key
+            :obj:`List[aztk.models.Cluster]`: list of clusters running the software defined by software_metadata_key
         """
         return list.list_clusters(self, software_metadata_key)

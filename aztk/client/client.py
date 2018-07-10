@@ -20,6 +20,16 @@ from aztk.utils import deprecated, secure_utils
 
 
 class CoreClient:
+    """The base AZTK client that all other clients inherit from.
+
+    **This client should not be used directly. Only software specific clients
+    should be used.**
+
+    Attributes:
+        cluster (:obj:`aztk.client.cluster.CoreClusterOperations`): Cluster
+        job (:obj:`aztk.client.job.CoreJobOperations`): Job
+    """
+
     # TODO: remove ability to specify secrets_config in 0.10.0
     def __init__(self, secrets_configuration: models.SecretsConfiguration = None, **kwargs):
         self.secrets_configuration = None

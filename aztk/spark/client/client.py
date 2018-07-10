@@ -19,6 +19,12 @@ from aztk.utils import azure_api, deprecated, helpers
 
 
 class Client(CoreClient):
+    """The client used to create and manage Spark clusters
+
+        Attributes:
+            cluster (:obj:`aztk.spark.client.cluster.ClusterOperations`): Cluster
+            job (:obj:`aztk.spark.client.job.JobOperations`): Job
+    """
     def __init__(self, secrets_configuration: models.SecretsConfiguration, **kwargs):
         self.secrets_configuration = None
         context = None

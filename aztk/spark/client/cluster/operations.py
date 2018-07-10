@@ -15,7 +15,7 @@ class ClusterOperations(CoreClusterOperations, SparkBaseOperations):
             wait (:obj:`bool`): if True, this function will block until the cluster creation is finished.
 
         Returns:
-            Cluster: An aztk.models.Cluster object representing the state and configuration of the cluster.
+            :obj:`aztk.spark.models.Cluster`: An Cluster object representing the state and configuration of the cluster.
         """
         return create.create_cluster(self, cluster_configuration, wait)
 
@@ -27,7 +27,7 @@ class ClusterOperations(CoreClusterOperations, SparkBaseOperations):
             keep_logs (:obj:`bool`): If True, the logs related to this cluster in Azure Storage are not deleted.
                 Defaults to False.
         Returns:
-            True if the deletion process was successful.
+            :obj:`bool`: True if the deletion process was successful.
         """
         return delete.delete_cluster(self, id, keep_logs)
 
@@ -38,7 +38,7 @@ class ClusterOperations(CoreClusterOperations, SparkBaseOperations):
             id (:obj:`str`): the id of the cluster to get.
 
         Returns:
-            Cluster: An aztk.models.Cluster object representing the state and configuration of the cluster.
+            :obj:`aztk.spark.models.Cluster`: A Cluster object representing the state and configuration of the cluster.
         """
         return get.get_cluster(self, id)
 
@@ -46,7 +46,7 @@ class ClusterOperations(CoreClusterOperations, SparkBaseOperations):
         """List all clusters.
 
         Returns:
-            List[Cluster]: List of aztk.models.Cluster objects each representing the state and configuration of the cluster.
+            :obj:`List[aztk.spark.models.Cluster]`: List of Cluster objects each representing the state and configuration of the cluster.
         """
         return list.list_clusters(self)
 
@@ -62,7 +62,7 @@ class ClusterOperations(CoreClusterOperations, SparkBaseOperations):
             wait (:obj:`bool`, optional): If True, this function blocks until the application has completed. Defaults to False.
 
         Returns:
-            Cluster: An aztk.models.Cluster object representing the state and configuration of the cluster.
+            None
         """
         return submit.submit(self, id, application, remote, wait)
 
@@ -88,7 +88,7 @@ class ClusterOperations(CoreClusterOperations, SparkBaseOperations):
             application_name (:obj:`str`): the name of the application to get
 
         Returns:
-            str: the status state of the application
+            :obj:`str`: the status state of the application
         """
         return get_application_status.get_application_status(self, id, application_name)
 
@@ -106,7 +106,7 @@ class ClusterOperations(CoreClusterOperations, SparkBaseOperations):
                 Defaults to None.
 
         Returns:
-            List[NodeOutput]: list of NodeOutput objects containing the output of the run command
+            :obj:`List[aztk.spark.models.NodeOutput]`: list of NodeOutput objects containing the output of the run command
         """
         return run.cluster_run(self, id, command, host, internal, timeout)
 
@@ -125,7 +125,7 @@ class ClusterOperations(CoreClusterOperations, SparkBaseOperations):
                 Defaults to None.
 
         Returns:
-            NodeOutput: object containing the output of the run command
+            :obj:`aztk.spark.models.NodeOutput`: object containing the output of the run command
         """
         return node_run.node_run(self, id, node_id, command, host, internal, timeout)
 
@@ -150,7 +150,7 @@ class ClusterOperations(CoreClusterOperations, SparkBaseOperations):
                 Defaults to None.
 
         Returns:
-            List[NodeOutput]: A list of NodeOutput objects representing the output of the copy command.
+            :obj:`List[aztk.spark.models.NodeOutput]`: A list of NodeOutput objects representing the output of the copy command.
         """
         return copy.cluster_copy(self, id, source_path, destination_path, host, internal, timeout)
 
@@ -177,7 +177,7 @@ class ClusterOperations(CoreClusterOperations, SparkBaseOperations):
                 Defaults to None.
 
         Returns:
-            List[NodeOutput]: A list of NodeOutput objects representing the output of the copy command.
+            :obj:`List[aztk.spark.models.NodeOutput]`: A list of NodeOutput objects representing the output of the copy command.
         """
         return download.cluster_download(self, id, source_path, destination_path, host, internal, timeout)
 
@@ -191,6 +191,6 @@ class ClusterOperations(CoreClusterOperations, SparkBaseOperations):
                 written to this path. Defaults to None.
 
         Returns:
-            List[NodeOutput]: A list of NodeOutput objects representing the output of the copy command.
+            :obj:`List[aztk.spark.models.NodeOutput]`: A list of NodeOutput objects representing the output of the copy command.
         """
         return diagnostics.run_cluster_diagnostics(self, id, output_directory)

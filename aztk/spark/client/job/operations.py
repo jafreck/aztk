@@ -11,7 +11,7 @@ class JobOperations(CoreJobOperations, SparkBaseOperations):
         """List all jobs.
 
         Returns:
-            List[Job]: List of aztk.models.Job objects each representing the state and configuration of the job.
+            :obj:`List[Job]`: List of aztk.models.Job objects each representing the state and configuration of the job.
         """
         return list.list_jobs(self)
 
@@ -19,11 +19,11 @@ class JobOperations(CoreJobOperations, SparkBaseOperations):
         """Delete a job.
 
         Args:
-            id (:obj:`str`): the id of the cluster to delete.
-            keep_logs (:obj:`bool`): If True, the logs related to this cluster in Azure Storage are not deleted.
+            id (:obj:`str`): the id of the job to delete.
+            keep_logs (:obj:`bool`): If True, the logs related to this job in Azure Storage are not deleted.
                 Defaults to False.
         Returns:
-            True if the deletion process was successful.
+            :obj:`bool`: True if the deletion process was successful.
         """
         return delete.delete(self, id, keep_logs)
 
@@ -31,10 +31,10 @@ class JobOperations(CoreJobOperations, SparkBaseOperations):
         """Get details about the state of a job.
 
         Args:
-            id (:obj:`str`): the id of the cluster to get.
+            id (:obj:`str`): the id of the job to get.
 
         Returns:
-            Cluster: An aztk.models.Cluster object representing the state and configuration of the cluster.
+            :obj:`aztk.spark.models.job`: A job object representing the state and configuration of the job.
         """
         return get.get_job(self, id)
 
@@ -42,11 +42,11 @@ class JobOperations(CoreJobOperations, SparkBaseOperations):
         """Get information on a submitted application
 
         Args:
-            id (:obj:`str`): the name of the cluster the application was submitted to
+            id (:obj:`str`): the name of the job the application was submitted to
             application_name (:obj:`str`): the name of the application to get
 
         Returns:
-            aztk.spark.models.Application: object representing that state and output of an application
+            :obj:`aztk.spark.models.Application`: object representing that state and output of an application
         """
         return get_application.get_application(self, id, application_name)
 
@@ -54,22 +54,22 @@ class JobOperations(CoreJobOperations, SparkBaseOperations):
         """Get the log for a running or completed application
 
         Args:
-            id (:obj:`str`): the id of the cluster to run the command on.
-            application_name (:obj:`str`): str
+            id (:obj:`str`): the id of the job the application was submitted to.
+            application_name (:obj:`str`): the name of the application to get the log of
 
         Returns:
-            aztk.spark.models.ApplicationLog: a model representing the output of the application.
+            :obj:`aztk.spark.models.ApplicationLog`: a model representing the output of the application.
         """
         return get_application_log.get_job_application_log(self, id, application_name)
 
     def list_applications(self, id):
         """List all application defined as a part of a job
-        
+
         Args:
             id (:obj:`str`): the id of the job to list the applications of
-        
+
         Returns:
-            List[aztk.spark.models.Application]: a list of all applications defined as a part of the job
+            :obj:`List[aztk.spark.models.Application]`: a list of all applications defined as a part of the job
         """
         return list_applications.list_applications(self, id)
 
@@ -78,7 +78,7 @@ class JobOperations(CoreJobOperations, SparkBaseOperations):
 
         Args:
             id (:obj:`str`): the id of the job to stop
-        
+
         Returns:
             None
         """
@@ -90,9 +90,9 @@ class JobOperations(CoreJobOperations, SparkBaseOperations):
         Args:
             id (:obj:`str`): the id of the job the application belongs to
             application_name (:obj:`str`):  the name of the application to stop
-        
+
         Returns:
-            bool: True if the stop was successful, else False
+            :obj:`bool`: True if the stop was successful, else False
         """
         return stop_application.stop_app(self, id, application_name)
 
@@ -104,10 +104,10 @@ class JobOperations(CoreJobOperations, SparkBaseOperations):
         in Azure Storage. When all applications have completed, the cluster will be automatically deleted.
 
         Args:
-            job_configuration (:obj:`aztk.models.JobConfiguration`): Model defining the job's configuration.
+            job_configuration (:obj:`aztk.spark.models.JobConfiguration`): Model defining the job's configuration.
 
         Returns:
-            aztk.spark.models.Job: Model representing the state of the job.
+            :obj:`aztk.spark.models.Job`: Model representing the state of the job.
         """
         return submit.submit_job(self, job_configuration)
 
