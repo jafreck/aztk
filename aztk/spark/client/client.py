@@ -30,7 +30,7 @@ class Client(CoreClient):
         context = None
         if kwargs.get("secrets_config"):
             # TODO: add deprecated warning
-            context = self.get_context(kwargs.get("secrets_config"))
+            context = self._get_context(kwargs.get("secrets_config"))
         else:
             context = self._get_context(secrets_configuration)
         self.cluster = ClusterOperations(context)
