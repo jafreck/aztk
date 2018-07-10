@@ -8,7 +8,7 @@ from .helpers import copy, create, delete, get, list
 class CoreClusterOperations(BaseOperations):
     def create(self, cluster_configuration: ClusterConfiguration, software_metadata_key: str, start_task,
                vm_image_model):
-        """ Create a cluster
+        """Create a cluster
 
         Args:
             cluster_configuration (:obj:`ClusterConfiguration`): Configuration for the cluster to be created
@@ -23,7 +23,7 @@ class CoreClusterOperations(BaseOperations):
 
     # TODO: change cluster_id to id
     def get(self, cluster_id: str):
-        """ Get the state and configuration of a cluster
+        """Get the state and configuration of a cluster
 
         Args:
             cluster_id (:obj:`str`): the id of the cluster to get.
@@ -42,7 +42,7 @@ class CoreClusterOperations(BaseOperations):
              internal=False,
              get=False,
              timeout=None):
-        """ Copy files to or from every node in a cluster.
+        """Copy files to or from every node in a cluster.
 
         Args:
             cluster_id (:obj:`str`): the id of the cluster to copy files with
@@ -67,7 +67,7 @@ class CoreClusterOperations(BaseOperations):
 
     #TODO: change pool_id to id
     def delete(self, pool_id: str, keep_logs: bool = False):
-        """ Copy files to or from every node in a cluster.
+        """Copy files to or from every node in a cluster.
 
         Args:
             pool_id (:obj:`str`): the id of the cluster to delete
@@ -80,7 +80,7 @@ class CoreClusterOperations(BaseOperations):
         return delete.delete_pool_and_job(self, pool_id, keep_logs)
 
     def list(self, software_metadata_key):
-        """ List clusters running the specified software.
+        """List clusters running the specified software.
 
         Args:
             software_metadata_key(:obj:`str`): the key of the primary softare running on the cluster.

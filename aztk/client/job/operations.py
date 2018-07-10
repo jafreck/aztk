@@ -6,7 +6,7 @@ from .helpers import submit
 class CoreJobOperations(BaseOperations):
     def submit(self, job_configuration, start_task, job_manager_task, autoscale_formula, software_metadata_key: str,
                vm_image_model, application_metadata):
-        """ Submit a job
+        """Submit a job
 
         Jobs are a cluster definition and one or many application definitions which run on the cluster. The job's
         cluster will be allocated and configured, then the applications will be executed with their output stored
