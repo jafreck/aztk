@@ -24,8 +24,8 @@ class ClusterOperations(CoreClusterOperations, SparkBaseOperations):
 
         Args:
             id (:obj:`str`): the id of the cluster to delete.
-            keep_logs (:obj:`bool`): if True, this function will block until the cluster creation is finished.
-
+            keep_logs (:obj:`bool`): If True, the logs related to this cluster in Azure Storage are not deleted.
+                Defaults to False.
         Returns:
             True if the deletion process was successful.
         """
