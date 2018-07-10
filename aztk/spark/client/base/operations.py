@@ -49,9 +49,9 @@ class SparkBaseOperations(CoreBaseOperations):
         Args:
             container_id (:obj:`str`): the id of the container to run the application in
             application (:obj:`aztk.spark.models.ApplicationConfiguration): the Application Definition
-            remote (:obj`bool`): If True, the application file will not be uploaded, it is assumed to be reachable 
+            remote (:obj:`bool`): If True, the application file will not be uploaded, it is assumed to be reachable
                 by the cluster already. This is useful when your application is stored in a mounted Azure File Share
-                and not the client.Defaults to False.
+                and not the client. Defaults to False.
 
         Returns:
             azure.batch.models.TaskAddParameter: the Task definition for the Application.

@@ -89,14 +89,14 @@ class BaseOperations:
         """
         return create_user_on_node.create_user_on_node(self, username, pool_id, node_id, ssh_key, password)
 
-    #TODO: rename pool to cluster
+    #TODO: rename pool to cluster, get rid of nodes parameter
     def create_user_on_pool(self, username, pool_id, nodes, ssh_pub_key=None, password=None):
         """Create a user on every node in the cluster
 
         Args:
             username (:obj:`str`): name of the user to create.
             pool_id (:obj:`str`): id of the cluster to create the user on.
-            node_id (:obj:`str`): id of the node in the cluster to create the user on.
+            nodes (:obj:`List[ComputeNode]`): list of nodes to create the user on
             ssh_key (:obj:`str`, optional): ssh public key to create the user with, must use ssh_key or password. Defaults to None.
             password (:obj:`str`, optional): password for the user, must use ssh_key or password. Defaults to None.
 
@@ -174,7 +174,7 @@ class BaseOperations:
                 Defaults to None.
 
         Returns:
-            NodeOutput:
+            NodeOutput: object containing the output of the run command
         """
         return node_run.node_run(self, cluster_id, node_id, command, internal, container_name, timeout)
 
@@ -204,7 +204,7 @@ class BaseOperations:
                 Defaults to None.
 
         Returns:
-            List[NodeOutput]
+            List[NodeOutput]: list of NodeOutput objects containing the output of the run command
         """
         return run.cluster_run(self, cluster_id, command, internal, container_name, timeout)
 

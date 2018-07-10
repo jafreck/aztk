@@ -45,11 +45,11 @@ class CoreClusterOperations(BaseOperations):
         """Copy files to or from every node in a cluster.
 
         Args:
-            cluster_id (:obj:`str`): the id of the cluster to copy files with
-            source_path (:obj:`str`): the path of the file to copy from
-            destination_path (:obj:`str`, optional): the path of the file to copy to.
-                If None, a SpooledTemporaryFile will be returned, else the file will be written to this path.
-                 Defaults to None.
+            cluster_id (:obj:`str`): the id of the cluster to copy files with.
+            source_path (:obj:`str`): the path of the file to copy from.
+            destination_path (:obj:`str`, optional): the local directory path where the output should be written.
+                If None, a SpooledTemporaryFile will be returned in the NodeOutput object, else the file will be
+                written to this path. Defaults to None.
             container_name (:obj:`str`, optional): the name of the container to copy to or from.
                 If None, the copy operation will occur on the host VM, Defaults to None.
             internal (:obj:`bool`, optional): if True, this will connect to the node using its internal IP.
