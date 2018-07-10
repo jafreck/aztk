@@ -19,23 +19,17 @@ from aztk.utils import azure_api, deprecated, helpers
 
 
 class Client(CoreClient):
-    def __init__(self, secrets_configuration: models.SecretsConfiguration):
-        context = self.get_context(secrets_configuration)
+    def __init__(self, secrets_configuration: models.SecretsConfiguration, **kwargs):
+        self.secrets_configuration = None
+        context = None
+        if kwargs.get("secrets_config"):
+            # TODO: add deprecated warning
+            context = self.get_context(kwargs.get("secrets_config"))
+        else:
+            context = self._get_context(secrets_configuration)
         self.cluster = ClusterOperations(context)
         self.job = JobOperations(context)
 
-    def get_context(self, secrets_configuration: models.SecretsConfiguration):
-        self.secrets_configuration = secrets_configuration
-
-        azure_api.validate_secrets(secrets_configuration)
-        self.batch_client = azure_api.make_batch_client(secrets_configuration)
-        self.blob_client = azure_api.make_blob_client(secrets_configuration)
-        context = {
-            'batch_client': self.batch_client,
-            'blob_client': self.blob_client,
-            'secrets_configuration': secrets_configuration,
-        }
-        return context
 
     # ALL THE FOLLOWING METHODS ARE DEPRECATED AND WILL BE REMOVED IN 0.10.0
 

@@ -20,13 +20,19 @@ from aztk.utils import deprecated, secure_utils
 
 
 class CoreClient:
-    def __init__(self, secrets_configuration: models.SecretsConfiguration): # make accept secrets_config and secrets_configuration
+    # TODO: remove ability to specify secrets_config in 0.10.0
+    def __init__(self, secrets_configuration: models.SecretsConfiguration = None, **kwargs):
         self.secrets_configuration = None
-        context = self.get_context(secrets_configuration)
+        context = None
+        if kwargs.get("secrets_config"):
+            # TODO: add deprecated warning
+            context = self._get_context(kwargs.get("secrets_config"))
+        else:
+            context = self._get_context(secrets_configuration)
         self.cluster = CoreClusterOperations(context)
         self.job = CoreJobOperations(context)
 
-    def get_context(self, secrets_configuration: models.SecretsConfiguration):
+    def _get_context(self, secrets_configuration: models.SecretsConfiguration):
         self.secrets_configuration = secrets_configuration
 
         azure_api.validate_secrets(secrets_configuration)
