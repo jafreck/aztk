@@ -33,7 +33,7 @@ class BaseOperations:
             port_forward_list (:obj:`List[PortForwardingSpecification`, optional): list of PortForwardingSpecifications.
                 The defined ports will be forwarded to the client.
             internal (:obj:`bool`, optional): if True, this will connect to the node using its internal IP.
-                Only use this if running within the same VNET as the cluster.
+                Only use this if running within the same VNET as the cluster. Defaults to False.
         Returns:
             ClusterConfiguration: Object representing the cluster's configuration
         """
@@ -70,7 +70,7 @@ class BaseOperations:
             port_forward_list (:obj:`List[PortForwardingSpecification`, optional): list of PortForwardingSpecifications.
                 The defined ports will be forwarded to the client.
             internal (:obj:`bool`, optional): if True, this will connect to the node using its internal IP.
-                Only use this if running within the same VNET as the cluster.
+                Only use this if running within the same VNET as the cluster. Defaults to False.
         Returns:
             None
         """
@@ -167,10 +167,11 @@ class BaseOperations:
             node_id (:obj:`str`): the id of the node in the cluster to run the command on.
             command (:obj:`str`): the bash command to execute on the node.
             internal (:obj:`bool`): if True, this will connect to the node using its internal IP.
-                Only use this if running within the same VNET as the cluster.
+                Only use this if running within the same VNET as the cluster. Defaults to False.
             container_name=None (:obj:`str`, optional): the name of the container to run the command in.
                 If None, the command will run on the host VM. Defaults to None.
             timeout=None (:obj:`str`, optional): The timeout in seconds for establishing a connection to the node.
+                Defaults to None.
 
         Returns:
             NodeOutput:
@@ -196,10 +197,11 @@ class BaseOperations:
             cluster_id (:obj:`str`): the id of the cluster to run the command on.
             command (:obj:`str`): the bash command to execute on the node.
             internal (:obj:`bool`): if true, this will connect to the node using its internal IP.
-                Only use this if running within the same VNET as the cluster.
+                Only use this if running within the same VNET as the cluster. Defaults to False.
             container_name=None (:obj:`str`, optional): the name of the container to run the command in.
                 If None, the command will run on the host VM. Defaults to None.
             timeout=None (:obj:`str`, optional): The timeout in seconds for establishing a connection to the node.
+                Defaults to None.
 
         Returns:
             List[NodeOutput]
