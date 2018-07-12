@@ -33,4 +33,4 @@ def cluster_run(base_client, cluster_id, command, internal, container_name=None,
     except OSError as exc:
         raise exc
     finally:
-        base_client.delete_user_on_pool(generated_username, pool.id, nodes)
+        base_client.delete_user_on_pool(pool.id, nodes, generated_username)

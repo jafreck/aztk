@@ -38,4 +38,4 @@ def cluster_copy(cluster_operations, cluster_id, source_path, destination_path=N
     except (OSError, batch_error.BatchErrorException) as exc:
         raise exc
     finally:
-        cluster_operations.delete_user_on_pool(generated_username, pool.id, nodes)
+        cluster_operations.delete_user_on_pool(pool.id, nodes, generated_username)

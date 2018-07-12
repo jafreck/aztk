@@ -56,10 +56,11 @@ class CoreClient:
         return context
 
     # ALL THE FOLLOWING METHODS ARE DEPRECATED AND WILL BE REMOVED IN 0.10.0
-
+    @deprecated("0.10.0")
     def get_cluster_config(self, cluster_id: str) -> models.ClusterConfiguration:
         return self._get_cluster_data(cluster_id).read_cluster_config()
 
+    @deprecated("0.10.0")
     def _get_cluster_data(self, cluster_id: str) -> cluster_data.ClusterData:
         """
         Returns ClusterData object to manage data related to the given cluster id
@@ -70,6 +71,7 @@ class CoreClient:
     General Batch Operations
     '''
 
+    @deprecated("0.10.0")
     def __delete_pool_and_job(self, pool_id: str, keep_logs: bool = False):
         """
             Delete a pool and it's associated job
@@ -99,6 +101,7 @@ class CoreClient:
 
         return job_exists or pool_exists
 
+    @deprecated("0.10.0")
     def __create_pool_and_job(self, cluster_conf: models.ClusterConfiguration, software_metadata_key: str, start_task, VmImageModel):
         """
             Create a pool and job
@@ -160,6 +163,7 @@ class CoreClient:
 
         return helpers.get_cluster(cluster_conf.cluster_id, self.batch_client)
 
+    @deprecated("0.10.0")
     def __get_pool_details(self, cluster_id: str):
         """
             Print the information for the given cluster
@@ -170,6 +174,7 @@ class CoreClient:
         nodes = self.batch_client.compute_node.list(pool_id=cluster_id)
         return pool, nodes
 
+    @deprecated("0.10.0")
     def __list_clusters(self, software_metadata_key):
         """
             List all the cluster on your account.
@@ -187,6 +192,7 @@ class CoreClient:
                 aztk_pools.append(pool)
         return aztk_pools
 
+    @deprecated("0.10.0")
     def __create_user(self, pool_id: str, node_id: str, username: str, password: str = None, ssh_key: str = None) -> str:
         """
             Create a pool user
@@ -208,6 +214,7 @@ class CoreClient:
                     ssh_key, self.secrets_configuration),
                 expiry_time=datetime.now(timezone.utc) + timedelta(days=365)))
 
+    @deprecated("0.10.0")
     def __delete_user(self, pool_id: str, node_id: str, username: str) -> str:
         """
             Create a pool user
@@ -218,6 +225,7 @@ class CoreClient:
         # Delete a user on the given node
         self.batch_client.compute_node.delete_user(pool_id, node_id, username)
 
+    @deprecated("0.10.0")
     def __get_remote_login_settings(self, pool_id: str, node_id: str):
         """
         Get the remote_login_settings for node
@@ -229,6 +237,7 @@ class CoreClient:
             pool_id, node_id)
         return models.RemoteLogin(ip_address=result.remote_login_ip_address, port=str(result.remote_login_port))
 
+    @deprecated("0.10.0")
     def __create_user_on_node(self, username, pool_id, node_id, ssh_key=None, password=None):
         try:
             self.__create_user(pool_id=pool_id, node_id=node_id, username=username, ssh_key=ssh_key, password=password)
@@ -239,6 +248,7 @@ class CoreClient:
             except batch_error.BatchErrorException as error:
                 raise error
 
+    @deprecated("0.10.0")
     def __generate_user_on_node(self, pool_id, node_id):
         generated_username = secure_utils.generate_random_string()
         ssh_key = RSA.generate(2048)
@@ -246,6 +256,7 @@ class CoreClient:
         self.__create_user_on_node(generated_username, pool_id, node_id, ssh_pub_key)
         return generated_username, ssh_key
 
+    @deprecated("0.10.0")
     def __generate_user_on_pool(self, pool_id, nodes):
         generated_username = secure_utils.generate_random_string()
         ssh_key = RSA.generate(2048)
@@ -260,6 +271,7 @@ class CoreClient:
 
         return generated_username, ssh_key
 
+    @deprecated("0.10.0")
     def __create_user_on_pool(self, username, pool_id, nodes, ssh_pub_key=None, password=None):
         with concurrent.futures.ThreadPoolExecutor() as executor:
             futures = {executor.submit(self.__create_user_on_node,
@@ -270,11 +282,13 @@ class CoreClient:
                                        password): node for node in nodes}
             concurrent.futures.wait(futures)
 
+    @deprecated("0.10.0")
     def __delete_user_on_pool(self, username, pool_id, nodes):
         with concurrent.futures.ThreadPoolExecutor() as executor:
             futures = [executor.submit(self.__delete_user, pool_id, node.id, username) for node in nodes]
             concurrent.futures.wait(futures)
 
+    @deprecated("0.10.0")
     def __node_run(self, cluster_id, node_id, command, internal, container_name=None, timeout=None):
         pool, nodes = self.__get_pool_details(cluster_id)
         try:
@@ -303,6 +317,7 @@ class CoreClient:
         finally:
             self.__delete_user(cluster_id, node.id, generated_username)
 
+    @deprecated("0.10.0")
     def __cluster_run(self, cluster_id, command, internal, container_name=None, timeout=None):
         pool, nodes = self.__get_pool_details(cluster_id)
         nodes = list(nodes)
@@ -329,6 +344,7 @@ class CoreClient:
         finally:
             self.__delete_user_on_pool(generated_username, pool.id, nodes)
 
+    @deprecated("0.10.0")
     def __cluster_copy(self, cluster_id, source_path, destination_path=None, container_name=None, internal=False, get=False, timeout=None):
         pool, nodes = self.__get_pool_details(cluster_id)
         nodes = list(nodes)
@@ -357,6 +373,7 @@ class CoreClient:
         finally:
             self.__delete_user_on_pool(generated_username, pool.id, nodes)
 
+    @deprecated("0.10.0")
     def __ssh_into_node(self, pool_id, node_id, username, ssh_key=None, password=None, port_forward_list=None, internal=False):
         if internal:
             result = self.batch_client.compute_node.get(pool_id=pool_id, node_id=node_id)
@@ -374,6 +391,7 @@ class CoreClient:
             port_forward_list=port_forward_list,
         )
 
+    @deprecated("0.10.0")
     def __submit_job(self,
                      job_configuration,
                      start_task,
