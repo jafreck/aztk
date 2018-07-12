@@ -111,5 +111,6 @@ class JobOperations(CoreJobOperations, SparkBaseOperations):
         """
         return submit.submit_job(self, job_configuration)
 
-    def wait_until_job_finished(self, id):    #TODO: rename to something better
+    #TODO: rename to something better or make this a parameter of submit
+    def wait_until_job_finished(self, id):
         wait_until_complete.wait_until_job_finished(self, id)

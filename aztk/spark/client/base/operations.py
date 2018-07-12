@@ -44,6 +44,7 @@ class SparkBaseOperations(CoreBaseOperations):
                                                                        docker_repo, file_shares, plugins, mixed_mode,
                                                                        worker_on_master)
 
+    #TODO: make this private or otherwise not public
     def generate_application_task(self, container_id, application, remote=False):
         """Generate the Azure Batch Start Task to provision a Spark cluster.
 
