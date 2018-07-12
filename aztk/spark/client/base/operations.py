@@ -11,7 +11,7 @@ from .helpers import generate_cluster_start_task, generate_application_task, get
 class SparkBaseOperations(CoreBaseOperations):
     def generate_cluster_start_task(self,
                                     zip_resource_file: batch_models.ResourceFile,
-                                    cluster_id: str,
+                                    id: str,
                                     gpu_enabled: bool,
                                     docker_repo: str = None,
                                     file_shares: List[models.FileShare] = None,
@@ -23,7 +23,7 @@ class SparkBaseOperations(CoreBaseOperations):
         Args:
             zip_resource_file (:obj:`azure.batch.models.ResourceFile`): a single zip file of all necessary data
                 to upload to the cluster.
-            cluster_id (:obj:`str`): the id of the cluster.
+            id (:obj:`str`): the id of the cluster.
             gpu_enabled (:obj:`bool`): if True, the cluster is GPU enabled.
             docker_repo (:obj:`str`, optional): the docker repository and tag that identifies the docker image to use.
                 If None, the default Docker image will be used. Defaults to None.
@@ -39,7 +39,7 @@ class SparkBaseOperations(CoreBaseOperations):
         Returns:
             azure.batch.models.StartTask: the StartTask definition to provision the cluster.
         """
-        return generate_cluster_start_task.generate_cluster_start_task(self, zip_resource_file, cluster_id, gpu_enabled,
+        return generate_cluster_start_task.generate_cluster_start_task(self, zip_resource_file, id, gpu_enabled,
                                                                        docker_repo, file_shares, plugins, mixed_mode,
                                                                        worker_on_master)
 

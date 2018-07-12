@@ -96,7 +96,7 @@ class ClusterOperations(CoreClusterOperations, SparkBaseOperations):
         """Run a bash command on every node in the cluster
 
         Args:
-            cluster_id (:obj:`str`): the id of the cluster to run the command on.
+            id (:obj:`str`): the id of the cluster to run the command on.
             command (:obj:`str`): the bash command to execute on the node.
             internal (:obj:`bool`): if true, this will connect to the node using its internal IP.
                 Only use this if running within the same VNET as the cluster. Defaults to False.
@@ -114,7 +114,7 @@ class ClusterOperations(CoreClusterOperations, SparkBaseOperations):
         """Run a bash command on the given node
 
         Args:
-            cluster_id (:obj:`str`): the id of the cluster to run the command on.
+            id (:obj:`str`): the id of the cluster to run the command on.
             node_id (:obj:`str`): the id of the node in the cluster to run the command on.
             command (:obj:`str`): the bash command to execute on the node.
             internal (:obj:`bool`): if True, this will connect to the node using its internal IP.
@@ -139,7 +139,7 @@ class ClusterOperations(CoreClusterOperations, SparkBaseOperations):
         """Copy a file to every node in a cluster.
 
         Args:
-            cluster_id (:obj:`str`): the id of the cluster to copy files with.
+            id (:obj:`str`): the id of the cluster to copy files with.
             source_path (:obj:`str`): the local path of the file to copy.
             destination_path (:obj:`str`, optional): the path on each node the file is copied to.
             container_name (:obj:`str`, optional): the name of the container to copy to or from.
@@ -164,7 +164,7 @@ class ClusterOperations(CoreClusterOperations, SparkBaseOperations):
         """Download a file from every node in a cluster.
 
         Args:
-            cluster_id (:obj:`str`): the id of the cluster to copy files with.
+            id (:obj:`str`): the id of the cluster to copy files with.
             source_path (:obj:`str`): the path of the file to copy from.
             destination_path (:obj:`str`, optional): the local directory path where the output should be written.
                 If None, a SpooledTemporaryFile will be returned in the NodeOutput object, else the file will be
