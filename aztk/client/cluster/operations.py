@@ -19,33 +19,26 @@ class CoreClusterOperations(BaseOperations):
         Returns:
             :obj:`aztk.models.Cluster`: A Cluster object representing the state and configuration of the cluster.
         """
-        return create.create_pool_and_job(self, cluster_configuration, software_metadata_key, start_task, vm_image_model)
+        return create.create_pool_and_job(self, cluster_configuration, software_metadata_key, start_task,
+                                          vm_image_model)
 
-    # TODO: change cluster_id to id
-    def get(self, cluster_id: str):
+    def get(self, id: str):
         """Get the state and configuration of a cluster
 
         Args:
-            cluster_id (:obj:`str`): the id of the cluster to get.
+            id (:obj:`str`): the id of the cluster to get.
 
         Returns:
             :obj:`aztk.models.Cluster`: A Cluster object representing the state and configuration of the cluster.
         """
-        return get.get_pool_details(self, cluster_id)
+        return get.get_pool_details(self, id)
 
-    # TODO: change cluster_id to id
-    def copy(self,
-             cluster_id,
-             source_path,
-             destination_path=None,
-             container_name=None,
-             internal=False,
-             get=False,
+    def copy(self, id, source_path, destination_path=None, container_name=None, internal=False, get=False,
              timeout=None):
         """Copy files to or from every node in a cluster.
 
         Args:
-            cluster_id (:obj:`str`): the id of the cluster to copy files with.
+            id (:obj:`str`): the id of the cluster to copy files with.
             source_path (:obj:`str`): the path of the file to copy from.
             destination_path (:obj:`str`, optional): the local directory path where the output should be written.
                 If None, a SpooledTemporaryFile will be returned in the NodeOutput object, else the file will be
@@ -62,22 +55,20 @@ class CoreClusterOperations(BaseOperations):
         Returns:
             :obj:`List[aztk.models.NodeOutput]`: A list of NodeOutput objects representing the output of the copy command.
         """
-        return copy.cluster_copy(self, cluster_id, source_path, destination_path, container_name, internal, get,
-                                 timeout)
+        return copy.cluster_copy(self, id, source_path, destination_path, container_name, internal, get, timeout)
 
-    #TODO: change pool_id to id
-    def delete(self, pool_id: str, keep_logs: bool = False):
+    def delete(self, id: str, keep_logs: bool = False):
         """Copy files to or from every node in a cluster.
 
         Args:
-            pool_id (:obj:`str`): the id of the cluster to delete
+            id (:obj:`str`): the id of the cluster to delete
             keep_logs (:obj:`bool`): If True, the logs related to this cluster in Azure Storage are not deleted.
                 Defaults to False.
 
         Returns:
             :obj:`List[aztk.models.NodeOutput]`: A list of NodeOutput objects representing the output of the copy command.
         """
-        return delete.delete_pool_and_job(self, pool_id, keep_logs)
+        return delete.delete_pool_and_job(self, id, keep_logs)
 
     def list(self, software_metadata_key):
         """List clusters running the specified software.
