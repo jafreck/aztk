@@ -9,6 +9,7 @@ from .helpers import generate_cluster_start_task, generate_application_task, get
 
 
 class SparkBaseOperations(CoreBaseOperations):
+    #TODO: make this private or otherwise not public
     def generate_cluster_start_task(self,
                                     zip_resource_file: batch_models.ResourceFile,
                                     id: str,
