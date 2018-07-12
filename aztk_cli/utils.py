@@ -17,8 +17,8 @@ from aztk.utils import get_ssh_key, helpers
 from . import log
 
 
-def get_ssh_key_or_prompt(ssh_key, username, password, secrets_config):
-    ssh_key = get_ssh_key.get_user_public_key(ssh_key, secrets_config)
+def get_ssh_key_or_prompt(ssh_key, username, password, secrets_configuration):
+    ssh_key = get_ssh_key.get_user_public_key(ssh_key, secrets_configuration)
 
     if username is not None and password is None and ssh_key is None:
         log.warning("It is recommended to use an SSH key for user creation instead of a password.")
@@ -188,7 +188,7 @@ def ssh_in_master(
     ssh_command = utils.command_builder.CommandBuilder('ssh')
 
     # get ssh private key path if specified
-    ssh_priv_key = client.secrets_config.ssh_priv_key
+    ssh_priv_key = client.secrets_configuration.ssh_priv_key
     if ssh_priv_key is not None:
         ssh_command.add_option("-i", ssh_priv_key)
 

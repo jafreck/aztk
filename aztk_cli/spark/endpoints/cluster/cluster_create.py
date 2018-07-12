@@ -66,10 +66,10 @@ def execute(args: typing.NamedTuple):
     user_configuration = cluster_conf.user_configuration
 
     if user_configuration and user_configuration.username:
-        ssh_key, password = utils.get_ssh_key_or_prompt(spark_client.secrets_config.ssh_pub_key,
+        ssh_key, password = utils.get_ssh_key_or_prompt(spark_client.secrets_configuration.ssh_pub_key,
                                                         user_configuration.username,
                                                         user_configuration.password,
-                                                        spark_client.secrets_config)
+                                                        spark_client.secrets_configuration)
         cluster_conf.user_configuration = aztk.spark.models.UserConfiguration(
             username=user_configuration.username,
             password=password,

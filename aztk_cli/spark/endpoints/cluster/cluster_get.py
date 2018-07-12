@@ -26,7 +26,7 @@ def execute(args: typing.NamedTuple):
     cluster = spark_client.cluster.get(cluster_id)
     utils.print_cluster(spark_client, cluster, args.internal)
 
-    configuration = spark_client.get_cluster_config(cluster_id)
+    configuration = spark_client.cluster.get_cluster_config(cluster_id)
     if configuration and args.show_config:
         log.info("-------------------------------------------")
         log.info("Cluster configuration:")

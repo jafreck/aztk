@@ -8,15 +8,15 @@ from aztk.utils import ssh as ssh_lib
 from aztk.utils import helpers
 
 
-def cluster_run(base_client, cluster_id, command, internal, container_name=None, timeout=None):
-    cluster = base_client.get(cluster_id)
+def cluster_run(base_operations, cluster_id, command, internal, container_name=None, timeout=None):
+    cluster = base_operations.get(cluster_id)
     pool, nodes = cluster.pool, list(cluster.nodes)
     if internal:
         cluster_nodes = [(node, models.RemoteLogin(ip_address=node.ip_address, port="22")) for node in nodes]
     else:
-        cluster_nodes = [(node, base_client.get_remote_login_settings(pool.id, node.id)) for node in nodes]
+        cluster_nodes = [(node, base_operations.get_remote_login_settings(pool.id, node.id)) for node in nodes]
     try:
-        generated_username, ssh_key = base_client.generate_user_on_pool(pool.id, nodes)
+        generated_username, ssh_key = base_operations.generate_user_on_pool(pool.id, nodes)
     except batch_error.BatchErrorException as e:
         raise error.AztkError(helpers.format_batch_exception(e))
 
@@ -33,4 +33,4 @@ def cluster_run(base_client, cluster_id, command, internal, container_name=None,
     except OSError as exc:
         raise exc
     finally:
-        base_client.delete_user_on_pool(pool.id, nodes, generated_username)
+        base_operations.delete_user_on_pool(pool.id, nodes, generated_username)
