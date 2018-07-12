@@ -24,11 +24,11 @@ class BaseOperations:
         self.blob_client = context['blob_client']
         self.secrets_configuration = context['secrets_configuration']
 
-    def get_cluster_config(self, cluster_id: str) -> models.ClusterConfiguration:
+    def get_cluster_config(self, id: str) -> models.ClusterConfiguration:
         """Open an ssh tunnel to a node
 
         Args:
-            cluster_id (:obj:`str`): the id of the cluster the node is in
+            id (:obj:`str`): the id of the cluster the node is in
             node_id (:obj:`str`): the id of the node to open the ssh tunnel to
             username (:obj:`str`): the username to authenticate the ssh session
             ssh_key (:obj:`str`, optional): ssh public key to create the user with, must use ssh_key
@@ -41,18 +41,18 @@ class BaseOperations:
         Returns:
             ClusterConfiguration: Object representing the cluster's configuration
         """
-        return self.get_cluster_data(cluster_id).read_cluster_config()
+        return self.get_cluster_data(id).read_cluster_config()
 
-    def get_cluster_data(self, cluster_id: str) -> cluster_data.ClusterData:
+    def get_cluster_data(self, id: str) -> cluster_data.ClusterData:
         """Gets the ClusterData object to manage data related to the given cluster
 
         Args:
-            cluster_id (:obj:`str`): the id of the cluster to get
+            id (:obj:`str`): the id of the cluster to get
 
         Returns:
             ClusterData: Object used to manage the data and storage functions for a cluster
         """
-        return cluster_data.ClusterData(self.blob_client, cluster_id)
+        return cluster_data.ClusterData(self.blob_client, id)
 
     def ssh_into_node(self,
                       id,
