@@ -17,7 +17,7 @@ def cluster_copy(cluster_operations, cluster_id, source_path, destination_path=N
         cluster_nodes = [(node, cluster_operations.get_remote_login_settings(pool.id, node.id)) for node in nodes]
 
     try:
-        generated_username, ssh_key = cluster_operations.generate_user_on_pool(pool.id, nodes)
+        generated_username, ssh_key = cluster_operations.generate_user_on_cluster(pool.id, nodes)
     except batch_error.BatchErrorException as e:
         raise error.AztkError(helpers.format_batch_exception(e))
 
@@ -38,4 +38,4 @@ def cluster_copy(cluster_operations, cluster_id, source_path, destination_path=N
     except (OSError, batch_error.BatchErrorException) as exc:
         raise exc
     finally:
-        cluster_operations.delete_user_on_pool(pool.id, nodes, generated_username)
+        cluster_operations.delete_user_on_cluster(pool.id, nodes, generated_username)

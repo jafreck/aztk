@@ -16,7 +16,7 @@ def cluster_run(base_operations, cluster_id, command, internal, container_name=N
     else:
         cluster_nodes = [(node, base_operations.get_remote_login_settings(pool.id, node.id)) for node in nodes]
     try:
-        generated_username, ssh_key = base_operations.generate_user_on_pool(pool.id, nodes)
+        generated_username, ssh_key = base_operations.generate_user_on_cluster(pool.id, nodes)
     except batch_error.BatchErrorException as e:
         raise error.AztkError(helpers.format_batch_exception(e))
 
@@ -33,4 +33,4 @@ def cluster_run(base_operations, cluster_id, command, internal, container_name=N
     except OSError as exc:
         raise exc
     finally:
-        base_operations.delete_user_on_pool(pool.id, nodes, generated_username)
+        base_operations.delete_user_on_cluster(pool.id, nodes, generated_username)
