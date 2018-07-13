@@ -5,6 +5,7 @@ from Cryptodome.PublicKey import RSA
 from aztk.utils import secure_utils
 
 
+#TODO: remove nodes param
 def generate_user_on_cluster(base_operations, id, nodes):
     generated_username = secure_utils.generate_random_string()
     ssh_key = RSA.generate(2048)
