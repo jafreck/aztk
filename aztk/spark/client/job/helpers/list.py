@@ -1,6 +1,5 @@
 import azure.batch.models.batch_error as batch_error
 
-import aztk.models  # TODO: get rid of this import and use aztk.spark.models
 from aztk import error
 from aztk.spark import models
 from aztk.utils import helpers

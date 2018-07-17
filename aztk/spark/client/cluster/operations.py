@@ -62,7 +62,7 @@ class ClusterOperations(CoreClusterOperations, SparkBaseOperations):
             wait (:obj:`bool`, optional): If True, this function blocks until the application has completed. Defaults to False.
 
         Returns:
-            None
+            :obj:`None`
         """
         return submit.submit(self, id, application, remote, wait)
 
@@ -76,7 +76,7 @@ class ClusterOperations(CoreClusterOperations, SparkBaseOperations):
             password (:obj:`str`, optional): password for the user, must use ssh_key or password. Defaults to None.
 
         Returns:
-            None
+            :obj:`None`
         """
         return create_user.create_user(self, id, username, ssh_key, password)
 
