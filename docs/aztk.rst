@@ -15,6 +15,12 @@ aztk.client module
     :show-inheritance:
 
 
+.. autoclass:: aztk.client.base.BaseOperations 
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
 .. autoclass:: aztk.client.cluster.CoreClusterOperations 
     :members:
     :undoc-members:

@@ -1,5 +1,4 @@
 from aztk.client.base import BaseOperations
-from aztk.client.base.base_operations import BaseOperations
 from aztk.models import ClusterConfiguration
 
 from .helpers import copy, create, delete, get, list

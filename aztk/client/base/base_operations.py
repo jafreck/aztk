@@ -38,8 +38,9 @@ class BaseOperations:
                 The defined ports will be forwarded to the client.
             internal (:obj:`bool`, optional): if True, this will connect to the node using its internal IP.
                 Only use this if running within the same VNET as the cluster. Defaults to False.
+
         Returns:
-            ClusterConfiguration: Object representing the cluster's configuration
+            :obj:`aztk.models.ClusterConfiguration`: Object representing the cluster's configuration
         """
         return self.get_cluster_data(id).read_cluster_config()
 
@@ -50,7 +51,7 @@ class BaseOperations:
             id (:obj:`str`): the id of the cluster to get
 
         Returns:
-            ClusterData: Object used to manage the data and storage functions for a cluster
+            :obj:`aztk.models.ClusterData`: Object used to manage the data and storage functions for a cluster
         """
         return cluster_data.ClusterData(self.blob_client, id)
 
@@ -67,8 +68,9 @@ class BaseOperations:
                 The defined ports will be forwarded to the client.
             internal (:obj:`bool`, optional): if True, this will connect to the node using its internal IP.
                 Only use this if running within the same VNET as the cluster. Defaults to False.
+
         Returns:
-            None
+            :obj:`None`
         """
         ssh_into_node.ssh_into_node(self, id, node_id, username, ssh_key, password, port_forward_list, internal)
 
@@ -81,6 +83,9 @@ class BaseOperations:
             username (:obj:`str`): name of the user to create.
             ssh_key (:obj:`str`, optional): ssh public key to create the user with, must use ssh_key or password.
             password (:obj:`str`, optional): password for the user, must use ssh_key or password.
+
+        Returns:
+            :obj:`None`
         """
         return create_user_on_node.create_user_on_node(self, id, node_id, username, ssh_key, password)
 
@@ -96,7 +101,7 @@ class BaseOperations:
             password (:obj:`str`, optional): password for the user, must use ssh_key or password. Defaults to None.
 
         Returns:
-            None
+            :obj:`None`
         """
         return create_user_on_cluster.create_user_on_cluster(self, id, nodes, username, ssh_pub_key, password)
 
@@ -108,7 +113,7 @@ class BaseOperations:
             node_id (:obj:`str`): the id of the node in the cluster to generate the user on.
 
         Returns:
-            tuple: A tuple of the form (username (:obj:`str`), ssh_key) where ssh_key is a Cryptodome.RSA key.
+            :obj:`tuple`: A tuple of the form (username: :obj:`str`, ssh_key: :obj:`Cryptodome.PublicKey.RSA`)
         """
         return generate_user_on_node.generate_user_on_node(self, id, node_id)
 
@@ -121,7 +126,7 @@ class BaseOperations:
             node_id (:obj:`str`): the id of the node in the cluster to generate the user on.
 
         Returns:
-            tuple: A tuple of the form (username (:obj:`str`), ssh_key) where ssh_key is a Cryptodome.RSA key.
+            :obj:`tuple`: A tuple of the form (username: :obj:`str`, ssh_key: :obj:`Cryptodome.PublicKey.RSA`)
         """
         return generate_user_on_cluster.generate_user_on_cluster(self, id, nodes)
 
@@ -134,7 +139,7 @@ class BaseOperations:
             username (:obj:`str`): the name of the user to delete.
 
         Returns:
-            None
+            :obj:`None`
         """
         return delete_user_on_node.delete_user(self, id, node_id, username)
 
@@ -148,7 +153,7 @@ class BaseOperations:
             username (:obj:`str`): the name of the user to delete.
 
         Returns:
-            None
+            :obj:`None`
         """
         return delete_user_on_cluster.delete_user_on_cluster(self, username, id, nodes)
 
@@ -167,7 +172,7 @@ class BaseOperations:
                 Defaults to None.
 
         Returns:
-            NodeOutput: object containing the output of the run command
+            :obj:`aztk.models.NodeOutput`: object containing the output of the run command
         """
         return node_run.node_run(self, id, node_id, command, internal, container_name, timeout)
 
@@ -179,7 +184,7 @@ class BaseOperations:
             node_id (:obj:`str`): the id of the node in the cluster
 
         Returns:
-            RemoteLogin:
+            :obj:`aztk.models.RemoteLogin`: Object that contains the ip address and port combination to login to a node
         """
         return get_remote_login_settings.get_remote_login_settings(self, id, node_id)
 
@@ -197,7 +202,7 @@ class BaseOperations:
                 Defaults to None.
 
         Returns:
-            List[NodeOutput]: list of NodeOutput objects containing the output of the run command
+            :obj:`List[azkt.models.NodeOutput]`: list of NodeOutput objects containing the output of the run command
         """
         return run.cluster_run(self, id, command, internal, container_name, timeout)
 
@@ -213,6 +218,6 @@ class BaseOperations:
                 Only useful is streaming the log as it is being written. Only used if tail is True.
 
         Returns:
-            aztk.models.ApplicationLog: a model representing the output of the application.
+            :obj:`aztk.models.ApplicationLog`: a model representing the output of the application.
         """
         return get_application_log.get_application_log(self, id, application_name, tail, current_bytes)
