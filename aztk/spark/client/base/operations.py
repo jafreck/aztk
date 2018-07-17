@@ -38,7 +38,7 @@ class SparkBaseOperations(CoreBaseOperations):
                 on the VM that runs the Spark master. Defaults to True.
 
         Returns:
-            azure.batch.models.StartTask: the StartTask definition to provision the cluster.
+            :obj:`azure.batch.models.StartTask`: the StartTask definition to provision the cluster.
         """
         return generate_cluster_start_task.generate_cluster_start_task(self, zip_resource_file, id, gpu_enabled,
                                                                        docker_repo, file_shares, plugins, mixed_mode,
@@ -56,7 +56,7 @@ class SparkBaseOperations(CoreBaseOperations):
                 and not the client. Defaults to False.
 
         Returns:
-            azure.batch.models.TaskAddParameter: the Task definition for the Application.
+            :obj:`azure.batch.models.TaskAddParameter`: the Task definition for the Application.
         """
         return generate_application_task.generate_application_task(self, container_id, application, remote)
 
@@ -72,6 +72,6 @@ class SparkBaseOperations(CoreBaseOperations):
                 Only useful is streaming the log as it is being written. Only used if tail is True.
 
         Returns:
-            aztk.spark.models.ApplicationLog: a model representing the output of the application.
+            :obj:`aztk.spark.models.ApplicationLog`: a model representing the output of the application.
         """
         return get_application_log.get_application_log(SparkBaseOperations, self, id, application_name, tail, current_bytes)

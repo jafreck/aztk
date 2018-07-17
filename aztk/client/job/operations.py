@@ -24,7 +24,7 @@ class CoreJobOperations(BaseOperations):
                 part of the job
 
         Returns:
-            azure.batch.models.CloudJobSchedule: Model representing the Azure Batch JobSchedule state.
+            :obj:`azure.batch.models.CloudJobSchedule`: Model representing the Azure Batch JobSchedule state.
         """
         return submit.submit_job(self, job_configuration, start_task, job_manager_task, autoscale_formula,
                                  software_metadata_key, vm_image_model, application_metadata)

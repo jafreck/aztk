@@ -80,7 +80,7 @@ class JobOperations(CoreJobOperations, SparkBaseOperations):
             id (:obj:`str`): the id of the job to stop
 
         Returns:
-            None
+            :obj:`None`
         """
         return stop.stop(self, id)
 

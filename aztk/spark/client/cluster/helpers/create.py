@@ -35,7 +35,7 @@ def create_cluster(spark_cluster_operations, cluster_conf: models.ClusterConfigu
         wait(bool): If you should wait for the cluster to be ready before returning
 
     Returns:
-        aztk.spark.models.Cluster
+        :obj:`aztk.spark.models.Cluster`
     """
     cluster_conf = _apply_default_for_cluster_config(cluster_conf)
     cluster_conf.validate()
