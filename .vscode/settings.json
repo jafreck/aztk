@@ -15,5 +15,4 @@
   "python.venvPath": "${workspaceFolder}/.venv/",
   "python.pythonPath": "${workspaceFolder}/.venv/Scripts/python.exe",
   "python.unitTest.pyTestEnabled": true,
-  // "editor.formatOnSave": true,
 }
