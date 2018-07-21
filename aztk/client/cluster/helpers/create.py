@@ -5,7 +5,7 @@ from aztk import models
 from aztk.utils import helpers, constants
 
 
-def create_pool_and_job(cluster_client, cluster_conf: models.ClusterConfiguration, software_metadata_key: str, start_task, VmImageModel):
+def create_pool_and_job(core_cluster_operations, cluster_conf: models.ClusterConfiguration, software_metadata_key: str, start_task, VmImageModel):
     """
         Create a pool and job
         :param cluster_conf: the configuration object used to create the cluster
@@ -15,7 +15,7 @@ def create_pool_and_job(cluster_client, cluster_conf: models.ClusterConfiguratio
         :param VmImageModel: the type of image to provision for the cluster
         :param wait: wait until the cluster is ready
     """
-    cluster_client.get_cluster_data(cluster_conf.cluster_id).save_cluster_config(cluster_conf)
+    core_cluster_operations.get_cluster_data(cluster_conf.cluster_id).save_cluster_config(cluster_conf)
     # reuse pool_id as job_id
     pool_id = cluster_conf.cluster_id
     job_id = cluster_conf.cluster_id
@@ -23,7 +23,7 @@ def create_pool_and_job(cluster_client, cluster_conf: models.ClusterConfiguratio
     # Get a verified node agent sku
     sku_to_use, image_ref_to_use = \
         helpers.select_latest_verified_vm_image_with_node_agent_sku(
-            VmImageModel.publisher, VmImageModel.offer, VmImageModel.sku, cluster_client.batch_client)
+            VmImageModel.publisher, VmImageModel.offer, VmImageModel.sku, core_cluster_operations.batch_client)
 
     network_conf = None
     if cluster_conf.subnet_id is not None:
@@ -54,7 +54,7 @@ def create_pool_and_job(cluster_client, cluster_conf: models.ClusterConfiguratio
         ])
 
     # Create the pool + create user for the pool
-    helpers.create_pool_if_not_exist(pool, cluster_client.batch_client)
+    helpers.create_pool_if_not_exist(pool, core_cluster_operations.batch_client)
 
     # Create job
     job = batch_models.JobAddParameter(
@@ -62,6 +62,6 @@ def create_pool_and_job(cluster_client, cluster_conf: models.ClusterConfiguratio
         pool_info=batch_models.PoolInformation(pool_id=pool_id))
 
     # Add job to batch
-    cluster_client.batch_client.job.add(job)
+    core_cluster_operations.batch_client.job.add(job)
 
-    return helpers.get_cluster(cluster_conf.cluster_id, cluster_client.batch_client)
+    return helpers.get_cluster(cluster_conf.cluster_id, core_cluster_operations.batch_client)

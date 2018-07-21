@@ -23,9 +23,9 @@ def _get_aztk_environment(cluster_id, worker_on_master, mixed_mode):
     return envs
 
 
-def __get_docker_credentials(spark_client):
+def __get_docker_credentials(core_base_operations):
     creds = []
-    docker = spark_client.secrets_configuration.docker
+    docker = core_base_operations.secrets_configuration.docker
     if docker:
         if docker.endpoint:
             creds.append(batch_models.EnvironmentSetting(name="DOCKER_ENDPOINT", value=docker.endpoint))
@@ -37,9 +37,9 @@ def __get_docker_credentials(spark_client):
     return creds
 
 
-def __get_secrets_env(spark_client):
-    shared_key = spark_client.secrets_configuration.shared_key
-    service_principal = spark_client.secrets_configuration.service_principal
+def __get_secrets_env(core_base_operations):
+    shared_key = core_base_operations.secrets_configuration.shared_key
+    service_principal = core_base_operations.secrets_configuration.service_principal
     if shared_key:
         return [
             batch_models.EnvironmentSetting(name="BATCH_SERVICE_URL", value=shared_key.batch_service_url),
@@ -103,7 +103,7 @@ def __cluster_install_cmd(zip_resource_file: batch_models.ResourceFile,
     return commands
 
 
-def generate_cluster_start_task(spark_client,
+def generate_cluster_start_task(core_base_operations,
                                 zip_resource_file: batch_models.ResourceFile,
                                 cluster_id: str,
                                 gpu_enabled: bool,
@@ -127,14 +127,14 @@ def generate_cluster_start_task(spark_client,
     spark_submit_logs_file = constants.SPARK_SUBMIT_LOGS_FILE
 
     # TODO use certificate
-    environment_settings = __get_secrets_env(spark_client) + [
+    environment_settings = __get_secrets_env(core_base_operations) + [
         batch_models.EnvironmentSetting(name="SPARK_WEB_UI_PORT", value=spark_web_ui_port),
         batch_models.EnvironmentSetting(name="SPARK_WORKER_UI_PORT", value=spark_worker_ui_port),
         batch_models.EnvironmentSetting(name="SPARK_JOB_UI_PORT", value=spark_job_ui_port),
         batch_models.EnvironmentSetting(name="SPARK_CONTAINER_NAME", value=spark_container_name),
         batch_models.EnvironmentSetting(name="SPARK_SUBMIT_LOGS_FILE", value=spark_submit_logs_file),
         batch_models.EnvironmentSetting(name="AZTK_GPU_ENABLED", value=helpers.bool_env(gpu_enabled)),
-    ] + __get_docker_credentials(spark_client) + _get_aztk_environment(cluster_id, worker_on_master, mixed_mode)
+    ] + __get_docker_credentials(core_base_operations) + _get_aztk_environment(cluster_id, worker_on_master, mixed_mode)
 
     # start task command
     command = __cluster_install_cmd(zip_resource_file, gpu_enabled, docker_repo, plugins, worker_on_master, file_shares,

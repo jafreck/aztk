@@ -296,5 +296,5 @@ def test_delete_job():
 def clean_up_job(job_id):
     try:
         spark_client.delete_job(job_id)
-    except (BatchErrorException, AztkError):
+    except Exception:
         pass

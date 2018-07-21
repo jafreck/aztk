@@ -6,14 +6,25 @@ from .helpers import (delete, get, get_application, get_application_log, list, l
                       stop_application, submit, wait_until_complete)
 
 
-class JobOperations(CoreJobOperations, SparkBaseOperations):
+class JobOperations(SparkBaseOperations):
+    """Spark ClusterOperations object
+
+    Attributes:
+        _core_job_operations (:obj:`aztk.client.cluster.CoreJobOperations`):
+    """
+
+    def __init__(self, context):
+        self._core_job_operations = CoreJobOperations(context)
+        # self._spark_base_cluster_operations = SparkBaseOperations()
+
+
     def list(self):
         """List all jobs.
 
         Returns:
             :obj:`List[Job]`: List of aztk.models.Job objects each representing the state and configuration of the job.
         """
-        return list.list_jobs(self)
+        return list.list_jobs(self._core_job_operations)
 
     def delete(self, id, keep_logs: bool = False):
         """Delete a job.
@@ -25,7 +36,7 @@ class JobOperations(CoreJobOperations, SparkBaseOperations):
         Returns:
             :obj:`bool`: True if the deletion process was successful.
         """
-        return delete.delete(self, id, keep_logs)
+        return delete.delete(self._core_job_operations, self, id, keep_logs)
 
     def get(self, id):
         """Get details about the state of a job.
@@ -36,7 +47,7 @@ class JobOperations(CoreJobOperations, SparkBaseOperations):
         Returns:
             :obj:`aztk.spark.models.job`: A job object representing the state and configuration of the job.
         """
-        return get.get_job(self, id)
+        return get.get_job(self._core_job_operations, id)
 
     def get_application(self, id, application_name):
         """Get information on a submitted application
@@ -60,7 +71,7 @@ class JobOperations(CoreJobOperations, SparkBaseOperations):
         Returns:
             :obj:`aztk.spark.models.ApplicationLog`: a model representing the output of the application.
         """
-        return get_application_log.get_job_application_log(self, id, application_name)
+        return get_application_log.get_job_application_log(self._core_job_operations, self, id, application_name)
 
     def list_applications(self, id):
         """List all application defined as a part of a job
@@ -71,7 +82,7 @@ class JobOperations(CoreJobOperations, SparkBaseOperations):
         Returns:
             :obj:`List[aztk.spark.models.Application]`: a list of all applications defined as a part of the job
         """
-        return list_applications.list_applications(self, id)
+        return list_applications.list_applications(self._core_job_operations, id)
 
     def stop(self, id):
         """Stop a submitted job
@@ -82,7 +93,7 @@ class JobOperations(CoreJobOperations, SparkBaseOperations):
         Returns:
             :obj:`None`
         """
-        return stop.stop(self, id)
+        return stop.stop(self._core_job_operations, id)
 
     def stop_application(self, id, application_name):
         """Stops a submitted application
@@ -94,7 +105,7 @@ class JobOperations(CoreJobOperations, SparkBaseOperations):
         Returns:
             :obj:`bool`: True if the stop was successful, else False
         """
-        return stop_application.stop_app(self, id, application_name)
+        return stop_application.stop_app(self._core_job_operations, id, application_name)
 
     def submit(self, job_configuration: models.JobConfiguration):
         """Submit a job
@@ -109,8 +120,8 @@ class JobOperations(CoreJobOperations, SparkBaseOperations):
         Returns:
             :obj:`aztk.spark.models.Job`: Model representing the state of the job.
         """
-        return submit.submit_job(self, job_configuration)
+        return submit.submit_job(self._core_job_operations, self, job_configuration)
 
     #TODO: rename to something better or make this a parameter of submit
     def wait_until_job_finished(self, id):
-        wait_until_complete.wait_until_job_finished(self, id)
+        wait_until_complete.wait_until_job_finished(self._core_job_operations, id)

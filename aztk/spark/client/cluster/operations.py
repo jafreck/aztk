@@ -2,11 +2,22 @@ from aztk.client.cluster import CoreClusterOperations
 from aztk.spark import models
 from aztk.spark.client.base import SparkBaseOperations
 
-from .helpers import (copy, create, create_user, delete, diagnostics, download,
-                      get, get_application_status, list, node_run, run, submit)
+from .helpers import (copy, create, create_user, delete, diagnostics, download, get, get_application_log,
+                      get_application_status, get_remote_login_settings, list, node_run, run, submit)
 
 
-class ClusterOperations(CoreClusterOperations, SparkBaseOperations):
+class ClusterOperations(SparkBaseOperations):
+    """Spark ClusterOperations object
+
+    Attributes:
+        _core_cluster_operations (:obj:`aztk.client.cluster.CoreClusterOperations`):
+        # _spark_base_cluster_operations (:obj:`aztk.spark.client.cluster.CoreClusterOperations`):
+    """
+
+    def __init__(self, context):
+        self._core_cluster_operations = CoreClusterOperations(context)
+        # self._spark_base_cluster_operations = SparkBaseOperations()
+
     def create(self, cluster_configuration: models.ClusterConfiguration, wait: bool = False):
         """Create a cluster.
 
@@ -17,7 +28,7 @@ class ClusterOperations(CoreClusterOperations, SparkBaseOperations):
         Returns:
             :obj:`aztk.spark.models.Cluster`: An Cluster object representing the state and configuration of the cluster.
         """
-        return create.create_cluster(self, cluster_configuration, wait)
+        return create.create_cluster(self._core_cluster_operations, self, cluster_configuration, wait)
 
     def delete(self, id: str, keep_logs: bool = False):
         """Delete a cluster.
@@ -29,7 +40,7 @@ class ClusterOperations(CoreClusterOperations, SparkBaseOperations):
         Returns:
             :obj:`bool`: True if the deletion process was successful.
         """
-        return delete.delete_cluster(self, id, keep_logs)
+        return delete.delete_cluster(self._core_cluster_operations, id, keep_logs)
 
     def get(self, id: str):
         """Get details about the state of a cluster.
@@ -40,7 +51,7 @@ class ClusterOperations(CoreClusterOperations, SparkBaseOperations):
         Returns:
             :obj:`aztk.spark.models.Cluster`: A Cluster object representing the state and configuration of the cluster.
         """
-        return get.get_cluster(self, id)
+        return get.get_cluster(self._core_cluster_operations, id)
 
     def list(self):
         """List all clusters.
@@ -48,7 +59,7 @@ class ClusterOperations(CoreClusterOperations, SparkBaseOperations):
         Returns:
             :obj:`List[aztk.spark.models.Cluster]`: List of Cluster objects each representing the state and configuration of the cluster.
         """
-        return list.list_clusters(self)
+        return list.list_clusters(self._core_cluster_operations)
 
     def submit(self, id: str, application: models.ApplicationConfiguration, remote: bool = False, wait: bool = False):
         """Submit an application to a cluster.
@@ -64,7 +75,7 @@ class ClusterOperations(CoreClusterOperations, SparkBaseOperations):
         Returns:
             :obj:`None`
         """
-        return submit.submit(self, id, application, remote, wait)
+        return submit.submit(self._core_cluster_operations, self, id, application, remote, wait)
 
     def create_user(self, id: str, username: str, password: str = None, ssh_key: str = None):
         """Create a user on every node in the cluster
@@ -90,7 +101,7 @@ class ClusterOperations(CoreClusterOperations, SparkBaseOperations):
         Returns:
             :obj:`str`: the status state of the application
         """
-        return get_application_status.get_application_status(self, id, application_name)
+        return get_application_status.get_application_status(self._core_cluster_operations, id, application_name)
 
     def run(self, id: str, command: str, host=False, internal: bool = False, timeout=None):
         """Run a bash command on every node in the cluster
@@ -108,7 +119,7 @@ class ClusterOperations(CoreClusterOperations, SparkBaseOperations):
         Returns:
             :obj:`List[aztk.spark.models.NodeOutput]`: list of NodeOutput objects containing the output of the run command
         """
-        return run.cluster_run(self, id, command, host, internal, timeout)
+        return run.cluster_run(self._core_cluster_operations, id, command, host, internal, timeout)
 
     def node_run(self, id: str, node_id: str, command: str, host=False, internal: bool = False, timeout=None):
         """Run a bash command on the given node
@@ -127,7 +138,7 @@ class ClusterOperations(CoreClusterOperations, SparkBaseOperations):
         Returns:
             :obj:`aztk.spark.models.NodeOutput`: object containing the output of the run command
         """
-        return node_run.node_run(self, id, node_id, command, host, internal, timeout)
+        return node_run.node_run(self._core_cluster_operations, id, node_id, command, host, internal, timeout)
 
     def copy(self,
              id: str,
@@ -152,7 +163,7 @@ class ClusterOperations(CoreClusterOperations, SparkBaseOperations):
         Returns:
             :obj:`List[aztk.spark.models.NodeOutput]`: A list of NodeOutput objects representing the output of the copy command.
         """
-        return copy.cluster_copy(self, id, source_path, destination_path, host, internal, timeout)
+        return copy.cluster_copy(self._core_cluster_operations, id, source_path, destination_path, host, internal, timeout)
 
     def download(self,
                  id: str,
@@ -179,7 +190,8 @@ class ClusterOperations(CoreClusterOperations, SparkBaseOperations):
         Returns:
             :obj:`List[aztk.spark.models.NodeOutput]`: A list of NodeOutput objects representing the output of the copy command.
         """
-        return download.cluster_download(self, id, source_path, destination_path, host, internal, timeout)
+        return download.cluster_download(self._core_cluster_operations, id, source_path, destination_path, host, internal,
+                                         timeout)
 
     def diagnostics(self, id, output_directory=None):
         """Download a file from every node in a cluster.
@@ -194,3 +206,31 @@ class ClusterOperations(CoreClusterOperations, SparkBaseOperations):
             :obj:`List[aztk.spark.models.NodeOutput]`: A list of NodeOutput objects representing the output of the copy command.
         """
         return diagnostics.run_cluster_diagnostics(self, id, output_directory)
+
+    def get_application_log(self, id: str, application_name: str, tail=False, current_bytes: int = 0):
+        """Get the log for a running or completed application
+
+        Args:
+            id (:obj:`str`): the id of the cluster to run the command on.
+            application_name (:obj:`str`): str
+            tail (:obj:`bool`, optional): If True, get the remaining bytes after current_bytes. Otherwise, the whole log will be retrieved.
+                Only use this if streaming the log as it is being written. Defaults to False.
+            current_bytes (:obj:`int`): Specifies the last seen byte, so only the bytes after current_bytes are retrieved.
+                Only useful is streaming the log as it is being written. Only used if tail is True.
+
+        Returns:
+            :obj:`aztk.spark.models.ApplicationLog`: a model representing the output of the application.
+        """
+        return get_application_log.get_application_log(self._core_cluster_operations, id, application_name, tail, current_bytes)
+
+    def get_remote_login_settings(self, id: str, node_id: str):
+        """Get the remote login information for a node in a cluster
+
+        Args:
+            id (:obj:`str`): the id of the cluster the node is in
+            node_id (:obj:`str`): the id of the node in the cluster
+
+        Returns:
+            :obj:`aztk.spark.models.RemoteLogin`: Object that contains the ip address and port combination to login to a node
+        """
+        return get_remote_login_settings.get_remote_login_settings(self._core_cluster_operations, id, node_id)

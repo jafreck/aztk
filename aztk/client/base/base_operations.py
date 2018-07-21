@@ -8,7 +8,7 @@ from .helpers import (create_user_on_cluster, create_user_on_node, delete_user_o
 
 
 class BaseOperations:
-    """Base operations that all other operations inherit from
+    """Base operations that all other operations have as an attribute
 
     Attributes:
         batch_client (:obj:`azure.batch.batch_service_client.BatchServiceClient`): Client used to interact with the

@@ -5,20 +5,24 @@ import azure.batch.models as batch_models
 from aztk.client.base import BaseOperations as CoreBaseOperations
 from aztk.spark import models
 
-from .helpers import generate_cluster_start_task, generate_application_task, get_application_log
+from .helpers import generate_cluster_start_task, generate_application_task
 
 
-class SparkBaseOperations(CoreBaseOperations):
+class SparkBaseOperations:
+    """Spark Base operations object that all other Spark operations objects inherit from
+    """
+
     #TODO: make this private or otherwise not public
-    def generate_cluster_start_task(self,
-                                    zip_resource_file: batch_models.ResourceFile,
-                                    id: str,
-                                    gpu_enabled: bool,
-                                    docker_repo: str = None,
-                                    file_shares: List[models.FileShare] = None,
-                                    plugins: List[models.PluginConfiguration] = None,
-                                    mixed_mode: bool = False,
-                                    worker_on_master: bool = True):
+    def _generate_cluster_start_task(self,
+                                     core_base_operations,
+                                     zip_resource_file: batch_models.ResourceFile,
+                                     id: str,
+                                     gpu_enabled: bool,
+                                     docker_repo: str = None,
+                                     file_shares: List[models.FileShare] = None,
+                                     plugins: List[models.PluginConfiguration] = None,
+                                     mixed_mode: bool = False,
+                                     worker_on_master: bool = True):
         """Generate the Azure Batch Start Task to provision a Spark cluster.
 
         Args:
@@ -40,12 +44,11 @@ class SparkBaseOperations(CoreBaseOperations):
         Returns:
             :obj:`azure.batch.models.StartTask`: the StartTask definition to provision the cluster.
         """
-        return generate_cluster_start_task.generate_cluster_start_task(self, zip_resource_file, id, gpu_enabled,
-                                                                       docker_repo, file_shares, plugins, mixed_mode,
-                                                                       worker_on_master)
+        return generate_cluster_start_task.generate_cluster_start_task(
+            core_base_operations, zip_resource_file, id, gpu_enabled, docker_repo, file_shares, plugins, mixed_mode, worker_on_master)
 
     #TODO: make this private or otherwise not public
-    def generate_application_task(self, container_id, application, remote=False):
+    def _generate_application_task(self, core_base_operations, container_id, application, remote=False):
         """Generate the Azure Batch Start Task to provision a Spark cluster.
 
         Args:
@@ -58,20 +61,4 @@ class SparkBaseOperations(CoreBaseOperations):
         Returns:
             :obj:`azure.batch.models.TaskAddParameter`: the Task definition for the Application.
         """
-        return generate_application_task.generate_application_task(self, container_id, application, remote)
-
-    def get_application_log(self, id: str, application_name: str, tail=False, current_bytes: int = 0):
-        """Get the log for a running or completed application
-
-        Args:
-            id (:obj:`str`): the id of the cluster to run the command on.
-            application_name (:obj:`str`): str
-            tail (:obj:`bool`, optional): If True, get the remaining bytes after current_bytes. Otherwise, the whole log will be retrieved.
-                Only use this if streaming the log as it is being written. Defaults to False.
-            current_bytes (:obj:`int`): Specifies the last seen byte, so only the bytes after current_bytes are retrieved.
-                Only useful is streaming the log as it is being written. Only used if tail is True.
-
-        Returns:
-            :obj:`aztk.spark.models.ApplicationLog`: a model representing the output of the application.
-        """
-        return get_application_log.get_application_log(SparkBaseOperations, self, id, application_name, tail, current_bytes)
+        return generate_application_task.generate_application_task(core_base_operations, container_id, application, remote)

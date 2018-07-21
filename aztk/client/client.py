@@ -25,23 +25,7 @@ class CoreClient:
     **This client should not be used directly. Only software specific clients
     should be used.**
 
-    Attributes:
-        cluster (:obj:`aztk.client.cluster.CoreClusterOperations`): Cluster
-        job (:obj:`aztk.client.job.CoreJobOperations`): Job
     """
-
-    # TODO: remove ability to specify secrets_config in 0.10.0
-    def __init__(self, secrets_configuration: models.SecretsConfiguration = None, **kwargs):
-        self.secrets_configuration = None
-        context = None
-        if kwargs.get("secrets_config"):
-            # TODO: add deprecated warning
-            context = self._get_context(kwargs.get("secrets_config"))
-        else:
-            context = self._get_context(secrets_configuration)
-        self.cluster = CoreClusterOperations(context)
-        self.job = CoreJobOperations(context)
-
     def _get_context(self, secrets_configuration: models.SecretsConfiguration):
         self.secrets_configuration = secrets_configuration
 

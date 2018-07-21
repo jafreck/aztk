@@ -4,7 +4,7 @@ import azure.batch.models.batch_error as batch_error
 from aztk import error
 from aztk.internal.cluster_data import NodeData
 from aztk.spark import models
-from aztk.spark.utils import util
+from aztk.spark.utils import constants, util
 from aztk.utils import helpers
 
 POOL_ADMIN_USER_IDENTITY = batch_models.UserIdentity(
@@ -26,7 +26,7 @@ def _apply_default_for_cluster_config(configuration: models.ClusterConfiguration
     return cluster_conf
 
 
-def create_cluster(spark_cluster_operations, cluster_conf: models.ClusterConfiguration, wait: bool = False):
+def create_cluster(core_cluster_operations, spark_cluster_operations, cluster_conf: models.ClusterConfiguration, wait: bool = False):
     """
     Create a new aztk spark cluster
 
@@ -40,26 +40,24 @@ def create_cluster(spark_cluster_operations, cluster_conf: models.ClusterConfigu
     cluster_conf = _apply_default_for_cluster_config(cluster_conf)
     cluster_conf.validate()
 
-    cluster_data = spark_cluster_operations.get_cluster_data(cluster_conf.cluster_id)
+    cluster_data = core_cluster_operations.get_cluster_data(cluster_conf.cluster_id)
     try:
         zip_resource_files = None
         node_data = NodeData(cluster_conf).add_core().done()
         zip_resource_files = cluster_data.upload_node_data(node_data).to_resource_file()
 
-        start_task = spark_cluster_operations.generate_cluster_start_task(zip_resource_files, cluster_conf.cluster_id,
+        start_task = spark_cluster_operations._generate_cluster_start_task(core_cluster_operations, zip_resource_files, cluster_conf.cluster_id,
                                                  cluster_conf.gpu_enabled(), cluster_conf.get_docker_repo(),
                                                  cluster_conf.file_shares, cluster_conf.plugins,
                                                  cluster_conf.mixed_mode(), cluster_conf.worker_on_master)
 
         software_metadata_key = "spark"
 
-        vm_image = models.VmImage(publisher='Canonical', offer='UbuntuServer', sku='16.04')
-
-        cluster = super(type(spark_cluster_operations), spark_cluster_operations).create(cluster_conf, software_metadata_key, start_task, vm_image)
+        cluster = core_cluster_operations.create(cluster_conf, software_metadata_key, start_task, constants.SPARK_VM_IMAGE)
 
         # Wait for the master to be ready
         if wait:
-            util.wait_for_master_to_be_ready(spark_cluster_operations, cluster.id)
+            util.wait_for_master_to_be_ready(core_cluster_operations, spark_cluster_operations, cluster.id)
             cluster = spark_cluster_operations.get(cluster.id)
 
         return cluster

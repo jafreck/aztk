@@ -19,12 +19,12 @@ def test_submit_job():
     app1 = aztk.spark.models.ApplicationConfiguration(
         name="pipy100",
         application="./examples/src/main/python/pi.py",
-        application_args=[100]
+        application_args=[10]
     )
     app2 = aztk.spark.models.ApplicationConfiguration(
         name="pipy101",
         application="./examples/src/main/python/pi.py",
-        application_args=[100]
+        application_args=[10]
     )
     job_configuration = aztk.spark.models.JobConfiguration(
         id=test_id+base_job_id,
@@ -54,12 +54,12 @@ def test_list_jobs():
     app1 = aztk.spark.models.ApplicationConfiguration(
         name="pipy100",
         application="./examples/src/main/python/pi.py",
-        application_args=[100]
+        application_args=[10]
     )
     app2 = aztk.spark.models.ApplicationConfiguration(
         name="pipy101",
         application="./examples/src/main/python/pi.py",
-        application_args=[100]
+        application_args=[10]
     )
     job_configuration = aztk.spark.models.JobConfiguration(
         id=test_id+base_job_id,
@@ -93,12 +93,12 @@ def test_list_applications():
     app1 = aztk.spark.models.ApplicationConfiguration(
         name="pipy100",
         application="./examples/src/main/python/pi.py",
-        application_args=[100]
+        application_args=[10]
     )
     app2 = aztk.spark.models.ApplicationConfiguration(
         name="pipy101",
         application="./examples/src/main/python/pi.py",
-        application_args=[100]
+        application_args=[10]
     )
     job_configuration = aztk.spark.models.JobConfiguration(
         id=test_id+base_job_id,
@@ -133,12 +133,12 @@ def test_get_job():
     app1 = aztk.spark.models.ApplicationConfiguration(
         name="pipy100",
         application="./examples/src/main/python/pi.py",
-        application_args=[100]
+        application_args=[10]
     )
     app2 = aztk.spark.models.ApplicationConfiguration(
         name="pipy101",
         application="./examples/src/main/python/pi.py",
-        application_args=[100]
+        application_args=[10]
     )
     job_configuration = aztk.spark.models.JobConfiguration(
         id=test_id+base_job_id,
@@ -172,7 +172,7 @@ def test_get_application():
     app1 = aztk.spark.models.ApplicationConfiguration(
         name="pipy100",
         application="./examples/src/main/python/pi.py",
-        application_args=[100]
+        application_args=[10]
     )
     job_configuration = aztk.spark.models.JobConfiguration(
         id=test_id+base_job_id,
@@ -203,7 +203,7 @@ def test_get_application_log():
     app1 = aztk.spark.models.ApplicationConfiguration(
         name="pipy100",
         application="./examples/src/main/python/pi.py",
-        application_args=[100]
+        application_args=[10]
     )
     job_configuration = aztk.spark.models.JobConfiguration(
         id=test_id+base_job_id,
@@ -239,7 +239,7 @@ def test_delete_job():
     app1 = aztk.spark.models.ApplicationConfiguration(
         name="pipy100",
         application="./examples/src/main/python/pi.py",
-        application_args=[100]
+        application_args=[10]
     )
     job_configuration = aztk.spark.models.JobConfiguration(
         id=test_id+base_job_id,
@@ -271,5 +271,5 @@ def test_delete_job():
 def clean_up_job(job_id):
     try:
         spark_client.job.delete(job_id)
-    except (BatchErrorException, AztkError):
+    except Exception:
         pass

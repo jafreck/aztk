@@ -7,7 +7,7 @@ from aztk.utils import helpers
 from aztk.utils.command_builder import CommandBuilder
 
 
-def generate_application_task(spark_client, container_id, application, remote=False):
+def generate_application_task(core_base_operations, container_id, application, remote=False):
     resource_files = []
 
     # The application provided is not hosted remotely and therefore must be uploaded
@@ -16,7 +16,7 @@ def generate_application_task(spark_client, container_id, application, remote=Fa
             container_name=container_id,
             application_name=application.name,
             file_path=application.application,
-            blob_client=spark_client.blob_client,
+            blob_client=core_base_operations.blob_client,
             use_full_path=False)
 
         # Upload application file
@@ -31,7 +31,7 @@ def generate_application_task(spark_client, container_id, application, remote=Fa
             container_name=container_id,
             application_name=application.name,
             file_path=jar,
-            blob_client=spark_client.blob_client,
+            blob_client=core_base_operations.blob_client,
             use_full_path=False)
         jar_resource_file_paths.append(current_jar_resource_file_path)
         resource_files.append(current_jar_resource_file_path)
@@ -43,7 +43,7 @@ def generate_application_task(spark_client, container_id, application, remote=Fa
             container_name=container_id,
             application_name=application.name,
             file_path=py_file,
-            blob_client=spark_client.blob_client,
+            blob_client=core_base_operations.blob_client,
             use_full_path=False)
         py_files_resource_file_paths.append(current_py_files_resource_file_path)
         resource_files.append(current_py_files_resource_file_path)
@@ -55,7 +55,7 @@ def generate_application_task(spark_client, container_id, application, remote=Fa
             container_name=container_id,
             application_name=application.name,
             file_path=file,
-            blob_client=spark_client.blob_client,
+            blob_client=core_base_operations.blob_client,
             use_full_path=False)
         files_resource_file_paths.append(files_resource_file_path)
         resource_files.append(files_resource_file_path)
@@ -69,7 +69,7 @@ def generate_application_task(spark_client, container_id, application, remote=Fa
         application_name=application.name,
         file_path='application.yaml',
         content=yaml.dump(vars(application)),
-        blob_client=spark_client.blob_client)
+        blob_client=core_base_operations.blob_client)
     resource_files.append(application_definition_file)
 
     # create command to submit task

@@ -25,7 +25,7 @@ class Client(CoreClient):
             cluster (:obj:`aztk.spark.client.cluster.ClusterOperations`): Cluster
             job (:obj:`aztk.spark.client.job.JobOperations`): Job
     """
-    def __init__(self, secrets_configuration: models.SecretsConfiguration, **kwargs):
+    def __init__(self, secrets_configuration: models.SecretsConfiguration = None, **kwargs):
         self.secrets_configuration = None
         context = None
         if kwargs.get("secrets_config"):
