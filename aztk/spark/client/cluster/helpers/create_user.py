@@ -10,6 +10,6 @@ def create_user(core_cluster_operations, spark_cluster_operations, cluster_id: s
         master_node_id = cluster.master_node_id
         if not master_node_id:
             raise error.ClusterNotReadyError("The master has not yet been picked, a user cannot be added.")
-        core_cluster_operations.create_user_on_cluster(username, cluster.id, cluster.nodes, ssh_key, password)
+        core_cluster_operations.create_user_on_cluster(cluster.id, cluster.nodes, username, ssh_key, password)
     except batch_error.BatchErrorException as e:
         raise error.AztkError(helpers.format_batch_exception(e))
