@@ -4,16 +4,17 @@ import azure.batch.models.batch_error as batch_error
 
 import aztk
 from aztk import error
+from aztk import models as base_models
 from aztk.client import CoreClient
 from aztk.internal.cluster_data import NodeData
 from aztk.spark import models
 from aztk.spark.client.cluster import ClusterOperations
 from aztk.spark.client.job import JobOperations
+from aztk.spark.helpers import cluster_diagnostic_helper
 from aztk.spark.helpers import create_cluster as create_cluster_helper
 from aztk.spark.helpers import get_log as get_log_helper
 from aztk.spark.helpers import job_submission as job_submit_helper
 from aztk.spark.helpers import submit as cluster_submit_helper
-from aztk.spark.helpers import cluster_diagnostic_helper
 from aztk.spark.utils import util
 from aztk.utils import azure_api, deprecated, helpers
 
@@ -94,10 +95,10 @@ class Client(CoreClient):
     @deprecated("0.10.0")
     def wait_until_cluster_is_ready(self, cluster_id: str):    # NOT IMPLEMENTED
         try:
-            util.wait_for_master_to_be_ready(self, cluster_id)
+            util.wait_for_master_to_be_ready(self.cluster._core_cluster_operations, self.cluster, cluster_id)
             pool = self.batch_client.pool.get(cluster_id)
             nodes = self.batch_client.compute_node.list(pool_id=cluster_id)
-            return models.Cluster(pool, nodes)
+            return models.Cluster(base_models.Cluster(pool, nodes))
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
 
@@ -169,7 +170,7 @@ class Client(CoreClient):
                                 password=None,
                                 port_forward_list=None,
                                 internal=False):
-        return self.cluster.ssh_into_node(cluster_id, node_id, username, ssh_key, password, port_forward_list, internal)
+        return self.cluster._core_cluster_operations.ssh_into_node(cluster_id, node_id, username, ssh_key, password, port_forward_list, internal)
 
     '''
         job submission
