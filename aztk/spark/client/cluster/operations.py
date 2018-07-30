@@ -89,7 +89,7 @@ class ClusterOperations(SparkBaseOperations):
         Returns:
             :obj:`None`
         """
-        return create_user.create_user(self, id, username, ssh_key, password)
+        return create_user.create_user(self._core_cluster_operations, self, id, username, ssh_key, password)
 
     def get_application_status(self, id: str, application_name: str):
         """Get the status of a submitted application
