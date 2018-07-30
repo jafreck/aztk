@@ -1,4 +1,7 @@
-import sys, os, time
+import os
+import sys
+import time
+
 import aztk.spark
 from aztk.error import AztkError
 
@@ -35,7 +38,7 @@ spark_configuration = aztk.spark.models.SparkConfiguration(
 
 # configure my cluster
 cluster_configuration = aztk.spark.models.ClusterConfiguration(
-    cluster_id="sdk-test1",
+    cluster_id="sdk-test",
     toolkit=aztk.spark.models.SparkToolkit(version="2.3.0"),
     size=2,
     vm_size="standard_f2",
@@ -68,8 +71,8 @@ status = client.cluster.get_application_status(cluster_configuration.cluster_id,
 # stream logs of app, print to console as it runs
 current_bytes = 0
 while True:
-    app1_logs = client.get_application_log(
-        cluster_id=cluster_configuration.cluster_id, application_name=app1.name, tail=True, current_bytes=current_bytes)
+    app1_logs = client.cluster.get_application_log(
+        id=cluster_configuration.cluster_id, application_name=app1.name, tail=True, current_bytes=current_bytes)
 
     print(app1_logs.log, end="")
 
@@ -79,8 +82,7 @@ while True:
     time.sleep(1)
 
 # alternatively, get entire log for application, print to console
-app1_logs = client.get_application_log(cluster_id=cluster_configuration.cluster_id, application_name=app1.name)
-print(app1_logs.log)
+app1_logs = client.cluster.get_application_log(id=cluster_configuration.cluster_id, application_name=app1.name)
 
 # delete the cluster
-client.delete_cluster(cluster.id)
+client.cluster.delete(cluster.id)
