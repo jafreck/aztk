@@ -116,6 +116,7 @@ class JobOperations(SparkBaseOperations):
 
         Args:
             job_configuration (:obj:`aztk.spark.models.JobConfiguration`): Model defining the job's configuration.
+            wait (:obj:`bool`): If True, blocks until job is completed. Defaults to False.
 
         Returns:
             :obj:`aztk.spark.models.Job`: Model representing the state of the job.
@@ -123,4 +124,11 @@ class JobOperations(SparkBaseOperations):
         return submit.submit_job(self._core_job_operations, self, job_configuration, wait)
 
     def wait(self, id):
+        """Wait until the job has completed.
+        Args:
+            id (:obj:`str`): the id of the job the application belongs to
+
+        Returns:
+            :obj:`None`
+        """
         wait_until_complete.wait_until_job_finished(self._core_job_operations, id)

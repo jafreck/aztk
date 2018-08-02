@@ -36,8 +36,7 @@ def test_submit_job():
         max_low_pri_nodes=0
     )
     try:
-        job = spark_client.job.submit(job_configuration=job_configuration)
-        spark_client.job.wait_until_job_finished(id=job_configuration.id)
+        job = spark_client.job.submit(job_configuration=job_configuration, wait=True)
 
         assert job.id == job_configuration.id
         assert job.state is not None
@@ -73,8 +72,7 @@ def test_list_jobs():
         worker_on_master=True
     )
     try:
-        spark_client.job.submit(job_configuration=job_configuration)
-        spark_client.job.wait_until_job_finished(job_configuration.id)
+        spark_client.job.submit(job_configuration=job_configuration, wait=True)
 
         jobs = spark_client.job.list()
 
@@ -111,8 +109,7 @@ def test_list_applications():
         max_low_pri_nodes=0
     )
     try:
-        spark_client.job.submit(job_configuration=job_configuration)
-        spark_client.job.wait_until_job_finished(job_configuration.id)
+        spark_client.job.submit(job_configuration=job_configuration, wait=True)
 
         applications = spark_client.job.list_applications(id=job_configuration.id)
 
@@ -152,8 +149,7 @@ def test_get_job():
         worker_on_master=True
     )
     try:
-        spark_client.job.submit(job_configuration=job_configuration)
-        spark_client.job.wait_until_job_finished(job_configuration.id)
+        spark_client.job.submit(job_configuration=job_configuration, wait=True)
 
         job = spark_client.job.get(id=job_configuration.id)
         assert job.id == job_configuration.id
@@ -185,8 +181,7 @@ def test_get_application():
         max_low_pri_nodes=0
     )
     try:
-        spark_client.job.submit(job_configuration=job_configuration)
-        spark_client.job.wait_until_job_finished(job_configuration.id)
+        spark_client.job.submit(job_configuration=job_configuration, wait=True)
         application = spark_client.job.get_application(id=job_configuration.id, application_name=app1.name)
         assert isinstance(application, aztk.spark.models.Application)
         assert application.exit_code == 0
@@ -216,8 +211,7 @@ def test_get_application_log():
         max_low_pri_nodes=0
     )
     try:
-        spark_client.job.submit(job_configuration=job_configuration)
-        spark_client.job.wait_until_job_finished(job_configuration.id)
+        spark_client.job.submit(job_configuration=job_configuration, wait=True)
 
         application_log = spark_client.job.get_application_log(id=job_configuration.id, application_name=app1.name)
 
@@ -253,8 +247,7 @@ def test_delete_job():
         worker_on_master=True
     )
     try:
-        spark_client.job.submit(job_configuration=job_configuration)
-        spark_client.job.wait_until_job_finished(job_configuration.id)
+        spark_client.job.submit(job_configuration=job_configuration, wait=True)
         spark_client.job.delete(job_configuration.id)
         assert job_configuration.id not in spark_client.job.list()
         try:

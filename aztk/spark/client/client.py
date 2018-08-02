@@ -219,7 +219,7 @@ class Client(CoreClient):
     @deprecated("0.10.0")
     def wait_until_job_finished(self, job_id):
         try:
-            job_submit_helper.wait_until_job_finished(self, job_id)
+            self.job.wait(self, job_id)
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
 
