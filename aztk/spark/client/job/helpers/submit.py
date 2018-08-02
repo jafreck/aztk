@@ -3,6 +3,7 @@ import azure.batch.models.batch_error as batch_error
 import yaml
 
 from aztk import error
+from aztk import models as base_models
 from aztk.internal.cluster_data import NodeData
 from aztk.spark import models
 from aztk.utils import helpers
@@ -88,7 +89,7 @@ def submit_job(core_job_operations, spark_job_operations, job_configuration: mod
 
         job_manager_task = generate_job_manager_task(core_job_operations, job_configuration, application_tasks)
 
-        software_metadata_key = "spark"
+        software_metadata_key = base_models.Software.spark
 
         vm_image = models.VmImage(publisher='Canonical', offer='UbuntuServer', sku='16.04')
 

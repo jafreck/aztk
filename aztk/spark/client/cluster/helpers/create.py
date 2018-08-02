@@ -2,6 +2,7 @@ import azure.batch.models as batch_models
 import azure.batch.models.batch_error as batch_error
 
 from aztk import error
+from aztk import models as base_models
 from aztk.internal.cluster_data import NodeData
 from aztk.spark import models
 from aztk.spark.utils import constants, util
@@ -51,7 +52,7 @@ def create_cluster(core_cluster_operations, spark_cluster_operations, cluster_co
                                                  cluster_conf.file_shares, cluster_conf.plugins,
                                                  cluster_conf.mixed_mode(), cluster_conf.worker_on_master)
 
-        software_metadata_key = "spark"
+        software_metadata_key = base_models.Software.spark
 
         cluster = core_cluster_operations.create(cluster_conf, software_metadata_key, start_task, constants.SPARK_VM_IMAGE)
 
