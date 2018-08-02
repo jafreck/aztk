@@ -1,7 +1,7 @@
 from aztk.client.base import BaseOperations
 from aztk.models import ClusterConfiguration
 
-from .helpers import copy, create, delete, get, list
+from .helpers import copy, create, delete, get, list, wait_for_task_to_complete
 
 
 class CoreClusterOperations(BaseOperations):
@@ -80,3 +80,15 @@ class CoreClusterOperations(BaseOperations):
             :obj:`List[aztk.models.Cluster]`: list of clusters running the software defined by software_metadata_key
         """
         return list.list_clusters(self, software_metadata_key)
+
+    def wait(self, id, task_name):
+        """Wait until the task has completed
+
+        Args:
+            id (:obj:`str`): the id of the job the task was submitted to
+            task_name (:obj:`str`): the name of the task to wait for
+
+        Returns:
+            :obj:`None`
+        """
+        return wait_for_task_to_complete.wait_for_task_to_complete(self, id, task_name)

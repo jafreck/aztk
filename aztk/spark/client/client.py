@@ -16,7 +16,7 @@ from aztk.spark.helpers import get_log as get_log_helper
 from aztk.spark.helpers import job_submission as job_submit_helper
 from aztk.spark.helpers import submit as cluster_submit_helper
 from aztk.spark.utils import util
-from aztk.utils import azure_api, deprecated, helpers
+from aztk.utils import azure_api, deprecated, deprecate, helpers
 
 
 class Client(CoreClient):
@@ -30,7 +30,8 @@ class Client(CoreClient):
         self.secrets_configuration = None
         context = None
         if kwargs.get("secrets_config"):
-            # TODO: add deprecated warning
+            deprecate(version="0.10.0", message="secrets_config key is deprecated in secrets.yaml",
+                      advice="Please use secrets_configuration key instead.")
             context = self._get_context(kwargs.get("secrets_config"))
         else:
             context = self._get_context(secrets_configuration)

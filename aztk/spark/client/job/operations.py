@@ -107,7 +107,7 @@ class JobOperations(SparkBaseOperations):
         """
         return stop_application.stop_app(self._core_job_operations, id, application_name)
 
-    def submit(self, job_configuration: models.JobConfiguration):
+    def submit(self, job_configuration: models.JobConfiguration, wait: bool = False):
         """Submit a job
 
         Jobs are a cluster definition and one or many application definitions which run on the cluster. The job's
@@ -120,8 +120,7 @@ class JobOperations(SparkBaseOperations):
         Returns:
             :obj:`aztk.spark.models.Job`: Model representing the state of the job.
         """
-        return submit.submit_job(self._core_job_operations, self, job_configuration)
+        return submit.submit_job(self._core_job_operations, self, job_configuration, wait)
 
-    #TODO: rename to something better or make this a parameter of submit
-    def wait_until_job_finished(self, id):
+    def wait(self, id):
         wait_until_complete.wait_until_job_finished(self._core_job_operations, id)

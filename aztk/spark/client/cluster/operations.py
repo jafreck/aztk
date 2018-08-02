@@ -3,7 +3,7 @@ from aztk.spark import models
 from aztk.spark.client.base import SparkBaseOperations
 
 from .helpers import (copy, create, create_user, delete, diagnostics, download, get, get_application_log,
-                      get_application_status, get_remote_login_settings, list, node_run, run, submit)
+                      get_application_status, get_remote_login_settings, list, node_run, run, submit, wait)
 
 
 class ClusterOperations(SparkBaseOperations):
@@ -234,3 +234,15 @@ class ClusterOperations(SparkBaseOperations):
             :obj:`aztk.spark.models.RemoteLogin`: Object that contains the ip address and port combination to login to a node
         """
         return get_remote_login_settings.get_remote_login_settings(self._core_cluster_operations, id, node_id)
+
+    def wait(self, id: str, application_name: str):
+        """Wait until the application has completed
+
+        Args:
+            id (:obj:`str`): the id of the cluster the application was submitted to
+            application_name (:obj:`str`): the name of the application to wait for
+
+        Returns:
+            :obj:`None`
+        """
+        return wait.wait_for_application_to_complete(self._core_cluster_operations, id, application_name)
