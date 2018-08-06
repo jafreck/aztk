@@ -102,8 +102,10 @@ def native_python_ssh_into_master(spark_client, cluster, ssh_conf, password):
     plugin_ports = []
     if configuration and configuration.plugins:
         ports = [
-            PortForwardingSpecification(port.internal, port.public_port) for plugin in configuration.plugins
-            for port in plugin.ports if port.expose_publicly
+            PortForwardingSpecification(port.internal, port.public_port)
+            for plugin in configuration.plugins
+            for port in plugin.ports
+            if port.expose_publicly
         ]
         plugin_ports.extend(ports)
 

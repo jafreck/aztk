@@ -183,7 +183,8 @@ def select_latest_verified_vm_image_with_node_agent_sku(publisher, offer, sku_st
     node_agent_skus = batch_client.account.list_node_agent_skus()
 
     # pick the latest supported sku
-    skus_to_use = [(sku, image_ref) for sku in node_agent_skus
+    skus_to_use = [(sku, image_ref)
+                   for sku in node_agent_skus
                    for image_ref in sorted(sku.verified_image_references, key=lambda item: item.sku)
                    if image_ref.publisher.lower() == publisher.lower() and image_ref.offer.lower() == offer.lower()
                    and image_ref.sku.startswith(sku_starts_with)]

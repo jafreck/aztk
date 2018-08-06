@@ -38,7 +38,7 @@ def try_assign_self_as_master(client: batch.BatchServiceClient, pool: batchmodel
             config.pool_id,
             batchmodels.PoolPatchParameter(metadata=new_metadata),
             batchmodels.PoolPatchOptions(if_match=pool.e_tag,
-                                         ))
+                                        ))
         return True
     except (batcherror.BatchErrorException, ClientRequestError):
         print("Couldn't assign itself as master the pool because the pool was modified since last get.")
