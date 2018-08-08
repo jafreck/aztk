@@ -1,17 +1,21 @@
+import re
+
+from aztk.core.models import Model, fields
 from aztk.error import InvalidModelError
 from aztk.utils import constants, deprecate
-from aztk.core.models import Model, fields
-import re
+
 
 class ToolkitDefinition:
     def __init__(self, versions, environments):
         self.versions = versions
         self.environments = environments
 
+
 class ToolkitEnvironmentDefinition:
     def __init__(self, versions=None, default=""):
         self.versions = versions or [""]
         self.default = default
+
 
 TOOLKIT_MAP = dict(
     spark=ToolkitDefinition(
@@ -21,8 +25,7 @@ TOOLKIT_MAP = dict(
             r=ToolkitEnvironmentDefinition(),
             miniconda=ToolkitEnvironmentDefinition(),
             anaconda=ToolkitEnvironmentDefinition(),
-        )
-    ),
+        )),
 )
 
 
@@ -78,8 +81,7 @@ class Toolkit(Model):
                 raise InvalidModelError(
                     "Docker run options contains invalid character '{0}'. Only A-Z, a-z, 0-9, space, hyphen (-), "
                     "underscore (_), period (.), forward slash (/), colon (:), equals(=), comma (,), and "
-                    "double quote (\") are allowed."
-                    .format(invalid_character.group(0)))
+                    "double quote (\") are allowed.".format(invalid_character.group(0)))
 
     def get_docker_repo(self, gpu: bool):
         if self.docker_repo:
@@ -110,7 +112,6 @@ class Toolkit(Model):
         array.append("gpu" if gpu else "base")
 
         return '-'.join(array)
-
 
     def _get_environment_definition(self) -> ToolkitEnvironmentDefinition:
         toolkit = TOOLKIT_MAP.get(self.software)

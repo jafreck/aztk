@@ -1,6 +1,7 @@
 import os
 from aztk.utils.command_builder import CommandBuilder
 
+
 class DockerCmd:
     """
     Class helping to write a docker command
@@ -18,7 +19,6 @@ class DockerCmd:
         self.cmd.add_argument(docker_repo)
         self.cmd.add_argument(cmd)
 
-
     def add_env(self, env: str, value: str):
         self.cmd.add_option('-e', '{0}={1}'.format(env, value))
 
@@ -32,8 +32,7 @@ class DockerCmd:
         self.cmd.add_option('-v', '{0}:{0}'.format(folder))
 
     def open_port(self, port: int):
-        self.cmd.add_option('-p', '{0}:{0}'.format(port))       # Spark Master UI
-
+        self.cmd.add_option('-p', '{0}:{0}'.format(port))    # Spark Master UI
 
     def to_str(self):
         return self.cmd.to_str()

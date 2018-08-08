@@ -19,10 +19,15 @@ def setup_parser(parser: argparse.ArgumentParser):
     parser.add_argument('-u', '--username', help='Username to spark cluster')
     parser.add_argument('--password', help='Password for the specified ssh user')
     parser.add_argument('--host', dest="host", action='store_true', help='Connect to the host of the Spark container')
-    parser.add_argument('--no-connect', dest="connect", action='store_false',
-                        help='Do not create the ssh session. Only print out the command to run.')
-    parser.add_argument('--internal', action='store_true',
-                        help='Connect using the local IP of the master node. Only use if using a VPN.')
+    parser.add_argument(
+        '--no-connect',
+        dest="connect",
+        action='store_false',
+        help='Do not create the ssh session. Only print out the command to run.')
+    parser.add_argument(
+        '--internal',
+        action='store_true',
+        help='Connect using the local IP of the master node. Only use if using a VPN.')
     parser.set_defaults(connect=True, internal=False)
 
 
@@ -31,8 +36,8 @@ http_prefix = 'http://localhost:'
 
 def execute(args: typing.NamedTuple):
     spark_client = aztk.spark.Client(config.load_aztk_secrets())
-    cluster = spark_client.get_cluster(args.cluster_id)
-    cluster_config = spark_client.get_cluster_config(args.cluster_id)
+    cluster = spark_client.cluster.get(args.cluster_id)
+    cluster_config = spark_client.cluster.get_cluster_config(args.cluster_id)
     ssh_conf = SshConfig()
 
     ssh_conf.merge(
@@ -93,30 +98,30 @@ def native_python_ssh_into_master(spark_client, cluster, ssh_conf, password):
         log.warning("No ssh client found, using pure python connection.")
         return
 
-    configuration = spark_client.get_cluster_config(cluster.id)
+    configuration = spark_client.cluster.get_cluster_config(cluster.id)
     plugin_ports = []
     if configuration and configuration.plugins:
         ports = [
-            PortForwardingSpecification(
-                port.internal,
-                port.public_port) for plugin in configuration.plugins for port in plugin.ports if port.expose_publicly
+            PortForwardingSpecification(port.internal, port.public_port)
+            for plugin in configuration.plugins
+            for port in plugin.ports
+            if port.expose_publicly
         ]
         plugin_ports.extend(ports)
 
     print("Press ctrl+c to exit...")
-    spark_client.cluster_ssh_into_master(
+    spark_client.cluster.ssh_into_master(
         cluster.id,
         cluster.master_node_id,
         ssh_conf.username,
         ssh_key=None,
         password=password,
         port_forward_list=[
-            PortForwardingSpecification(remote_port=8080, local_port=8080),      # web ui
-            PortForwardingSpecification(remote_port=4040, local_port=4040),      # job ui
+            PortForwardingSpecification(remote_port=8080, local_port=8080),    # web ui
+            PortForwardingSpecification(remote_port=4040, local_port=4040),    # job ui
             PortForwardingSpecification(remote_port=18080, local_port=18080),    # job history ui
         ] + plugin_ports,
-        internal=ssh_conf.internal
-    )
+        internal=ssh_conf.internal)
 
 
 def shell_out_ssh(spark_client, ssh_conf):
