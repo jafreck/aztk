@@ -1,13 +1,13 @@
 import aztk.error as error
 from aztk.core.models import Model, fields
-from aztk.utils import deprecated, deprecate, helpers
+from aztk.utils import deprecate, deprecated, helpers
 
 from .custom_script import CustomScript
 from .file_share import FileShare
 from .plugins import PluginConfiguration
+from .scheduling_target import SchedulingTarget
 from .toolkit import Toolkit
 from .user_configuration import UserConfiguration
-from .scheduling_target import SchedulingTarget
 
 
 class ClusterConfiguration(Model):

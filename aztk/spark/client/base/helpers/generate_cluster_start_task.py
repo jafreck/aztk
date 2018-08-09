@@ -97,7 +97,7 @@ def __cluster_install_cmd(zip_resource_file: batch_models.ResourceFile,
         '/bin/bash $AZ_BATCH_TASK_WORKING_DIR/aztk/node_scripts/setup_host.sh {0} {1} "{2}"'.format(
             constants.DOCKER_SPARK_CONTAINER_NAME,
             docker_repo,
-            docker_run_options.replace('"', '\\\"')
+            "" if docker_run_options is None else docker_run_options.replace('"', '\\\"')
         )
     ]
 
