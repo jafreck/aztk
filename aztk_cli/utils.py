@@ -17,8 +17,8 @@ from aztk.utils import get_ssh_key, helpers
 from . import log
 
 
-def get_ssh_key_or_prompt(ssh_key, username, password, secrets_config):
-    ssh_key = get_ssh_key.get_user_public_key(ssh_key, secrets_config)
+def get_ssh_key_or_prompt(ssh_key, username, password, secrets_configuration):
+    ssh_key = get_ssh_key.get_user_public_key(ssh_key, secrets_configuration)
 
     if username is not None and password is None and ssh_key is None:
         log.warning("It is recommended to use an SSH key for user creation instead of a password.")
@@ -34,8 +34,11 @@ def get_ssh_key_or_prompt(ssh_key, username, password, secrets_config):
             else:
                 break
         else:
-            raise error.AztkError("Failed to get valid password, cannot add user to cluster. It is recommended that you provide a ssh public key in .aztk/secrets.yaml. Or provide an ssh-key or password with command line parameters (--ssh-key or --password). You may also run the 'aztk spark cluster add-user' command to add a user to this cluster.")
+            raise error.AztkError(
+                "Failed to get valid password, cannot add user to cluster. It is recommended that you provide a ssh public key in .aztk/secrets.yaml. Or provide an ssh-key or password with command line parameters (--ssh-key or --password). You may also run the 'aztk spark cluster add-user' command to add a user to this cluster."
+            )
     return ssh_key, password
+
 
 def print_cluster(client, cluster: models.Cluster, internal: bool = False):
     node_count = __pretty_node_count(cluster)
@@ -61,48 +64,41 @@ def print_cluster(client, cluster: models.Cluster, internal: bool = False):
     if not cluster.nodes:
         return
     for node in cluster.nodes:
-        remote_login_settings = client.get_remote_login_settings(cluster.id, node.id)
+        remote_login_settings = client.cluster.get_remote_login_settings(cluster.id, node.id)
         if internal:
             ip = node.ip_address
         else:
-            ip ='{}:{}'.format(remote_login_settings.ip_address, remote_login_settings.port)
+            ip = '{}:{}'.format(remote_login_settings.ip_address, remote_login_settings.port)
         log.info(
-            print_format.format(
-                node.id,
-                node.state.value,
-                ip,
-                "*" if node.is_dedicated else '',
-                '*' if node.id == cluster.master_node_id else '')
-        )
+            print_format.format(node.id, node.state.value, ip, "*" if node.is_dedicated else '', '*'
+                                if node.id == cluster.master_node_id else ''))
     log.info('')
+
 
 def __pretty_node_count(cluster: models.Cluster) -> str:
     if cluster.pool.allocation_state is batch_models.AllocationState.resizing:
-        return '{} -> {}'.format(
-            cluster.total_current_nodes,
-            cluster.total_target_nodes)
+        return '{} -> {}'.format(cluster.total_current_nodes, cluster.total_target_nodes)
     else:
         return '{}'.format(cluster.total_current_nodes)
 
-def __pretty_dedicated_node_count(cluster: models.Cluster)-> str:
+
+def __pretty_dedicated_node_count(cluster: models.Cluster) -> str:
     if (cluster.pool.allocation_state is batch_models.AllocationState.resizing
             or cluster.pool.state is batch_models.PoolState.deleting)\
             and cluster.current_dedicated_nodes != cluster.target_dedicated_nodes:
-        return '{} -> {}'.format(
-            cluster.current_dedicated_nodes,
-            cluster.target_dedicated_nodes)
+        return '{} -> {}'.format(cluster.current_dedicated_nodes, cluster.target_dedicated_nodes)
     else:
         return '{}'.format(cluster.current_dedicated_nodes)
 
-def __pretty_low_pri_node_count(cluster: models.Cluster)-> str:
+
+def __pretty_low_pri_node_count(cluster: models.Cluster) -> str:
     if (cluster.pool.allocation_state is batch_models.AllocationState.resizing
             or cluster.pool.state is batch_models.PoolState.deleting)\
             and cluster.current_low_pri_nodes != cluster.target_low_pri_nodes:
-        return '{} -> {}'.format(
-            cluster.current_low_pri_nodes,
-            cluster.target_low_pri_nodes)
+        return '{} -> {}'.format(cluster.current_low_pri_nodes, cluster.target_low_pri_nodes)
     else:
         return '{}'.format(cluster.current_low_pri_nodes)
+
 
 def print_clusters(clusters: List[models.Cluster]):
     print_format = '{:<34}| {:<10}| {:<20}| {:<7}'
@@ -113,14 +109,7 @@ def print_clusters(clusters: List[models.Cluster]):
     for cluster in clusters:
         node_count = __pretty_node_count(cluster)
 
-        log.info(
-            print_format.format(
-                cluster.id,
-                cluster.visible_state,
-                cluster.vm_size,
-                node_count
-            )
-        )
+        log.info(print_format.format(cluster.id, cluster.visible_state, cluster.vm_size, node_count))
 
 
 def print_clusters_quiet(clusters: List[models.Cluster]):
@@ -130,28 +119,25 @@ def print_clusters_quiet(clusters: List[models.Cluster]):
 def stream_logs(client, cluster_id, application_name):
     current_bytes = 0
     while True:
-        app_logs = client.get_application_log(
-            cluster_id=cluster_id,
-            application_name=application_name,
-            tail=True,
-            current_bytes=current_bytes)
+        app_logs = client.cluster.get_application_log(
+            id=cluster_id, application_name=application_name, tail=True, current_bytes=current_bytes)
         log.print(app_logs.log)
         if app_logs.application_state == 'completed':
             return app_logs.exit_code
         current_bytes = app_logs.total_bytes
         time.sleep(3)
 
-def ssh_in_master(
-        client,
-        cluster_id: str,
-        username: str = None,
-        webui: str = None,
-        jobui: str = None,
-        jobhistoryui: str = None,
-        ports=None,
-        host: bool = False,
-        connect: bool = True,
-        internal: bool = False):
+
+def ssh_in_master(client,
+                  cluster_id: str,
+                  username: str = None,
+                  webui: str = None,
+                  jobui: str = None,
+                  jobhistoryui: str = None,
+                  ports=None,
+                  host: bool = False,
+                  connect: bool = True,
+                  internal: bool = False):
     """
         SSH into head node of spark-app
         :param cluster_id: Id of the cluster to ssh in
@@ -165,8 +151,8 @@ def ssh_in_master(
     subprocess.call(["ssh"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
     # Get master node id from task (job and task are both named pool_id)
-    cluster = client.get_cluster(cluster_id)
-    configuration = client.get_cluster_config(cluster_id)
+    cluster = client.cluster.get(cluster_id)
+    configuration = client.cluster.get_cluster_config(cluster_id)
 
     master_node_id = cluster.master_node_id
 
@@ -174,7 +160,7 @@ def ssh_in_master(
         raise error.ClusterNotReadyError("Master node has not yet been picked!")
 
     # get remote login settings for the user
-    remote_login_settings = client.get_remote_login_settings(cluster.id, master_node_id)
+    remote_login_settings = client.cluster.get_remote_login_settings(cluster.id, master_node_id)
     master_internal_node_ip = [node.ip_address for node in cluster.nodes if node.id == master_node_id][0]
     master_node_ip = remote_login_settings.ip_address
     master_node_port = remote_login_settings.port
@@ -187,22 +173,19 @@ def ssh_in_master(
     ssh_command = utils.command_builder.CommandBuilder('ssh')
 
     # get ssh private key path if specified
-    ssh_priv_key = client.secrets_config.ssh_priv_key
+    ssh_priv_key = client.secrets_configuration.ssh_priv_key
     if ssh_priv_key is not None:
         ssh_command.add_option("-i", ssh_priv_key)
 
     ssh_command.add_argument("-t")
-    ssh_command.add_option("-L", "{0}:localhost:{1}".format(
-        webui,  spark_web_ui_port), enable=bool(webui))
-    ssh_command.add_option("-L", "{0}:localhost:{1}".format(
-        jobui, spark_job_ui_port), enable=bool(jobui))
-    ssh_command.add_option("-L", "{0}:localhost:{1}".format(
-        jobhistoryui, spark_job_history_ui_port), enable=bool(jobui))
+    ssh_command.add_option("-L", "{0}:localhost:{1}".format(webui, spark_web_ui_port), enable=bool(webui))
+    ssh_command.add_option("-L", "{0}:localhost:{1}".format(jobui, spark_job_ui_port), enable=bool(jobui))
+    ssh_command.add_option(
+        "-L", "{0}:localhost:{1}".format(jobhistoryui, spark_job_history_ui_port), enable=bool(jobui))
 
     if ports is not None:
         for port in ports:
-            ssh_command.add_option(
-                "-L", "{0}:localhost:{1}".format(port[0], port[1]))
+            ssh_command.add_option("-L", "{0}:localhost:{1}".format(port[0], port[1]))
     if configuration and configuration.plugins:
         for plugin in configuration.plugins:
             for port in plugin.ports:
@@ -213,8 +196,7 @@ def ssh_in_master(
     if internal:
         ssh_command.add_argument("{0}@{1}".format(user, master_internal_node_ip))
     else:
-        ssh_command.add_argument(
-            "{0}@{1} -p {2}".format(user, master_node_ip, master_node_port))
+        ssh_command.add_argument("{0}@{1} -p {2}".format(user, master_node_ip, master_node_port))
 
     if host is False:
         ssh_command.add_argument("\'sudo docker exec -it spark /bin/bash\'")
@@ -225,6 +207,7 @@ def ssh_in_master(
         call(command, shell=True)
 
     return '\n\t{}\n'.format(command)
+
 
 def print_batch_exception(batch_exception):
     """
@@ -248,6 +231,7 @@ def print_batch_exception(batch_exception):
     Job submission
 '''
 
+
 def print_jobs(jobs: List[models.Job]):
     print_format = '{:<34}| {:<10}| {:<20}'
     print_format_underline = '{:-<34}|{:-<11}|{:-<21}'
@@ -256,13 +240,7 @@ def print_jobs(jobs: List[models.Job]):
     log.info(print_format_underline.format('', '', '', ''))
     for job in jobs:
 
-        log.info(
-            print_format.format(
-                job.id,
-                job.state,
-                utc_to_local(job.creation_time)
-            )
-        )
+        log.info(print_format.format(job.id, job.state, utc_to_local(job.creation_time)))
 
 
 def print_job(client, job: models.Job):
@@ -288,7 +266,7 @@ def print_job(client, job: models.Job):
     if job.applications:
         application_summary(job.applications)
     else:
-        application_summary(client.list_applications(job.id))
+        application_summary(client.job.list_applications(job.id))
     log.info("")
 
 
@@ -305,7 +283,7 @@ def print_cluster_summary(cluster: models.Cluster):
     print_format = '{:<4} {:<23} {:<15}'
 
     log.info("Cluster           %s", cluster.id)
-    log.info("-"*42)
+    log.info("-" * 42)
     log.info("Nodes             %s", __pretty_node_count(cluster))
     log.info("| Dedicated:      %s", __pretty_dedicated_node_count(cluster))
     log.info("| Low priority:   %s", __pretty_low_pri_node_count(cluster))
@@ -330,13 +308,14 @@ def application_summary(applications):
 
     print_format = '{:<17} {:<14}'
     log.info("Applications")
-    log.info("-"*42)
+    log.info("-" * 42)
     for state in states:
         if states[state] > 0:
             log.info(print_format.format(state + ":", states[state]))
 
     if warn_scheduling:
         log.warning("\nNo Spark applications will be scheduled until the master is selected.")
+
 
 def print_applications(applications):
     print_format = '{:<36}| {:<15}| {:<16} | {:^9} |'
@@ -347,46 +326,26 @@ def print_applications(applications):
     warn_scheduling = False
     for name in applications:
         if applications[name] is None:
-            log.info(
-                print_format.format(
-                    name,
-                    "scheduling",
-                    "-",
-                    "-"
-                )
-            )
+            log.info(print_format.format(name, "scheduling", "-", "-"))
             warn_scheduling = True
         else:
             application = applications[name]
             log.info(
-                print_format.format(
-                    application.name,
-                    application.state,
-                    utc_to_local(application.state_transition_time),
-                    application.exit_code if application.exit_code is not None else "-"
-                )
-            )
+                print_format.format(application.name, application.state, utc_to_local(
+                    application.state_transition_time), application.exit_code
+                                    if application.exit_code is not None else "-"))
     if warn_scheduling:
         log.warning("\nNo Spark applications will be scheduled until the master is selected.")
+
 
 def print_application(application: models.Application):
     print_format = '{:<30}| {:<15}'
 
     log.info("")
     log.info("Application         %s", application.name)
-    log.info("-"*42)
-    log.info(
-        print_format.format(
-            "State",
-            application.state
-        )
-    )
-    log.info(
-        print_format.format(
-            "State transition time",
-            utc_to_local(application.state_transition_time)
-        )
-    )
+    log.info("-" * 42)
+    log.info(print_format.format("State", application.state))
+    log.info(print_format.format("State transition time", utc_to_local(application.state_transition_time)))
     log.info("")
 
 
@@ -397,7 +356,8 @@ class Spinner:
     @staticmethod
     def spinning_cursor():
         while 1:
-            for cursor in '|/-\\': yield cursor
+            for cursor in '|/-\\':
+                yield cursor
 
     def __init__(self, delay=None):
         self.spinner_generator = self.spinning_cursor()
@@ -441,7 +401,8 @@ def print_cluster_conf(cluster_conf: ClusterConfiguration, wait: bool):
     log.info("cluster vm size:         %s", cluster_conf.vm_size)
     log.info("custom scripts:          %s", len(cluster_conf.custom_scripts) if cluster_conf.custom_scripts else 0)
     log.info("subnet ID:               %s", cluster_conf.subnet_id)
-    log.info("file shares:             %s", len(cluster_conf.file_shares) if cluster_conf.file_shares is not None else 0)
+    log.info("file shares:             %s",
+             len(cluster_conf.file_shares) if cluster_conf.file_shares is not None else 0)
     log.info("gpu enabled:             %s", str(cluster_conf.gpu_enabled()))
     log.info("docker repo name:        %s", cluster_conf.get_docker_repo())
     if cluster_conf.get_docker_run_options():
@@ -465,12 +426,21 @@ def log_property(label: str, value: str):
     log.info("{0:30} {1}".format(label, value))
 
 
-def log_execute_result(node_id, result):
-    log.info("-" * (len(node_id) + 4))
-    log.info("| %s |", node_id)
-    log.info("-" * (len(node_id) + 4))
-    if isinstance(result, Exception):
-        log.info("%s\n", result)
+def log_node_copy_output(node_output):
+    log.info("-" * (len(node_output.id) + 4))
+    log.info("| %s |", node_output.id)
+    log.info("-" * (len(node_output.id) + 4))
+    if node_output.error:
+        log.error(node_output.error)
     else:
-        for line in result:
-            log.print(line)
+        log.print("Copy successful")
+
+
+def log_node_run_output(node_output):
+    log.info("-" * (len(node_output.id) + 4))
+    log.info("| %s |", node_output.id)
+    log.info("-" * (len(node_output.id) + 4))
+    if node_output.error:
+        log.error("%s\n", node_output.error)
+    else:
+        log.print(node_output.output)

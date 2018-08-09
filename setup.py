@@ -6,7 +6,6 @@ from setuptools import find_packages, setup
 from aztk import version
 from aztk_cli import constants
 
-
 data_files = []
 
 
@@ -16,6 +15,7 @@ def _includeFile(filename: str, exclude: [str]) -> bool:
             return False
 
     return True
+
 
 def find_package_files(root, directory, dest=""):
     paths = []
@@ -41,10 +41,10 @@ setup(
     license='MIT',
     packages=find_packages(exclude=["tests"]),
     install_requires=[
-        "azure-batch==4.1.3",
-        "azure-mgmt-batch==5.0.0",
-        "azure-mgmt-storage==1.5.0",
-        "azure-storage-blob==1.1.0",
+        "azure-batch~=4.1.3",
+        "azure-mgmt-batch~=5.0.0",
+        "azure-mgmt-storage~=2.0.0",
+        "azure-storage-blob~=1.3.1",
         "pyyaml>=3.12",
         "pycryptodomex>=3.4",
         "paramiko>=2.4",
