@@ -60,7 +60,7 @@ def __cluster_install_cmd(zip_resource_file: batch_models.ResourceFile,
                           gpu_enabled: bool,
                           docker_repo: str = None,
                           docker_run_options: str = None,
-                          plugins = None,
+                          plugins=None,
                           worker_on_master: bool = True,
                           file_mounts=None,
                           mixed_mode: bool = False):
@@ -101,17 +101,17 @@ def __cluster_install_cmd(zip_resource_file: batch_models.ResourceFile,
     commands = shares + setup
     return commands
 
-def generate_cluster_start_task(
-        spark_client,
-        zip_resource_file: batch_models.ResourceFile,
-        cluster_id: str,
-        gpu_enabled: bool,
-        docker_repo: str = None,
-        docker_run_options: str = None,
-        file_shares: List[aztk_models.FileShare] = None,
-        plugins: List[aztk_models.PluginConfiguration] = None,
-        mixed_mode: bool = False,
-        worker_on_master: bool = True):
+
+def generate_cluster_start_task(spark_client,
+                                zip_resource_file: batch_models.ResourceFile,
+                                cluster_id: str,
+                                gpu_enabled: bool,
+                                docker_repo: str = None,
+                                docker_run_options: str = None,
+                                file_shares: List[aztk_models.FileShare] = None,
+                                plugins: List[aztk_models.PluginConfiguration] = None,
+                                mixed_mode: bool = False,
+                                worker_on_master: bool = True):
     """
         This will return the start task object for the pool to be created.
         :param cluster_id str: Id of the cluster(Used for uploading the resource files)
@@ -137,7 +137,8 @@ def generate_cluster_start_task(
     ] + __get_docker_credentials(spark_client) + _get_aztk_environment(cluster_id, worker_on_master, mixed_mode)
 
     # start task command
-    command = __cluster_install_cmd(zip_resource_file, gpu_enabled, docker_repo, docker_run_options, plugins, worker_on_master, file_shares, mixed_mode)
+    command = __cluster_install_cmd(zip_resource_file, gpu_enabled, docker_repo, docker_run_options, plugins,
+                                    worker_on_master, file_shares, mixed_mode)
 
     return batch_models.StartTask(
         command_line=helpers.wrap_commands_in_shell(command),
