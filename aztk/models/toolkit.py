@@ -1,3 +1,5 @@
+import re
+
 from aztk.core.models import Model, fields
 from aztk.error import InvalidModelError
 from aztk.utils import constants
