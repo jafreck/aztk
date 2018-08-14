@@ -14,7 +14,6 @@ from aztk.utils import constants
 from aztk_cli import config
 from tests.integration_tests.spark.sdk.get_client import get_spark_client, get_test_suffix
 
-
 base_cluster_id = get_test_suffix("cluster")
 spark_client = get_spark_client()
 
@@ -225,7 +224,7 @@ def test_submit():
         with pytest.warns(DeprecationWarning):
             spark_client.submit(
                 cluster_id=cluster_configuration.cluster_id, application=application_configuration, wait=True)
-        
+
         assert True
 
     except (AztkError, BatchErrorException):
