@@ -37,9 +37,10 @@ def create_pool_and_job(core_cluster_operations, cluster_conf: models.ClusterCon
     pool = batch_models.PoolAddParameter(
         id=pool_id,
         virtual_machine_configuration=batch_models.VirtualMachineConfiguration(
-            image_reference=image_ref_to_use, node_agent_sku_id=sku_to_use,
+            image_reference=image_ref_to_use,
+            node_agent_sku_id=sku_to_use,
             container_configuration=batch_models.ContainerConfiguration(
-                container_image_names=["aztk/spark:v0.1.0-spark2.3.0-base"] # TODO: parametize container
+                container_image_names=["aztk/spark:v0.1.0-spark2.3.0-base"]    # TODO: parametize container
             )),
         vm_size=cluster_conf.vm_size,
         enable_auto_scale=True,
