@@ -11,6 +11,7 @@ export PYTHONUNBUFFERED=TRUE
 container_name=$1
 docker_repo_name=$2
 
+
 install_prerequisites () {
     echo "Installing pre-reqs"
 
@@ -31,6 +32,7 @@ install_prerequisites () {
     echo "Finished installing pre-reqs"
 }
 
+
 install_docker_compose () {
     echo "Installing Docker-Compose"
     sudo curl -L https://github.com/docker/compose/releases/download/1.19.0/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
@@ -44,8 +46,8 @@ install_python_dependencies () {
     pipenv install --python /usr/bin/python3.5m
     pipenv run pip install --upgrade setuptools wheel #TODO: add pip when pipenv is compatible with pip10
     echo "Finished installing python dependencies"
-
 }
+
 
 run_docker_container () {
     echo "Running docker container"
@@ -75,11 +77,7 @@ run_docker_container () {
         ln -s $docker_log $AZ_BATCH_TASK_WORKING_DIR/logs/docker.log
     fi
     echo "Finished running docker container"
-
 }
-
-
-
 
 
 main () {
