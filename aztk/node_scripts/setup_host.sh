@@ -15,7 +15,6 @@ docker_repo_name=$2
 install_prerequisites () {
     echo "Installing pre-reqs"
 
-
     packages=(
         apt-transport-https
         curl
