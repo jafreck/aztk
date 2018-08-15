@@ -5,10 +5,9 @@ import azure.batch.models.batch_error as batch_error
 
 import aztk
 from aztk.models import ClusterConfiguration
+from aztk.spark.models import PortForwardingSpecification
 from aztk_cli import config, log, utils
 from aztk_cli.config import SshConfig
-
-from aztk.spark.models import PortForwardingSpecification
 
 
 def setup_parser(parser: argparse.ArgumentParser):
@@ -37,7 +36,7 @@ http_prefix = 'http://localhost:'
 def execute(args: typing.NamedTuple):
     spark_client = aztk.spark.Client(config.load_aztk_secrets())
     cluster = spark_client.cluster.get(args.cluster_id)
-    cluster_config = spark_client.cluster.get_cluster_config(args.cluster_id)
+    cluster_config = spark_client.cluster._core_cluster_operations.get_cluster_config(args.cluster_id)
     ssh_conf = SshConfig()
 
     ssh_conf.merge(

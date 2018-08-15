@@ -8,7 +8,6 @@ from aztk.internal.cluster_data import NodeData
 from aztk.spark import models
 from aztk.spark.utils import util
 from aztk.utils import constants, helpers
-from aztk.spark import models
 
 POOL_ADMIN_USER_IDENTITY = batch_models.UserIdentity(
     auto_user=batch_models.AutoUserSpecification(
@@ -89,6 +88,8 @@ def __cluster_install_cmd(zip_resource_file: batch_models.ResourceFile,
     setup = [
         'time('\
             'apt-get -y update;'\
+            'n=0;'\
+            'until [ $n -ge 15 ]; do apt-get -y --no-install-recommends install unzip && break; n=$[$n+1]; sleep 5; echo "waited $n*5 seconds"; done;'\
             'apt-get -y --no-install-recommends install unzip;'\
             'unzip -o $AZ_BATCH_TASK_WORKING_DIR/{0};'\
             'chmod 777 $AZ_BATCH_TASK_WORKING_DIR/aztk/node_scripts/setup_host.sh;'\
@@ -145,4 +146,5 @@ def generate_cluster_start_task(core_base_operations,
         resource_files=resource_files,
         environment_settings=environment_settings,
         user_identity=POOL_ADMIN_USER_IDENTITY,
-        wait_for_success=True)
+        wait_for_success=True,
+        max_task_retry_count=2)

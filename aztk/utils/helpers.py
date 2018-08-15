@@ -1,20 +1,23 @@
 from __future__ import print_function
+
 import datetime
 import io
-import os
-import time
-import re
-import azure.common
-import azure.batch.batch_service_client as batch
-import azure.batch.batch_auth as batch_auth
-import azure.batch.models as batch_models
-import azure.storage.blob as blob
-from aztk.version import __version__
-from aztk.utils import constants
-from aztk import error
-import aztk.models
-import yaml
 import logging
+import os
+import re
+import time
+
+import azure.batch.batch_auth as batch_auth
+import azure.batch.batch_service_client as batch
+import azure.batch.models as batch_models
+import azure.common
+import azure.storage.blob as blob
+import yaml
+
+import aztk.models
+from aztk import error
+from aztk.utils import constants
+from aztk.version import __version__
 
 _STANDARD_OUT_FILE_NAME = 'stdout.txt'
 _STANDARD_ERROR_FILE_NAME = 'stderr.txt'
@@ -179,19 +182,10 @@ def select_latest_verified_vm_image_with_node_agent_sku(publisher, offer, sku_st
     :rtype: tuple
     :return: (node agent sku id to use, vm image ref to use)
     """
-    # get verified vm image list and node agent sku ids from service
-    node_agent_skus = batch_client.account.list_node_agent_skus()
-
-    # pick the latest supported sku
-    skus_to_use = [(sku, image_ref)
-                   for sku in node_agent_skus
-                   for image_ref in sorted(sku.verified_image_references, key=lambda item: item.sku)
-                   if image_ref.publisher.lower() == publisher.lower() and image_ref.offer.lower() == offer.lower()
-                   and image_ref.sku.startswith(sku_starts_with)]
-
-    # skus are listed in reverse order, pick first for latest
-    sku_to_use, image_ref_to_use = skus_to_use[0]
-    return (sku_to_use.id, image_ref_to_use)
+    image_ref_to_use = batch_models.ImageReference(
+        publisher='microsoft-azure-batch', offer='ubuntu-server-container', sku='16-04-lts', version='latest')
+    node_agent_sku_id = 'batch.node.ubuntu 16.04'
+    return (node_agent_sku_id, image_ref_to_use)
 
 
 def create_sas_token(container_name, blob_name, permission, blob_client, expiry=None, timeout=None):

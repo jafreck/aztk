@@ -14,8 +14,6 @@ docker_repo_name=$2
 install_prerequisites () {
     echo "Installing pre-reqs"
 
-    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-    add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
 
     packages=(
         apt-transport-https
@@ -24,18 +22,12 @@ install_prerequisites () {
         software-properties-common
         python3-pip
         python3-venv
-        docker-ce
     )
 
     echo "running apt-get install -y --no-install-recommends \"${packages[@]}\""
     apt-get -y update &&
     apt-get install -y --no-install-recommends "${packages[@]}"
 
-    if [ $AZTK_GPU_ENABLED == "true" ]; then
-        apt-get install -y nvidia-384 nvidia-modprobe
-        wget -P /tmp https://github.com/NVIDIA/nvidia-docker/releases/download/v1.0.1/nvidia-docker_1.0.1-1_amd64.deb
-        sudo dpkg -i /tmp/nvidia-docker*.deb && rm /tmp/nvidia-docker*.deb
-    fi
     echo "Finished installing pre-reqs"
 }
 
@@ -46,19 +38,6 @@ install_docker_compose () {
     echo "Finished installing Docker-Compose"
 }
 
-pull_docker_container () {
-    echo "Pulling $docker_repo_name"
-
-    if [ -z "$DOCKER_USERNAME" ]; then
-        echo "No Credentials provided. No need to login to dockerhub"
-    else
-        echo "Docker credentials provided. Login in."
-        docker login $DOCKER_ENDPOINT --username $DOCKER_USERNAME --password $DOCKER_PASSWORD
-    fi
-
-    docker pull $docker_repo_name
-    echo "Finished pulling $docker_repo_name"
-}
 
 install_python_dependencies () {
     echo "Installing python dependencies"
@@ -119,9 +98,6 @@ main () {
         install_docker_compose
     ) 2>&1
 
-    time(
-        pull_docker_container
-    ) 2>&1
 
     # Unzip resource files and set permissions
     chmod 777 $AZTK_WORKING_DIR/aztk/node_scripts/docker_main.sh
