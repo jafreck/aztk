@@ -102,7 +102,7 @@ def test_list_clusters():
     cluster_configuration = aztk.spark.models.ClusterConfiguration(
         cluster_id=test_id + base_cluster_id,
         size=2,
-        vm_low_pri_count=0,
+        size_low_priority=0,
         vm_size="standard_f2",
         subnet_id=None,
         custom_scripts=None,
@@ -127,7 +127,7 @@ def test_get_remote_login_settings():
     cluster_configuration = aztk.spark.models.ClusterConfiguration(
         cluster_id=test_id + base_cluster_id,
         size=2,
-        vm_low_pri_count=0,
+        size_low_priority=0,
         vm_size="standard_f2",
         subnet_id=None,
         custom_scripts=None,
@@ -155,7 +155,7 @@ def test_submit():
     cluster_configuration = aztk.spark.models.ClusterConfiguration(
         cluster_id=test_id + base_cluster_id,
         size=2,
-        vm_low_pri_count=0,
+        size_low_priority=0,
         vm_size="standard_f2",
         subnet_id=None,
         custom_scripts=None,
@@ -196,7 +196,7 @@ def test_get_application_log():
     cluster_configuration = aztk.spark.models.ClusterConfiguration(
         cluster_id=test_id + base_cluster_id,
         size=2,
-        vm_low_pri_count=0,
+        size_low_priority=0,
         vm_size="standard_f2",
         subnet_id=None,
         custom_scripts=None,
@@ -257,7 +257,7 @@ def test_get_application_status_complete():
     cluster_configuration = aztk.spark.models.ClusterConfiguration(
         cluster_id=test_id + base_cluster_id,
         size=2,
-        vm_low_pri_count=0,
+        size_low_priority=0,
         vm_size="standard_f2",
         subnet_id=None,
         custom_scripts=None,
@@ -301,7 +301,7 @@ def test_delete_cluster():
     cluster_configuration = aztk.spark.models.ClusterConfiguration(
         cluster_id=test_id + base_cluster_id,
         size=2,
-        vm_low_pri_count=0,
+        size_low_priority=0,
         vm_size="standard_f2",
         subnet_id=None,
         custom_scripts=None,
@@ -327,7 +327,7 @@ def test_spark_processes_up():
     cluster_configuration = aztk.spark.models.ClusterConfiguration(
         cluster_id=test_id + base_cluster_id,
         size=2,
-        vm_low_pri_count=0,
+        size_low_priority=0,
         vm_size="standard_f2",
         subnet_id=None,
         custom_scripts=None,
