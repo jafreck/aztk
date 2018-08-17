@@ -11,7 +11,6 @@ This toolkit is built on top of Azure Batch but does not require any Azure Batch
    :caption: User documentation:
 
    00-getting-started
-   01-getting-started-script
    10-clusters
    12-docker-image
    13-configuration
