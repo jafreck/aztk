@@ -37,7 +37,7 @@ http_prefix = 'http://localhost:'
 def execute(args: typing.NamedTuple):
     spark_client = aztk.spark.Client(config.load_aztk_secrets())
     cluster = spark_client.cluster.get(args.cluster_id)
-    cluster_config = spark_client.cluster.get_cluster_config(args.cluster_id)
+    cluster_config = spark_client.cluster.get_configuration(args.cluster_id)
     ssh_conf = SshConfig()
 
     ssh_conf.merge(
@@ -98,7 +98,7 @@ def native_python_ssh_into_master(spark_client, cluster, ssh_conf, password):
         log.warning("No ssh client found, using pure python connection.")
         return
 
-    configuration = spark_client.cluster.get_cluster_config(cluster.id)
+    configuration = spark_client.cluster.get_configuration(cluster.id)
     plugin_ports = []
     if configuration and configuration.plugins:
         ports = [
