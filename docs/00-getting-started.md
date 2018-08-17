@@ -7,7 +7,21 @@ The minimum requirements to get started with this package are:
 Before you start, ensure you are running python 3.5 or greater by running: `python --version`.
 
 ### Install from pip
-The latest release of aztk is distributed through `pip`. To install, run:
+It is recommended that you install `aztk` in a virtual environment:
+```
+# install venv
+pip install python-venv
+
+# create a virutal environment called env
+python -m venv env
+
+# activate the virtual environment (linux)
+source env/bin/activate
+
+# activate the virtual environment (windows)
+env/Scripts/activate
+```
+To install `aztk` using `pip`, run:
 ```sh
 pip install aztk
 ```
@@ -28,7 +42,7 @@ aztk spark init
 ```
 This will create a *.aztk* folder with preset configuration files in your current working directory.
 
-If you would like to initialize your AZTK clusters with a specific development toolset, please pass one of the following flags:
+If you would like to initialize your `aztk` clusters with a specific development toolset, please pass one of the following flags:
 ```bash
 aztk spark init --python
 aztk spark init --R
@@ -111,7 +125,7 @@ If you do not already have an Azure account, go to [https://azure.microsoft.com]
 Once you have one, log in and go to the [Azure Portal](https://portal.azure.com) to create your Azure Batch account and Azure Storage account.
 
 #### Using Azure Active Directory Authentication
-To get the required keys for your Azure Active Directory (AAD) Service Principal, Azure Batch Account and Azure Storage Account, please follow these instructions. Note that this is the recommended path for use with AZTK, as some features require AAD and are disabled if using the alternative Shared Key authentication.
+To get the required keys for your Azure Active Directory (AAD) Service Principal, Azure Batch Account and Azure Storage Account, please follow these instructions. Note that this is the recommended path for use with `aztk`, as some features require AAD and are disabled if using the alternative Shared Key authentication.
 
 1. Register an Azure Active Directory (AAD) Application
 
@@ -182,7 +196,7 @@ service_principal:
 ```
 
 #### Using Shared Key Authentication
-Please note that using Shared Keys prevents the use of certain AZTK features including low priority nodes and VNET support. It is reccomended to use [Azure Active Directory (AAD) Authentication](#using-azure-active-directory-authentication).
+Please note that using Shared Keys prevents the use of certain `aztk` features including low priority nodes and VNET support. It is recommended to use [Azure Active Directory (AAD) Authentication](#using-azure-active-directory-authentication).
 
 To get the required keys for Azure Batch and Azure Storage, please follow the below instructions:
 
