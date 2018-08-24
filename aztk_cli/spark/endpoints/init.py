@@ -2,8 +2,9 @@ import argparse
 import os
 import typing
 from distutils.dir_util import copy_tree
+
+from aztk.utils import constants
 from aztk_cli import log
-import aztk.utils.constants as constants
 
 
 def setup_parser(parser: argparse.ArgumentParser):

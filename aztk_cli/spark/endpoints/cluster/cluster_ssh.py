@@ -1,7 +1,7 @@
 import argparse
 import typing
 
-import azure.batch.models.batch_error as batch_error
+from azure.batch.models import batch_error
 
 import aztk
 from aztk.models import ClusterConfiguration

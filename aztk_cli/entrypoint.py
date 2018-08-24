@@ -7,10 +7,13 @@
 import argparse
 import warnings
 from typing import NamedTuple
-import azure.batch.models.batch_error as batch_error
+
+from azure.batch.models import batch_error
+
 import aztk
-from aztk_cli import logger, log, utils, constants
+from aztk_cli import constants, log, logger, utils
 from aztk_cli.spark.endpoints import spark
+
 from . import plugins, toolkit
 
 
