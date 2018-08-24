@@ -7,9 +7,10 @@ from aztk.error import AztkError
 def clean_up_cluster(spark_client, id):
     try:
         cluster = spark_client.cluster.get(id)
+        nodes = [node for node in cluster.nodes]
         if not any([
                 node.state in [batch_models.ComputeNodeState.unusable, batch_models.ComputeNodeState.start_task_failed]
-                for node in cluster.nodes
+                for node in nodes
         ]):
             spark_client.cluster.delete(id=id)
     except (BatchErrorException, AztkError) as e:
