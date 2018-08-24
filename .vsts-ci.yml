@@ -38,7 +38,7 @@ phases:
       displayName: integration tests
     
     - script: |
-        pylint -jobs 2 --disbale fixme aztk aztk_cli
+        pylint -jobs 2 --disable=fixme aztk aztk_cli
       continueOnError: true
       condition: succeeded()
       displayName: pylint report
