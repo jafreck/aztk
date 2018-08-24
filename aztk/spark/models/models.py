@@ -195,7 +195,6 @@ class JobConfiguration:
             id=None,
             applications=None,
             vm_size=None,
-            custom_scripts=None,
             spark_configuration=None,
             toolkit=None,
             max_dedicated_nodes=0,
@@ -206,7 +205,6 @@ class JobConfiguration:
 
         self.id = id
         self.applications = applications
-        self.custom_scripts = custom_scripts
         self.spark_configuration = spark_configuration
         self.vm_size = vm_size
         self.gpu_enabled = None
@@ -222,7 +220,6 @@ class JobConfiguration:
     def to_cluster_config(self):
         return ClusterConfiguration(
             cluster_id=self.id,
-            custom_scripts=self.custom_scripts,
             toolkit=self.toolkit,
             vm_size=self.vm_size,
             size=self.max_dedicated_nodes,
