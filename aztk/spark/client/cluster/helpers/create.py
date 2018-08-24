@@ -13,11 +13,11 @@ POOL_ADMIN_USER_IDENTITY = batch_models.UserIdentity(
         scope=batch_models.AutoUserScope.pool, elevation_level=batch_models.ElevationLevel.admin))
 
 
-def _default_scheduling_target(vm_count: int):
-    if vm_count == 0:
-        return models.SchedulingTarget.Any
-    else:
-        return models.SchedulingTarget.Dedicated
+# def _default_scheduling_target(vm_count: int):
+#     if vm_count == 0:
+#         return models.SchedulingTarget.Any
+#     else:
+#         return models.SchedulingTarget.Dedicated
 
 
 def _apply_default_for_cluster_config(configuration: models.ClusterConfiguration):

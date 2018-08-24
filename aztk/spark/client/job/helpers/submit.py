@@ -50,11 +50,11 @@ def generate_job_manager_task(core_job_operations, job, application_tasks):
     return task
 
 
-def _default_scheduling_target(vm_count: int):
-    if vm_count == 0:
-        return models.SchedulingTarget.Any
-    else:
-        return models.SchedulingTarget.Dedicated
+# def _default_scheduling_target(vm_count: int):
+#     if vm_count == 0:
+#         return models.SchedulingTarget.Any
+#     else:
+#         return models.SchedulingTarget.Dedicated
 
 
 def _apply_default_for_job_config(job_conf: models.JobConfiguration):
