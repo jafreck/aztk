@@ -23,7 +23,7 @@ phases:
       displayName: yapf
 
     - script: |
-        pylint -j 2 -E aztk aztk_cli
+        pylint -jobs 2 --errors-only aztk aztk_cli
       condition: succeeded()
       displayName: pylint error check
     
@@ -33,12 +33,12 @@ phases:
       displayName: unit tests
 
     - script: |
-        pytest -n 75
+        pytest --numprocesses=75
       condition: succeeded()
       displayName: integration tests
     
     - script: |
-        pylint  -j 2 aztk aztk_cli
+        pylint -jobs 2 --disbale fixme aztk aztk_cli
       continueOnError: true
       condition: succeeded()
       displayName: pylint report
