@@ -12,7 +12,6 @@ POOL_ADMIN_USER_IDENTITY = batch_models.UserIdentity(
     auto_user=batch_models.AutoUserSpecification(
         scope=batch_models.AutoUserScope.pool, elevation_level=batch_models.ElevationLevel.admin))
 
-
 # def _default_scheduling_target(vm_count: int):
 #     if vm_count == 0:
 #         return models.SchedulingTarget.Any
