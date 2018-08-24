@@ -1,10 +1,12 @@
 from typing import List
-from Cryptodome.PublicKey import RSA
+
 import azure.batch.models as batch_models
+from Cryptodome.PublicKey import RSA
+
 import aztk.models
 from aztk import error
-from aztk.utils import constants, helpers
 from aztk.core.models import Model, fields
+from aztk.utils import constants, helpers
 
 
 class SparkToolkit(aztk.models.Toolkit):
@@ -105,7 +107,7 @@ class PluginConfiguration(aztk.models.PluginConfiguration):
     pass
 
 
-SchedulingTarget = aztk.models.SchedulingTarget
+# SchedulingTarget = aztk.models.SchedulingTarget
 
 
 class ClusterConfiguration(aztk.models.ClusterConfiguration):
@@ -188,18 +190,19 @@ class Application:
 
 
 class JobConfiguration:
-    def __init__(self,
-                 id=None,
-                 applications=None,
-                 vm_size=None,
-                 custom_scripts=None,
-                 spark_configuration=None,
-                 toolkit=None,
-                 max_dedicated_nodes=0,
-                 max_low_pri_nodes=0,
-                 subnet_id=None,
-                 scheduling_target: SchedulingTarget = None,
-                 worker_on_master=None):
+    def __init__(
+            self,
+            id=None,
+            applications=None,
+            vm_size=None,
+            custom_scripts=None,
+            spark_configuration=None,
+            toolkit=None,
+            max_dedicated_nodes=0,
+            max_low_pri_nodes=0,
+            subnet_id=None,
+    #  scheduling_target: SchedulingTarget = None,
+            worker_on_master=None):
 
         self.id = id
         self.applications = applications
@@ -214,7 +217,7 @@ class JobConfiguration:
         self.max_low_pri_nodes = max_low_pri_nodes
         self.subnet_id = subnet_id
         self.worker_on_master = worker_on_master
-        self.scheduling_target = scheduling_target
+        # self.scheduling_target = scheduling_target
 
     def to_cluster_config(self):
         return ClusterConfiguration(
@@ -227,7 +230,7 @@ class JobConfiguration:
             subnet_id=self.subnet_id,
             worker_on_master=self.worker_on_master,
             spark_configuration=self.spark_configuration,
-            scheduling_target=self.scheduling_target,
+        # scheduling_target=self.scheduling_target,
         )
 
     def mixed_mode(self) -> bool:
@@ -265,8 +268,8 @@ class JobConfiguration:
                 "You must configure a VNET to use AZTK in mixed mode (dedicated and low priority nodes) and pass the subnet_id in your configuration.."
             )
 
-        if self.scheduling_target == SchedulingTarget.Dedicated and self.max_dedicated_nodes == 0:
-            raise error.InvalidModelError("Scheduling target cannot be Dedicated if dedicated vm size is 0")
+        # if self.scheduling_target == SchedulingTarget.Dedicated and self.max_dedicated_nodes == 0:
+        #     raise error.InvalidModelError("Scheduling target cannot be Dedicated if dedicated vm size is 0")
 
 
 class JobState():

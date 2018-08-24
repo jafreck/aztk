@@ -58,8 +58,8 @@ def _default_scheduling_target(vm_count: int):
 
 
 def _apply_default_for_job_config(job_conf: models.JobConfiguration):
-    if job_conf.scheduling_target is None:
-        job_conf.scheduling_target = _default_scheduling_target(job_conf.max_dedicated_nodes)
+    # if job_conf.scheduling_target is None:
+    #     job_conf.scheduling_target = _default_scheduling_target(job_conf.max_dedicated_nodes)
 
     return job_conf
 
