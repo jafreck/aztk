@@ -28,7 +28,7 @@ phases:
       displayName: pylint error check
     
     - script: |
-        pytest -n 20 --ignore=tests/integration_tests
+        pytest --ignore=tests/integration_tests
       condition: succeeded()
       displayName: unit tests
 
