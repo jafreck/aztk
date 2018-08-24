@@ -115,7 +115,7 @@ class NodeData:
         data = []
         for plugin in self.cluster_config.plugins:
             for file in plugin.files:
-                zipf = self.zipf.writestr('plugins/{0}/{1}'.format(plugin.name, file.target), file.content())
+                self.zipf.writestr('plugins/{0}/{1}'.format(plugin.name, file.target), file.content())
             if plugin.execute:
                 data.append(
                     dict(
@@ -128,7 +128,6 @@ class NodeData:
                     ))
 
         self.zipf.writestr(os.path.join('plugins', 'plugins-manifest.yaml'), yaml.dump(data))
-        return zipf
 
     def _add_node_scripts(self):
         self.add_dir(os.path.join(ROOT_PATH, NODE_SCRIPT_FOLDER), NODE_SCRIPT_FOLDER, exclude=['*.pyc*', '*.png'])
