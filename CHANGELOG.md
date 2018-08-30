@@ -8,7 +8,6 @@
 * 0.9.0 deprecated code removal (#645) ([eef36dc](https://github.com/Azure/aztk/commit/eef36dc)), closes [#645](https://github.com/Azure/aztk/issues/645)
 * SDK refactor (#622) ([b18eb69](https://github.com/Azure/aztk/commit/b18eb69)), closes [#622](https://github.com/Azure/aztk/issues/622)
 
-
 **Features**
 * Add ability to specify docker run options in toolkit config (#613) ([9d554c3](https://github.com/Azure/aztk/commit/9d554c3)), closes [#613](https://github.com/Azure/aztk/issues/613) [#3](https://github.com/Azure/aztk/issues/3)
 * add brief flag to debug tool (#634) ([b7bdd8c](https://github.com/Azure/aztk/commit/b7bdd8c)), closes [#634](https://github.com/Azure/aztk/issues/634)
