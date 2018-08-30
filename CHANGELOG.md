@@ -1,6 +1,6 @@
 # Changelog
 
-##  0.9.0 (2018-08-29)
+##  0.9.0 (2018-08-30)
 
 **Breaking Changes**
 * spark roll back scheduling disable (#653) ([93615d9](https://github.com/Azure/aztk/commit/93615d9)), closes [#653](https://github.com/Azure/aztk/issues/653)
