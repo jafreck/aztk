@@ -1,5 +1,6 @@
 import azure.batch.models as batch_models
 import azure.batch.models.batch_error as batch_error
+import yaml
 
 from aztk import error
 from aztk.error import AztkError
@@ -21,21 +22,45 @@ def affinitize_task_to_master(core_cluster_operations, spark_cluster_operations,
     return task
 
 
+def upload_task_to_storage(blob_client, cluster_id, task):
+    return helpers.upload_text_to_container(
+        container_name=cluster_id,
+        application_name=task.id,
+        file_path="task.yaml",
+        content=yaml.dump(vars(task)),
+        blob_client=blob_client,
+    )
+
+
+def schedule_with_target(core_cluster_operations, cluster_id, task):
+    # upload "real" task definition to storage
+    task_sas_url = upload_task_to_storage(core_cluster_operations.blob_client, cluster_id, task)
+    # schedule "ghost" task
+    core_cluster_operations.batch_client.task.add(cluster_id)
+    # tell the node to run the task
+    core_cluster_operations.node_run("python submit.py {}".format(task_sas_url))
+
+
 def submit_application(core_cluster_operations,
                        spark_cluster_operations,
                        cluster_id,
                        application,
                        remote: bool = False,
-                       wait: bool = False):
+                       wait: bool = False,
+                       scheduling_target: str = None,
+):
     """
     Submit a spark app
     """
     task = spark_cluster_operations._generate_application_task(core_cluster_operations, cluster_id, application, remote)
     task = affinitize_task_to_master(core_cluster_operations, spark_cluster_operations, cluster_id, task)
 
-    # Add task to batch job (which has the same name as cluster_id)
-    job_id = cluster_id
-    core_cluster_operations.batch_client.task.add(job_id=job_id, task=task)
+
+    if scheduling_target:
+        schedule_with_target(core_cluster_operations, cluster_id, task)
+    else:
+        # Add task to batch job (which has the same name as cluster_id)
+        core_cluster_operations.batch_client.task.add(job_id=cluster_id, task=task)
 
     if wait:
         helpers.wait_for_task_to_complete(
@@ -49,6 +74,8 @@ def submit(
         application: models.ApplicationConfiguration,
         remote: bool = False,
         wait: bool = False,
+        scheduling_target: str = None,
+
 ):
     try:
         submit_application(core_cluster_operations, spark_cluster_operations, cluster_id, application, remote, wait)
