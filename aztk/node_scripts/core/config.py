@@ -74,6 +74,17 @@ def get_batch_client() -> batch.BatchServiceClient:
     return batch.BatchServiceClient(credentials, base_url=base_url)
 
 
+# better place for this function?
+def get_blob_client_with_sas(sas_token) -> blob.BlockBlobService:
+    account_name = None
+    if not batch_resource_id:
+        account_name = batch_account_name
+    else:
+        m = RESOURCE_ID_PATTERN.match(batch_resource_id)
+        account_name = m.group("account")
+    return blob.BlockBlobService(account_name=account_name, sas_token=sas_token)
+
+
 batch_client = get_batch_client()
 blob_client = get_blob_client()
 

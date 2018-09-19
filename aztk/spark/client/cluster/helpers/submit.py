@@ -22,23 +22,47 @@ def affinitize_task_to_master(core_cluster_operations, spark_cluster_operations,
     return task
 
 
-def upload_task_to_storage(blob_client, cluster_id, task):
+def upload_serialized_task_to_storage(blob_client, cluster_id, task):
     return helpers.upload_text_to_container(
         container_name=cluster_id,
         application_name=task.id,
         file_path="task.yaml",
-        content=yaml.dump(vars(task)),
+        content=yaml.dump(task),
         blob_client=blob_client,
     )
 
+def select_scheduling_target_node(spark_cluster_operations, cluster_id, scheduling_target):
+    # for now, limit to only targeting master
+    cluster = spark_cluster_operations.get(cluster_id)
+    if not cluster.master_node_id:
+        return None
+    return cluster.master_node_id
 
-def schedule_with_target(core_cluster_operations, cluster_id, task):
+
+def schedule_with_target(core_cluster_operations, spark_cluster_operations, cluster_id, scheduling_target, task):
     # upload "real" task definition to storage
-    task_sas_url = upload_task_to_storage(core_cluster_operations.blob_client, cluster_id, task)
-    # schedule "ghost" task
-    core_cluster_operations.batch_client.task.add(cluster_id)
+    serialized_task_resource_file = upload_serialized_task_to_storage(core_cluster_operations.blob_client, cluster_id, task)
+    # # schedule "ghost" task
+    # ghost_task = batch_models.TaskAddParameter(
+    #     id=task.id,
+    #     command_line="",
+    # )
+    # core_cluster_operations.batch_client.task.add(cluster_id, task=ghost_task)
     # tell the node to run the task
-    core_cluster_operations.node_run("python submit.py {}".format(task_sas_url))
+
+    task_cmd = (r"source ~/.bashrc; " 
+                r"export PYTHONPATH=$PYTHONPATH:$AZTK_WORKING_DIR; "
+                r"cd $AZ_BATCH_TASK_WORKING_DIR; "
+                r'$AZTK_WORKING_DIR/.aztk-env/.venv/bin/python $AZTK_WORKING_DIR/aztk/node_scripts/submit.py "{}" >> {}-output.log 2>&1'.format(serialized_task_resource_file.blob_source, task.id))
+    print("task_cmd", task_cmd)
+    node_id = select_scheduling_target_node(spark_cluster_operations, cluster_id, scheduling_target)
+    node_run_output = spark_cluster_operations.node_run(cluster_id, node_id, task_cmd, timeout=120)
+    print(node_run_output.__dict__)
+
+
+def get_cluster_scheduling_target(core_cluster_operations, cluster_id):
+    cluster_configuration = core_cluster_operations.get_cluster_data(cluster_id).read_cluster_config()
+    return cluster_configuration.scheduling_target
 
 
 def submit_application(core_cluster_operations,
@@ -47,7 +71,6 @@ def submit_application(core_cluster_operations,
                        application,
                        remote: bool = False,
                        wait: bool = False,
-                       scheduling_target: str = None,
 ):
     """
     Submit a spark app
@@ -55,16 +78,16 @@ def submit_application(core_cluster_operations,
     task = spark_cluster_operations._generate_application_task(core_cluster_operations, cluster_id, application, remote)
     task = affinitize_task_to_master(core_cluster_operations, spark_cluster_operations, cluster_id, task)
 
-
+    scheduling_target = get_cluster_scheduling_target(core_cluster_operations, cluster_id)
     if scheduling_target:
-        schedule_with_target(core_cluster_operations, cluster_id, task)
+        schedule_with_target(core_cluster_operations, spark_cluster_operations, cluster_id, scheduling_target, task)
     else:
         # Add task to batch job (which has the same name as cluster_id)
         core_cluster_operations.batch_client.task.add(job_id=cluster_id, task=task)
 
     if wait:
         helpers.wait_for_task_to_complete(
-            job_id=job_id, task_id=task.id, batch_client=core_cluster_operations.batch_client)
+            job_id=cluster_id, task_id=task.id, batch_client=core_cluster_operations.batch_client)
 
 
 def submit(

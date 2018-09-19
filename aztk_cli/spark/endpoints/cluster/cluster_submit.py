@@ -135,6 +135,13 @@ def execute(args: typing.NamedTuple):
         remote=args.remote,
         wait=False,
     )
+    ##################
+    # temporarily prevent get_log in submit if scheduling_target is set
+    cluster_configuration = spark_client.cluster._core_cluster_operations.get_cluster_data(
+        args.cluster_id).read_cluster_config()
+    if cluster_configuration.scheduling_target:
+        return
+    ##################
 
     if args.wait:
         if not args.output:

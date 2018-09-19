@@ -1,14 +1,18 @@
+import concurrent.futures
 import datetime
 import logging
 import os
 import subprocess
 import sys
+import time
 from typing import List
 
 import azure.batch.models as batch_models
 import azure.storage.blob as blob
+import requests
 import yaml
 
+from aztk import error
 from aztk.utils.command_builder import CommandBuilder
 from core import config
 
@@ -186,12 +190,99 @@ def upload_error_log(error, application_file_path):
     upload_log(blob_client, application)
 
 
+def ssh_submit(task_sas_url):
+    # download task from storage
+    response = http_request_wrapper(requests.get, task_sas_url, timeout=10)
+    yaml_serialized_task = response.content
+    task = yaml.load(yaml_serialized_task)
+    print(task)
+
+    # download the tasks resource files to well known path /mnt/aztk/tasks/workitems/$(task_name)/
+    download_task_resource_files(task.id, task.resource_files)
+
+
+def http_request_wrapper(func, *args, timeout=None, max_execution_time=300, **kwargs):
+    start_time = time.clock()
+    while True:
+        try:
+            response = func(*args, timeout=timeout, **kwargs)
+            response.raise_for_status()
+            return response
+        except requests.Timeout:
+            pass
+
+        if (time.clock() - start_time > max_execution_time):
+            raise error.AztkError("Waited {} seconds for request {}, exceeded max_execution_time={}".format(
+                time.clock() - start_time,
+                func.__name__,
+                max_execution_time,
+            ))
+
+
+def _download_resource_file(task_id, resource_file):
+    # timeout = 30 # set to default blob download timeout
+    response = http_request_wrapper(requests.get, url=resource_file.blob_source, timeout=None, stream=True)
+    if resource_file.file_path:
+        with open(resource_file.file_path, 'wb') as stream:
+            for chunk in response.iter_content(chunk_size=16777216):
+                stream.write(chunk)
+            return None
+
+    raise error.AztkError("ResourceFile file_path not set.")
+
+
+def download_task_resource_files(task_id, resource_files):
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        futures = {
+            executor.submit(_download_resource_file, task_id, resource_file): resource_file
+            for resource_file in resource_files
+        }
+    done, not_done = concurrent.futures.wait(futures)
+    if not_done:
+        raise error.AztkError("Not all futures completed. {}".format(not_done.pop().result()))
+    errors = [result.result() for result in done if isinstance(result.result(), Exception)]
+    if errors:
+        raise error.AztkError(errors)
+    else:
+        return [result.result() for result in done]
+
+
+def run_task(task):
+    cmd = __app_submit_cmd(
+        name=task. "name"],
+        app=task. "application"],
+        app_args=task. "application_args"],
+        main_class=task. "main_class"],
+        jars=task. "jars"],
+        py_files=task. "py_files"],
+        files=task. "files"],
+        driver_java_options=task. "driver_java_options"],
+        driver_library_path=task. "driver_library_path"],
+        driver_class_path=task. "driver_class_path"],
+        driver_memory=task. "driver_memory"],
+        executor_memory=task. "executor_memory"],
+        driver_cores=task. "driver_cores"],
+        executor_cores=task. "executor_cores"],
+    )
+
+
 if __name__ == "__main__":
     return_code = 1
-    try:
-        return_code = receive_submit_request(os.path.join(os.environ["AZ_BATCH_TASK_WORKING_DIR"], "application.yaml"))
-    except Exception as e:
-        upload_error_log(str(e), os.path.join(os.environ["AZ_BATCH_TASK_WORKING_DIR"], "application.yaml"))
+    print("sys.argv", sys.argv)
+    if len(sys.argv) == 2:
+        serialized_task_sas_url = sys.argv[1]
+        print("serialized_task_sas_url", serialized_task_sas_url)
+        ssh_submit(serialized_task_sas_url)
 
-    # force batch task exit code to match spark exit code
-    sys.exit(return_code)
+        # use task id to make an TASK_WORKING_DIR
+        # download the task's application.yaml
+        # use the application.yaml to run the Spark application
+    else:
+        try:
+            return_code = receive_submit_request(
+                os.path.join(os.environ["AZ_BATCH_TASK_WORKING_DIR"], "application.yaml"))
+        except Exception as e:
+            upload_error_log(str(e), os.path.join(os.environ["AZ_BATCH_TASK_WORKING_DIR"], "application.yaml"))
+
+        # force batch task exit code to match spark exit code
+        sys.exit(return_code)
