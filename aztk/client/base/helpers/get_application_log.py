@@ -68,7 +68,9 @@ def get_log(batch_client, blob_client, cluster_id: str, application_name: str, t
 
     task = __wait_for_app_to_be_running(batch_client, cluster_id, application_name)
 
-    if not __check_task_node_exist(batch_client, cluster_id, task):
+    #TODO: find a better way to detect ghost tasks -- metatdata
+    if (task.state is batch_models.TaskState.completed,
+            batch_models.TaskState) or not __check_task_node_exist(batch_client, cluster_id, task):
         return get_log_from_storage(blob_client, cluster_id, application_name, task)
 
     file = __get_output_file_properties(batch_client, cluster_id, application_name)
