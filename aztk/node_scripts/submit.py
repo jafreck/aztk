@@ -161,23 +161,21 @@ def upload_error_log(error, application_file_path):
     upload_log(blob_client, application)
 
 
-def ssh_submit(task_sas_url):
-    # download task from storage
+def download_task_definition(task_sas_url):
     response = http_request_wrapper(requests.get, task_sas_url, timeout=10)
     yaml_serialized_task = response.content
-    task = yaml.load(yaml_serialized_task)
-    print(task)
+    return yaml.load(yaml_serialized_task)
 
-    # download the tasks resource files to well known path /mnt/aztk/tasks/workitems/$(task_name)/
+
+def ssh_submit(task_sas_url):
+    task = download_task_definition(task_sas_url)
     download_task_resource_files(task.id, task.resource_files)
 
-    # read application.yaml
     application = load_application(os.path.join(os.environ["AZ_BATCH_TASK_WORKING_DIR"], "application.yaml"))
-    # run application
+
     cmd = __app_submit_cmd(application)
     return_code = subprocess.call(cmd.to_str(), shell=True)
 
-    # upload log
     upload_log(config.blob_client, application)
 
     return return_code
@@ -232,10 +230,10 @@ def download_task_resource_files(task_id, resource_files):
 
 if __name__ == "__main__":
     return_code = 1
-    print("sys.argv", sys.argv)
+
     if len(sys.argv) == 2:
         serialized_task_sas_url = sys.argv[1]
-        print("serialized_task_sas_url", serialized_task_sas_url)
+
         try:
             return_code = ssh_submit(serialized_task_sas_url)
         except Exception as e:
@@ -248,4 +246,5 @@ if __name__ == "__main__":
             upload_error_log(str(e), os.path.join(os.environ["AZ_BATCH_TASK_WORKING_DIR"], "application.yaml"))
 
         # force batch task exit code to match spark exit code
+        # TODO: make this valuable to ssh_submit
         sys.exit(return_code)
