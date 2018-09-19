@@ -67,52 +67,38 @@ def upload_file_to_container(container_name,
     return batch_models.ResourceFile(file_path=node_path, blob_source=sas_url)
 
 
-def __app_submit_cmd(
-        name: str,
-        app: str,
-        app_args: List[str],
-        main_class: str,
-        jars: List[str],
-        py_files: List[str],
-        files: List[str],
-        driver_java_options: str,
-        driver_library_path: str,
-        driver_class_path: str,
-        driver_memory: str,
-        executor_memory: str,
-        driver_cores: int,
-        executor_cores: int,
-):
+def __app_submit_cmd(application):
     spark_home = os.environ["SPARK_HOME"]
     with open(os.path.join(spark_home, "conf", "master")) as f:
         master_ip = f.read().rstrip()
 
     # set file paths to correct path on container
     files_path = os.environ["AZ_BATCH_TASK_WORKING_DIR"]
-    jars = [os.path.join(files_path, os.path.basename(jar)) for jar in jars]
-    py_files = [os.path.join(files_path, os.path.basename(py_file)) for py_file in py_files]
-    files = [os.path.join(files_path, os.path.basename(f)) for f in files]
+    jars = [os.path.join(files_path, os.path.basename(jar)) for jar in application.jars]
+    py_files = [os.path.join(files_path, os.path.basename(py_file)) for py_file in application.py_files]
+    files = [os.path.join(files_path, os.path.basename(f)) for f in application.files]
 
     # 2>&1 redirect stdout and stderr to be in the same file
     spark_submit_cmd = CommandBuilder("{0}/bin/spark-submit".format(spark_home))
     spark_submit_cmd.add_option("--master", "spark://{0}:7077".format(master_ip))
-    spark_submit_cmd.add_option("--name", name)
-    spark_submit_cmd.add_option("--class", main_class)
+    spark_submit_cmd.add_option("--name", application.name)
+    spark_submit_cmd.add_option("--class", application.main_class)
     spark_submit_cmd.add_option("--jars", jars and ",".join(jars))
     spark_submit_cmd.add_option("--py-files", py_files and ",".join(py_files))
     spark_submit_cmd.add_option("--files", files and ",".join(files))
-    spark_submit_cmd.add_option("--driver-java-options", driver_java_options)
-    spark_submit_cmd.add_option("--driver-library-path", driver_library_path)
-    spark_submit_cmd.add_option("--driver-class-path", driver_class_path)
-    spark_submit_cmd.add_option("--driver-memory", driver_memory)
-    spark_submit_cmd.add_option("--executor-memory", executor_memory)
-    if driver_cores:
-        spark_submit_cmd.add_option("--driver-cores", str(driver_cores))
-    if executor_cores:
-        spark_submit_cmd.add_option("--executor-cores", str(executor_cores))
+    spark_submit_cmd.add_option("--driver-java-options", application.driver_java_options)
+    spark_submit_cmd.add_option("--driver-library-path", application.driver_library_path)
+    spark_submit_cmd.add_option("--driver-class-path", application.driver_class_path)
+    spark_submit_cmd.add_option("--driver-memory", application.driver_memory)
+    spark_submit_cmd.add_option("--executor-memory", application.executor_memory)
+    if application.driver_cores:
+        spark_submit_cmd.add_option("--driver-cores", str(application.driver_cores))
+    if application.executor_cores:
+        spark_submit_cmd.add_option("--executor-cores", str(application.executor_cores))
 
     spark_submit_cmd.add_argument(
-        os.path.expandvars(app) + " " + " ".join(["'" + str(app_arg) + "'" for app_arg in (app_args or [])]))
+        os.path.expandvars(application.application) + " " +
+        " ".join(["'" + str(app_arg) + "'" for app_arg in (application.application_args or [])]))
 
     with open("spark-submit.txt", mode="w", encoding="UTF-8") as stream:
         stream.write(spark_submit_cmd.to_str())
@@ -150,22 +136,7 @@ def receive_submit_request(application_file_path):
     blob_client = config.blob_client
     application = load_application(application_file_path)
 
-    cmd = __app_submit_cmd(
-        name=application["name"],
-        app=application["application"],
-        app_args=application["application_args"],
-        main_class=application["main_class"],
-        jars=application["jars"],
-        py_files=application["py_files"],
-        files=application["files"],
-        driver_java_options=application["driver_java_options"],
-        driver_library_path=application["driver_library_path"],
-        driver_class_path=application["driver_class_path"],
-        driver_memory=application["driver_memory"],
-        executor_memory=application["executor_memory"],
-        driver_cores=application["driver_cores"],
-        executor_cores=application["executor_cores"],
-    )
+    cmd = __app_submit_cmd(application)
 
     return_code = subprocess.call(cmd.to_str(), shell=True)
     upload_log(blob_client, application)
@@ -182,7 +153,7 @@ def upload_error_log(error, application_file_path):
 
     upload_file_to_container(
         container_name=os.environ["STORAGE_LOGS_CONTAINER"],
-        application_name=application["name"],
+        application_name=application,
         file_path=os.path.realpath(error_log.name),
         blob_client=blob_client,
         use_full_path=False,
@@ -203,22 +174,7 @@ def ssh_submit(task_sas_url):
     # read application.yaml
     application = load_application(os.path.join(os.environ["AZ_BATCH_TASK_WORKING_DIR"], "application.yaml"))
     # run application
-    cmd = __app_submit_cmd(
-        name=application["name"],
-        app=application["application"],
-        app_args=application["application_args"],
-        main_class=application["main_class"],
-        jars=application["jars"],
-        py_files=application["py_files"],
-        files=application["files"],
-        driver_java_options=application["driver_java_options"],
-        driver_library_path=application["driver_library_path"],
-        driver_class_path=application["driver_class_path"],
-        driver_memory=application["driver_memory"],
-        executor_memory=application["executor_memory"],
-        driver_cores=application["driver_cores"],
-        executor_cores=application["executor_cores"],
-    )
+    cmd = __app_submit_cmd(application)
     return_code = subprocess.call(cmd.to_str(), shell=True)
 
     # upload log

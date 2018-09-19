@@ -72,7 +72,7 @@ def generate_application_task(core_base_operations, container_id, application, r
         container_name=container_id,
         application_name=application.name,
         file_path="application.yaml",
-        content=yaml.dump(vars(application)),
+        content=yaml.dump(application),
         blob_client=core_base_operations.blob_client,
     )
     resource_files.append(application_definition_file)
