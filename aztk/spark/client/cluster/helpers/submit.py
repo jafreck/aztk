@@ -5,7 +5,7 @@ import yaml
 from aztk import error
 from aztk.error import AztkError
 from aztk.spark import models
-from aztk.utils import helpers
+from aztk.utils import constants, helpers
 
 
 def __get_node(core_cluster_operations, node_id: str, cluster_id: str) -> batch_models.ComputeNode:
@@ -31,6 +31,7 @@ def upload_serialized_task_to_storage(blob_client, cluster_id, task):
         blob_client=blob_client,
     )
 
+
 def select_scheduling_target_node(spark_cluster_operations, cluster_id, scheduling_target):
     # for now, limit to only targeting master
     cluster = spark_cluster_operations.get(cluster_id)
@@ -41,23 +42,30 @@ def select_scheduling_target_node(spark_cluster_operations, cluster_id, scheduli
 
 def schedule_with_target(core_cluster_operations, spark_cluster_operations, cluster_id, scheduling_target, task):
     # upload "real" task definition to storage
-    serialized_task_resource_file = upload_serialized_task_to_storage(core_cluster_operations.blob_client, cluster_id, task)
+    serialized_task_resource_file = upload_serialized_task_to_storage(core_cluster_operations.blob_client, cluster_id,
+                                                                      task)
     # # schedule "ghost" task
-    # ghost_task = batch_models.TaskAddParameter(
-    #     id=task.id,
-    #     command_line="",
-    # )
-    # core_cluster_operations.batch_client.task.add(cluster_id, task=ghost_task)
+    ghost_task = batch_models.TaskAddParameter(
+        id=task.id,
+        command_line="/bin/bash",
+    )
+    core_cluster_operations.batch_client.task.add(cluster_id, task=ghost_task)
     # tell the node to run the task
 
-    task_cmd = (r"source ~/.bashrc; " 
-                r"export PYTHONPATH=$PYTHONPATH:$AZTK_WORKING_DIR; "
-                r"cd $AZ_BATCH_TASK_WORKING_DIR; "
-                r'$AZTK_WORKING_DIR/.aztk-env/.venv/bin/python $AZTK_WORKING_DIR/aztk/node_scripts/submit.py "{}" >> {}-output.log 2>&1'.format(serialized_task_resource_file.blob_source, task.id))
-    print("task_cmd", task_cmd)
+    task_working_dir = "/mnt/aztk/startup/tasks/workitems/{}".format(task.id)
+
+    task_cmd = (
+        r"source ~/.bashrc; "
+        r"mkdir -p {0};"
+        r"export PYTHONPATH=$PYTHONPATH:$AZTK_WORKING_DIR; "
+        r"export AZ_BATCH_TASK_WORKING_DIR={0};"
+        r"export STORAGE_LOGS_CONTAINER={1};"
+        r"cd $AZ_BATCH_TASK_WORKING_DIR; "
+        r'$AZTK_WORKING_DIR/.aztk-env/.venv/bin/python $AZTK_WORKING_DIR/aztk/node_scripts/submit.py "{2}" >> {3} 2>&1'.
+        format(task_working_dir, cluster_id, serialized_task_resource_file.blob_source,
+               constants.SPARK_SUBMIT_LOGS_FILE))
     node_id = select_scheduling_target_node(spark_cluster_operations, cluster_id, scheduling_target)
     node_run_output = spark_cluster_operations.node_run(cluster_id, node_id, task_cmd, timeout=120)
-    print(node_run_output.__dict__)
 
 
 def get_cluster_scheduling_target(core_cluster_operations, cluster_id):
@@ -65,12 +73,13 @@ def get_cluster_scheduling_target(core_cluster_operations, cluster_id):
     return cluster_configuration.scheduling_target
 
 
-def submit_application(core_cluster_operations,
-                       spark_cluster_operations,
-                       cluster_id,
-                       application,
-                       remote: bool = False,
-                       wait: bool = False,
+def submit_application(
+        core_cluster_operations,
+        spark_cluster_operations,
+        cluster_id,
+        application,
+        remote: bool = False,
+        wait: bool = False,
 ):
     """
     Submit a spark app
@@ -98,7 +107,6 @@ def submit(
         remote: bool = False,
         wait: bool = False,
         scheduling_target: str = None,
-
 ):
     try:
         submit_application(core_cluster_operations, spark_cluster_operations, cluster_id, application, remote, wait)

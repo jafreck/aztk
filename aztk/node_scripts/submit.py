@@ -200,6 +200,32 @@ def ssh_submit(task_sas_url):
     # download the tasks resource files to well known path /mnt/aztk/tasks/workitems/$(task_name)/
     download_task_resource_files(task.id, task.resource_files)
 
+    # read application.yaml
+    application = load_application(os.path.join(os.environ["AZ_BATCH_TASK_WORKING_DIR"], "application.yaml"))
+    # run application
+    cmd = __app_submit_cmd(
+        name=application["name"],
+        app=application["application"],
+        app_args=application["application_args"],
+        main_class=application["main_class"],
+        jars=application["jars"],
+        py_files=application["py_files"],
+        files=application["files"],
+        driver_java_options=application["driver_java_options"],
+        driver_library_path=application["driver_library_path"],
+        driver_class_path=application["driver_class_path"],
+        driver_memory=application["driver_memory"],
+        executor_memory=application["executor_memory"],
+        driver_cores=application["driver_cores"],
+        executor_cores=application["executor_cores"],
+    )
+    return_code = subprocess.call(cmd.to_str(), shell=True)
+
+    # upload log
+    upload_log(config.blob_client, application)
+
+    return return_code
+
 
 def http_request_wrapper(func, *args, timeout=None, max_execution_time=300, **kwargs):
     start_time = time.clock()
@@ -223,7 +249,8 @@ def _download_resource_file(task_id, resource_file):
     # timeout = 30 # set to default blob download timeout
     response = http_request_wrapper(requests.get, url=resource_file.blob_source, timeout=None, stream=True)
     if resource_file.file_path:
-        with open(resource_file.file_path, 'wb') as stream:
+        write_path = os.path.join(os.environ.get("AZ_BATCH_TASK_WORKING_DIR"), resource_file.file_path)
+        with open(write_path, 'wb') as stream:
             for chunk in response.iter_content(chunk_size=16777216):
                 stream.write(chunk)
             return None
@@ -247,21 +274,16 @@ def download_task_resource_files(task_id, resource_files):
         return [result.result() for result in done]
 
 
-def run_task(task):
-    pass
-
-
 if __name__ == "__main__":
     return_code = 1
     print("sys.argv", sys.argv)
     if len(sys.argv) == 2:
         serialized_task_sas_url = sys.argv[1]
         print("serialized_task_sas_url", serialized_task_sas_url)
-        ssh_submit(serialized_task_sas_url)
-
-        # use task id to make an TASK_WORKING_DIR
-        # download the task's application.yaml
-        # use the application.yaml to run the Spark application
+        try:
+            return_code = ssh_submit(serialized_task_sas_url)
+        except Exception as e:
+            upload_error_log(str(e), os.path.join(os.environ["AZ_BATCH_TASK_WORKING_DIR"], "application.yaml"))
     else:
         try:
             return_code = receive_submit_request(
