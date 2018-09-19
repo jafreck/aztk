@@ -248,22 +248,7 @@ def download_task_resource_files(task_id, resource_files):
 
 
 def run_task(task):
-    cmd = __app_submit_cmd(
-        name=task. "name"],
-        app=task. "application"],
-        app_args=task. "application_args"],
-        main_class=task. "main_class"],
-        jars=task. "jars"],
-        py_files=task. "py_files"],
-        files=task. "files"],
-        driver_java_options=task. "driver_java_options"],
-        driver_library_path=task. "driver_library_path"],
-        driver_class_path=task. "driver_class_path"],
-        driver_memory=task. "driver_memory"],
-        executor_memory=task. "executor_memory"],
-        driver_cores=task. "driver_cores"],
-        executor_cores=task. "executor_cores"],
-    )
+    pass
 
 
 if __name__ == "__main__":
