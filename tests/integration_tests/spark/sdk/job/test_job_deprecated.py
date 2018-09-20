@@ -281,6 +281,7 @@ def test_delete_job():
 
 def clean_up_job(job_id):
     try:
-        spark_client.delete_job(job_id)
+        with pytest.warns(DeprecationWarning):
+            spark_client.delete_job(job_id)
     except Exception:
         pass
