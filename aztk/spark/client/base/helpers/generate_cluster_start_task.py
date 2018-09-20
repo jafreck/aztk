@@ -89,7 +89,7 @@ def __cluster_install_cmd(zip_resource_file: batch_models.ResourceFile,
         'time('\
             'apt-get -y update;'\
             'n=0;'\
-            'until [ $n -ge 15 ]; do apt-get -y --no-install-recommends install unzip && break; n=$[$n+1]; sleep 5; echo "waited $n*5 seconds"; done;'\
+            'until [ $n -ge 15 ]; do apt-get -y --no-install-recommends install unzip && break; n=$[$n+1]; ps faux; sleep 5; echo "waited $n*5 seconds"; done;'\
             'apt-get -y --no-install-recommends install unzip;'\
             'unzip -o $AZ_BATCH_TASK_WORKING_DIR/{0};'\
             'chmod 777 $AZ_BATCH_TASK_WORKING_DIR/aztk/node_scripts/setup_host.sh;'\
