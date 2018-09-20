@@ -42,7 +42,7 @@ phases:
         export ID_RSA_PUB=`$(ID_RSA_PUB)`
         export STORAGE_ACCOUNT_RESOURCE_ID=$(STORAGE_ACCOUNT_RESOURCE_ID)
         export TENANT_ID=$(TENANT_ID)
-        pytest --numprocesses=75 tests/integration_tests
+        pytest --numprocesses=70 tests/integration_tests
       condition: succeeded() #and(succeeded(), or(startsWith(variables['Build.SourceBranchName'], 'release'), eq(variables['Build.SourceBranchName'], 'master')))
       displayName: integration tests
 
