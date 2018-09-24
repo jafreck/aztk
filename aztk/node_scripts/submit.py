@@ -200,7 +200,6 @@ def http_request_wrapper(func, *args, timeout=None, max_execution_time=300, **kw
 
 
 def _download_resource_file(task_id, resource_file):
-    # timeout = 30 # set to default blob download timeout
     response = http_request_wrapper(requests.get, url=resource_file.blob_source, timeout=None, stream=True)
     if resource_file.file_path:
         write_path = os.path.join(os.environ.get("AZ_BATCH_TASK_WORKING_DIR"), resource_file.file_path)
