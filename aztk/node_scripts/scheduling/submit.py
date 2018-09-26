@@ -73,14 +73,8 @@ def receive_submit_request(application_file_path):
     return return_code
 
 
-def download_task_definition(task_sas_url):
-    response = scheduling_target.http_request_wrapper(requests.get, task_sas_url, timeout=10)
-    yaml_serialized_task = response.content
-    return yaml.load(yaml_serialized_task)
-
-
 def ssh_submit(task_sas_url):
-    task = download_task_definition(task_sas_url)
+    task = common.download_task_definition(task_sas_url)
     scheduling_target.download_task_resource_files(task.id, task.resource_files)
 
     application = common.load_application(os.path.join(os.environ["AZ_BATCH_TASK_WORKING_DIR"], "application.yaml"))

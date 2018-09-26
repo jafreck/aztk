@@ -11,6 +11,7 @@ azure-storage-blob = "==1.1.0"
 pycryptodomex = "==3.6.1"
 PyYAML = "==3.12"
 requests = "==2.19.1"
+paramiko = "==2.4.1"
 
 [dev-packages]
 

@@ -6,11 +6,12 @@ from aztk import error
 from aztk import models as base_models
 from aztk.internal.cluster_data import NodeData
 from aztk.spark import models
+from aztk.spark.models import SchedulingTarget
 from aztk.utils import helpers
 from aztk.utils.command_builder import CommandBuilder
 
 
-def __app_cmd(resource_files):
+def __app_cmd(scheduling_target=None, resource_files=None):
     docker_exec = CommandBuilder("sudo docker exec")
     docker_exec.add_argument("-i")
     docker_exec.add_option("-e", "AZ_BATCH_TASK_WORKING_DIR=$AZ_BATCH_TASK_WORKING_DIR")
@@ -20,8 +21,9 @@ def __app_cmd(resource_files):
         r"source ~/.bashrc; "
         r"export PYTHONPATH=$PYTHONPATH:\$AZTK_WORKING_DIR; "
         r"cd \$AZ_BATCH_TASK_WORKING_DIR; "
-        r'\$AZTK_WORKING_DIR/.aztk-env/.venv/bin/python \$AZTK_WORKING_DIR/aztk/node_scripts/job_submission.py {}"'.
-        format([task_def.blob_source for task_def in resource_files]))
+        r'\$AZTK_WORKING_DIR/.aztk-env/.venv/bin/python \$AZTK_WORKING_DIR/aztk/node_scripts/job_submission.py {0} {1}"'.
+        format(scheduling_target,
+               [task_def.blob_source for task_def in resource_files]))
     return docker_exec.to_str()
 
 
@@ -36,8 +38,9 @@ def generate_job_manager_task(core_job_operations, job, application_tasks):
             blob_client=core_job_operations.blob_client,
         )
         resource_files.append(task_definition_resource_file)
-    if scheduling_target:
-        task_cmd = __app_cmd(resource_files)    # this needs to support schedule_with_target as well
+
+    if job.scheduling_target == SchedulingTarget.master:
+        task_cmd = __app_cmd(SchedulingTarget.master, resource_files)
     else:
         task_cmd = __app_cmd()
 

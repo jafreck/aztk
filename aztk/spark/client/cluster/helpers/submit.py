@@ -49,8 +49,8 @@ def schedule_with_target(core_cluster_operations, spark_cluster_operations, clus
         id=task.id,
         command_line="/bin/bash",
     )
-    core_cluster_operations.batch_client.task.add(cluster_id, task=ghost_task)
     # tell the node to run the task
+    core_cluster_operations.batch_client.task.add(cluster_id, task=ghost_task)
 
     task_working_dir = "/mnt/aztk/startup/tasks/workitems/{}".format(task.id)
 

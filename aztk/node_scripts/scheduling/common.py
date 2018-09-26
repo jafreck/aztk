@@ -3,9 +3,11 @@ import os
 
 import azure.batch.models as batch_models
 import azure.storage.blob as blob
+import requests
 import yaml
 
 import common
+import scheduling_target
 from aztk.node_scripts.core import config
 
 
@@ -92,3 +94,9 @@ def upload_error_log(error, application_file_path):
         use_full_path=False,
     )
     upload_log(blob_client, application)
+
+
+def download_task_definition(task_sas_url):
+    response = scheduling_target.http_request_wrapper(requests.get, task_sas_url, timeout=10)
+    yaml_serialized_task = response.content
+    return yaml.load(yaml_serialized_task)
