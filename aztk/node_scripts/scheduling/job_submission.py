@@ -4,14 +4,11 @@ import sys
 import azure.batch.models as batch_models
 import yaml
 
-import aztk.spark.models as models
 import common
 import scheduling_target
-from aztk import constants
-from aztk.client.base.base_operations import node_run
 from aztk.node_scripts.core import config
 from aztk.node_scripts.install.pick_master import get_master_node_id
-from aztk.spark.models import Client
+from aztk.utils import constants
 
 
 def read_downloaded_tasks():
@@ -86,8 +83,8 @@ def schedule_with_target(scheduling_target, task_sas_urls):
 if __name__ == "__main__":
     scheduling_target = sys.argv.get(1)
     if scheduling_target:
-        task_sas_urls =  [task_sas_url for task_sas_url in sys.argv[2:]
-        schedule_with_target(scheduling_target,])
+        task_sas_urls = [task_sas_url for task_sas_url in sys.argv[2:]]
+        schedule_with_target(scheduling_target, task_sas_urls)
     else:
         tasks = read_downloaded_tasks()
         schedule_tasks(tasks)
