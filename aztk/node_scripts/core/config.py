@@ -9,8 +9,8 @@ from azure.mgmt.batch import BatchManagementClient
 from azure.mgmt.storage import StorageManagementClient
 from azure.storage.common import CloudStorageAccount
 
+from aztk.node_scripts.core import log
 from aztk.spark import Client, models
-from core import log
 
 RESOURCE_ID_PATTERN = re.compile("^/subscriptions/(?P<subscription>[^/]+)"
                                  "/resourceGroups/(?P<resourcegroup>[^/]+)"
