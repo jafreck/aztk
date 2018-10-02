@@ -22,7 +22,6 @@ install_prerequisites () {
         apt-transport-https
         curl
         ca-certificates
-        nohup
         software-properties-common
         python3-pip
         python3-venv
