@@ -84,6 +84,9 @@ def get_spark_client():
             batch_account_resource_id=batch_resource_id,
             storage_account_resource_id=storage_resource_id,
         )
+        return Client(
+            secrets_configuration=models.SecretsConfiguration(service_principal=serice_principle_configuration))
+
     else:
         # this must be true if service principle configuration keys were not set
         assert (all([
@@ -99,11 +102,7 @@ def get_spark_client():
             storage_account_suffix=storage_account_suffix,
         )
 
-    return Client(
-        secrets_configuration=models.SecretsConfiguration(
-            service_principal=serice_principle_configuration,
-            shared_key=shared_key_configuration,
-        ))
+        return Client(secrets_configuration=models.SecretsConfiguration(shared_key=shared_key_configuration))
 
 
 batch_client = get_batch_client()

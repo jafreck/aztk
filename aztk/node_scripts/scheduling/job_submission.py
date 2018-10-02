@@ -74,7 +74,7 @@ def schedule_with_target(scheduling_target, task_sas_urls):
             r"export AZ_BATCH_TASK_WORKING_DIR={0};"
             r"export STORAGE_LOGS_CONTAINER={1};"
             r"cd $AZ_BATCH_TASK_WORKING_DIR; "
-            r'$AZTK_WORKING_DIR/.aztk-env/.venv/bin/python $AZTK_WORKING_DIR/aztk/node_scripts/submit.py "{2}" >> {3} 2>&1'.
+            r'$AZTK_WORKING_DIR/.aztk-env/.venv/bin/python $AZTK_WORKING_DIR/aztk/node_scripts/scheduling/submit.py "{2}" >> {3} 2>&1'.
             format(task_working_dir, config.pool_id, task.blob_source, constants.SPARK_SUBMIT_LOGS_FILE))
         node_id = select_scheduling_target_node(config.spark_client.cluster, config.pool_id, scheduling_target)
         node_run_output = config.spark_client.cluster.node_run(config.pool_id, node_id, task_cmd, timeout=120)
