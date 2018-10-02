@@ -12,7 +12,6 @@ pycryptodomex = "==3.6.6"
 PyYAML = "==3.13"
 requests = "==2.19.1"
 paramiko = "==2.4.2"
-pynacl = "==1.2.1"
 
 [dev-packages]
 
