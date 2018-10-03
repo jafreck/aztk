@@ -8,9 +8,9 @@ import requests
 import yaml
 
 import common
-import scheduling_target
 from aztk import error
 from aztk.node_scripts.core import config
+from aztk.node_scripts.scheduling import scheduling_target
 from aztk.utils.command_builder import CommandBuilder
 
 # limit azure.storage logging

@@ -81,7 +81,11 @@ def schedule_with_target(scheduling_target, task_sas_urls):
 
 
 if __name__ == "__main__":
-    scheduling_target = sys.argv.get(1)
+    try:
+        scheduling_target = sys.argv[1]
+    except IndexError:
+        scheduling_target = None
+
     if scheduling_target:
         task_sas_urls = [task_sas_url for task_sas_url in sys.argv[2:]]
         schedule_with_target(scheduling_target, task_sas_urls)

@@ -15,8 +15,7 @@ from aztk_cli import config
 from tests.integration_tests.spark.sdk.clean_up_cluster import clean_up_cluster
 from tests.integration_tests.spark.sdk.ensure_spark_processes import \
     ensure_spark_processes
-from tests.integration_tests.spark.sdk.get_client import (get_spark_client,
-                                                          get_test_suffix)
+from tests.integration_tests.spark.sdk.get_client import (get_spark_client, get_test_suffix)
 from tests.integration_tests.spark.sdk.wait_for_all_nodes import \
     wait_for_all_nodes
 
@@ -126,6 +125,7 @@ def test_submit():
 
         spark_client.cluster.submit(
             id=cluster_configuration.cluster_id, application=application_configuration, wait=True)
+        #TODO: assert for success
     finally:
         clean_up_cluster(spark_client, cluster_configuration.cluster_id)
 
@@ -294,5 +294,43 @@ def test_debug_tool():
             assert node_output.id in [node.id for node in nodes]
             assert node_output.error is None
             assert any(member in name for name in debug_zip.namelist() for member in expected_members)
+    finally:
+        clean_up_cluster(spark_client, cluster_configuration.cluster_id)
+
+
+def test_scheduling_target():
+    test_id = "test-scheduling-target-"
+    cluster_configuration = aztk.spark.models.ClusterConfiguration(
+        cluster_id=test_id + base_cluster_id,
+        size=2,
+        size_low_priority=0,
+        vm_size="standard_f2",
+        subnet_id=None,
+        file_shares=None,
+        toolkit=aztk.spark.models.SparkToolkit(version="2.3.0"),
+        spark_configuration=None,
+        scheduling_target=aztk.spark.models.SchedulingTarget.master)
+
+    application_configuration = aztk.spark.models.ApplicationConfiguration(
+        name="pipy100",
+        application="./examples/src/main/python/pi.py",
+        application_args=[100],
+        main_class=None,
+        jars=[],
+        py_files=[],
+        files=[],
+        driver_java_options=None,
+        driver_class_path=None,
+        driver_memory=None,
+        driver_cores=None,
+        executor_memory=None,
+        executor_cores=None,
+        max_retry_count=None)
+    try:
+        spark_client.cluster.create(cluster_configuration, wait=True)
+
+        spark_client.cluster.submit(
+            id=cluster_configuration.cluster_id, application=application_configuration, wait=True)
+        #TODO: assert for success
     finally:
         clean_up_cluster(spark_client, cluster_configuration.cluster_id)

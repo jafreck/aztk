@@ -6,7 +6,7 @@ import azure.batch.models as batchmodels
 import azure.batch.models.batch_error as batcherror
 from msrest.exceptions import ClientRequestError
 
-from core import config
+from aztk.node_scripts.core import config
 
 MASTER_NODE_METADATA_KEY = "_spark_master_node"
 

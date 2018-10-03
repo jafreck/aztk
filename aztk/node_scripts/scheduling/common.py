@@ -7,8 +7,8 @@ import requests
 import yaml
 
 import common
-import scheduling_target
 from aztk.node_scripts.core import config
+from aztk.node_scripts.scheduling import scheduling_target
 
 
 def load_application(application_file_path):
