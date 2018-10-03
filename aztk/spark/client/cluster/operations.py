@@ -126,7 +126,16 @@ class ClusterOperations(SparkBaseOperations):
         """
         return run.cluster_run(self._core_cluster_operations, id, command, host, internal, timeout)
 
-    def node_run(self, id: str, node_id: str, command: str, host=False, internal: bool = False, timeout=None):
+    def node_run(
+            self,
+            id: str,
+            node_id: str,
+            command: str,
+            host=False,
+            internal: bool = False,
+            timeout=None,
+            block=True,
+    ):
         """Run a bash command on the given node
 
         Args:
@@ -139,11 +148,11 @@ class ClusterOperations(SparkBaseOperations):
                 If None, the command will run on the host VM. Defaults to None.
             timeout=None (:obj:`str`, optional): The timeout in seconds for establishing a connection to the node.
                 Defaults to None.
-
+            block=True (:obj:`bool`, optional): If True, the command blocks until execution is complete.
         Returns:
             :obj:`aztk.spark.models.NodeOutput`: object containing the output of the run command
         """
-        return node_run.node_run(self._core_cluster_operations, id, node_id, command, host, internal, timeout)
+        return node_run.node_run(self._core_cluster_operations, id, node_id, command, host, internal, timeout, block)
 
     def copy(
             self,

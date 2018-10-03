@@ -1,19 +1,9 @@
 from aztk import models
 from aztk.internal import cluster_data
 
-from .helpers import (
-    create_user_on_cluster,
-    create_user_on_node,
-    delete_user_on_cluster,
-    delete_user_on_node,
-    generate_user_on_cluster,
-    generate_user_on_node,
-    get_application_log,
-    get_remote_login_settings,
-    node_run,
-    run,
-    ssh_into_node,
-)
+from .helpers import (create_user_on_cluster, create_user_on_node, delete_user_on_cluster, delete_user_on_node,
+                      generate_user_on_cluster, generate_user_on_node, get_application_log, get_remote_login_settings,
+                      node_run, run, ssh_into_node)
 
 
 class BaseOperations:
@@ -168,7 +158,7 @@ class BaseOperations:
         """
         return delete_user_on_cluster.delete_user_on_cluster(self, username, id, nodes)
 
-    def node_run(self, id, node_id, command, internal, container_name=None, timeout=None):
+    def node_run(self, id, node_id, command, internal, container_name=None, timeout=None, block=True):
         """Run a bash command on the given node
 
         Args:
@@ -181,11 +171,12 @@ class BaseOperations:
                 If None, the command will run on the host VM. Defaults to None.
             timeout=None (:obj:`str`, optional): The timeout in seconds for establishing a connection to the node.
                 Defaults to None.
+            block=True (:obj:`bool`, optional): If True, the command blocks until execution is complete.
 
         Returns:
             :obj:`aztk.models.NodeOutput`: object containing the output of the run command
         """
-        return node_run.node_run(self, id, node_id, command, internal, container_name, timeout)
+        return node_run.node_run(self, id, node_id, command, internal, container_name, timeout, block)
 
     def get_remote_login_settings(self, id: str, node_id: str):
         """Get the remote login information for a node in a cluster

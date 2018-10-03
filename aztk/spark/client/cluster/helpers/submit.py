@@ -40,7 +40,7 @@ def select_scheduling_target_node(spark_cluster_operations, cluster_id, scheduli
     return cluster.master_node_id
 
 
-def schedule_with_target(core_cluster_operations, spark_cluster_operations, cluster_id, scheduling_target, task):
+def schedule_with_target(core_cluster_operations, spark_cluster_operations, cluster_id, scheduling_target, task, wait):
     # upload "real" task definition to storage
     serialized_task_resource_file = upload_serialized_task_to_storage(core_cluster_operations.blob_client, cluster_id,
                                                                       task)
@@ -65,7 +65,7 @@ def schedule_with_target(core_cluster_operations, spark_cluster_operations, clus
         format(task_working_dir, cluster_id, serialized_task_resource_file.blob_source,
                constants.SPARK_SUBMIT_LOGS_FILE))
     node_id = select_scheduling_target_node(spark_cluster_operations, cluster_id, scheduling_target)
-    node_run_output = spark_cluster_operations.node_run(cluster_id, node_id, task_cmd, timeout=120)
+    node_run_output = spark_cluster_operations.node_run(cluster_id, node_id, task_cmd, timeout=120, block=wait)
 
 
 def get_cluster_scheduling_target(core_cluster_operations, cluster_id):
@@ -89,7 +89,8 @@ def submit_application(
 
     scheduling_target = get_cluster_scheduling_target(core_cluster_operations, cluster_id)
     if scheduling_target:
-        schedule_with_target(core_cluster_operations, spark_cluster_operations, cluster_id, scheduling_target, task)
+        schedule_with_target(core_cluster_operations, spark_cluster_operations, cluster_id, scheduling_target, task,
+                             wait)
     else:
         # Add task to batch job (which has the same name as cluster_id)
         core_cluster_operations.batch_client.task.add(job_id=cluster_id, task=task)
