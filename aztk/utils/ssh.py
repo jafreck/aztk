@@ -130,11 +130,7 @@ def node_exec_command(node_id,
     channel = transport.open_session()
     channel.exec_command(cmd)
     stdout = channel.makefile("r", -1)
-    # stderr = channel.makefile_stderr("r", -1)
-    # stdout.channel.recv_exit_status()
     output = stdout.read().decode("utf-8")
-    # print(stdout.read())
-    # print(stderr.read())
     client.close()
     return NodeOutput(node_id, output, None)
 
