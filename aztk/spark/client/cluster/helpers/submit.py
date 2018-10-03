@@ -61,7 +61,7 @@ def schedule_with_target(core_cluster_operations, spark_cluster_operations, clus
         r"export AZ_BATCH_TASK_WORKING_DIR={0};"
         r"export STORAGE_LOGS_CONTAINER={1};"
         r"cd $AZ_BATCH_TASK_WORKING_DIR; "
-        r'nohup $AZTK_WORKING_DIR/.aztk-env/.venv/bin/python $AZTK_WORKING_DIR/aztk/node_scripts/scheduling/submit.py "{2}" >> {3} 2>&1 &'.
+        r'$AZTK_WORKING_DIR/.aztk-env/.venv/bin/python $AZTK_WORKING_DIR/aztk/node_scripts/scheduling/submit.py "{2}" >> {3} 2>&1'.
         format(task_working_dir, cluster_id, serialized_task_resource_file.blob_source,
                constants.SPARK_SUBMIT_LOGS_FILE))
     node_id = select_scheduling_target_node(spark_cluster_operations, cluster_id, scheduling_target)

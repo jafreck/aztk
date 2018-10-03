@@ -121,12 +121,20 @@ def node_exec_command(node_id,
     except AztkError as e:
         return NodeOutput(node_id, None, e)
     if container_name:
-        cmd = "sudo docker exec 2>&1 -t {0} /bin/bash -c 'set -e; set -o pipefail; {1}; wait'".format(
+        cmd = "sudo docker exec 2>&1 -td {0} /bin/bash -c 'set -e; set -o pipefail; {1}; wait'".format(
             container_name, command)
     else:
-        cmd = "/bin/bash 2>&1 -c 'set -e; set -o pipefail; {0}; wait'".format(command)
-    _, stdout, _ = client.exec_command(cmd, get_pty=True)
+        cmd = "/bin/bash 2>&1 -c 'set -e; set -o pipefail; {0}; wait;'".format(command)
+
+    transport = client.get_transport()
+    channel = transport.open_session()
+    channel.exec_command(cmd)
+    stdout = channel.makefile("r", -1)
+    # stderr = channel.makefile_stderr("r", -1)
+    # stdout.channel.recv_exit_status()
     output = stdout.read().decode("utf-8")
+    # print(stdout.read())
+    # print(stderr.read())
     client.close()
     return NodeOutput(node_id, output, None)
 
