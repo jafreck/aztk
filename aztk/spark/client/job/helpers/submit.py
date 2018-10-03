@@ -39,8 +39,8 @@ def generate_job_manager_task(core_job_operations, job, application_tasks):
         )
         resource_files.append(task_definition_resource_file)
 
-    if job.scheduling_target == SchedulingTarget.master:
-        task_cmd = __app_cmd(SchedulingTarget.master, resource_files)
+    if job.scheduling_target == SchedulingTarget.Master:
+        task_cmd = __app_cmd(SchedulingTarget.Master, resource_files)
     else:
         task_cmd = __app_cmd()
 
