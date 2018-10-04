@@ -92,9 +92,11 @@ def ssh_submit(task_sas_url):
     try:
         exit_code = subprocess.call(cmd.to_str(), shell=True)
         common.upload_log(config.blob_client, application)
+        #TODO: separate logging and applicaiton output
         print("completed application, updating storage table")
         mark_task_complete(config.pool_id, task.id, exit_code)
     except Exception as e:
+        #TODO: separate logging and applicaiton output
         print("application failed, updating storage table")
         mark_task_failure(config.pool_id, task.id, exit_code, str(e))
 
