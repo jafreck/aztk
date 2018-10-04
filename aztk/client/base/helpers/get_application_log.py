@@ -19,18 +19,19 @@ def __check_task_node_exist(batch_client, cluster_id: str, task: batch_models.Cl
         return False
 
 
-def __wait_for_app_to_be_running(batch_client, cluster_id: str, application_name: str) -> batch_models.CloudTask:
+def __wait_for_app_to_be_running(base_operations, cluster_id: str, application_name: str) -> batch_models.CloudTask:
     """
         Wait for the batch task to leave the waiting state into running(or completed if it was fast enough)
     """
+    # TODO: should not return batch task...
     while True:
-        task = batch_client.task.get(cluster_id, application_name)
+        application_state = base_operations.get_task_status(cluster_id, application_name)
 
-        if task.state is batch_models.TaskState.active or task.state is batch_models.TaskState.preparing:
+        if application_state in [batch_models.TaskState.active, batch_models.TaskState.preparing]:
             # TODO: log
             time.sleep(5)
         else:
-            return task
+            return base_operations.batch_client.task.get(job_id=cluster_id, task_id=application_name)
 
 
 def __get_output_file_properties(batch_client, cluster_id: str, application_name: str):
@@ -64,12 +65,12 @@ def get_log_from_storage(blob_client, container_name, application_name, task):
 
 
 def wait_for_scheduling_target_task(base_operations, cluster_id, application_name):
-    entity = base_operations.get_task_from_table(cluster_id, application_name)
-    while TaskState(entity.state) not in [TaskState.Completed, TaskState.Failed]:
+    application_state = base_operations.get_task_status(cluster_id, application_name)
+    while TaskState(application_state) not in [TaskState.Completed, TaskState.Failed]:
         time.sleep(3)
         # TODO: enable logger
         # log.debug("{} {}: application not yet complete".format(cluster_id, application_name))
-        entity = base_operations.get_task_from_table(cluster_id, application_name)
+        application_state = base_operations.get_task_status(cluster_id, application_name)
     return
 
 
@@ -77,7 +78,7 @@ def get_log(base_operations, cluster_id: str, application_name: str, tail=False,
     job_id = cluster_id
     task_id = application_name
 
-    task = __wait_for_app_to_be_running(base_operations.batch_client, cluster_id, application_name)
+    task = __wait_for_app_to_be_running(base_operations, cluster_id, application_name)
     scheduling_target = base_operations.get_cluster_configuration(cluster_id).scheduling_target
 
     if not __check_task_node_exist(base_operations.batch_client, cluster_id, task):
