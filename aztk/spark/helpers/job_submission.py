@@ -169,7 +169,6 @@ def get_application_log(spark_client, job_id, application_name):
         print(e)
         # see if the application is written to metadata of pool
         applications = list_applications(spark_client, job_id)
-        print(applications)
         for application in applications:
             if applications[application] is None and application == application_name:
                 raise error.AztkError("The application {0} has not yet been created.".format(application))

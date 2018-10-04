@@ -87,35 +87,56 @@ def ssh_submit(task_sas_url):
     cmd = __app_submit_cmd(application)
 
     # update task table before running
-    insert_task_into_task_table(helpers.convert_id_to_table_id(config.pool_id), task)
+    insert_task_into_task_table(config.pool_id, task)
+    exit_code = -1
+    try:
+        exit_code = subprocess.call(cmd.to_str(), shell=True)
+        common.upload_log(config.blob_client, application)
+        print("completed application, updating storage table")
+        mark_task_complete(config.pool_id, task.id, exit_code)
+    except Exception as e:
+        print("application failed, updating storage table")
+        mark_task_failure(config.pool_id, task.id, exit_code, str(e))
 
-    return_code = subprocess.call(cmd.to_str(), shell=True)
-
-    common.upload_log(config.blob_client, application)
-
-    return return_code
+    return exit_code
 
 
-def update_task_table(table_id, entity):
-    config.spark_client.cluster._core_cluster_operations.insert_task_into_task_table(table_id, entity)
-
-
-def insert_task_into_task_table(table_id, task):
+def insert_task_into_task_table(cluster_id, task):
     entity = Entity()
-    entity.PartitionKey = 'id'
-    entity.RowKey = str(uuid.uuid4())
-    entity.id = task
-    entity.state = TaskState.Running
+    entity.PartitionKey = config.pool_id
+    entity.RowKey = task.id
+    entity.state = TaskState.Running.value
     entity.start_time = time.time()
     entity.end_time = None
-    entity.return_code = None
+    entity.exit_code = None
+    entity.failure_info = None
 
-    update_task_table(table_id, entity)
+    config.spark_client.cluster._core_cluster_operations.insert_task_into_task_table(cluster_id, entity)
 
 
-def update_task_in_task_table(*args, **kwargs):
-    # needs to account for completion and failure
-    pass
+def get_table_entity(cluster_id, task_id):
+    return config.spark_client.cluster._core_cluster_operations.get_task_from_table(cluster_id, task_id)
+
+
+def mark_task_complete(cluster_id, task_id, exit_code):
+    entity = get_table_entity(cluster_id, task_id)
+    entity.end_time = time.time()
+    entity.exit_code = exit_code
+    entity.state = TaskState.Completed.value
+    config.spark_client.table_service.insert_or_replace_entity(helpers.convert_id_to_table_id(cluster_id), entity)
+    entity = get_table_entity(cluster_id, task_id)
+    print(entity)
+
+
+def mark_task_failure(cluster_id, task_id, exit_code, failure_info):
+    entity = get_table_entity(cluster_id, task_id)
+    entity.end_time = time.time()
+    entity.exit_code = exit_code
+    entity.state = TaskState.Completed.value
+    entity.failure_info = failure_info
+    config.spark_client.table_service.insert_or_replace_entity(helpers.convert_id_to_table_id(cluster_id), entity)
+    entity = get_table_entity(cluster_id, task_id)
+    print(entity)
 
 
 if __name__ == "__main__":
@@ -127,6 +148,8 @@ if __name__ == "__main__":
         try:
             return_code = ssh_submit(serialized_task_sas_url)
         except Exception as e:
+            import traceback
+            print(traceback.format_exc())
             common.upload_error_log(str(e), os.path.join(os.environ["AZ_BATCH_TASK_WORKING_DIR"], "application.yaml"))
     else:
         try:

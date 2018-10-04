@@ -22,7 +22,7 @@ def delete_pool_and_job_and_table(core_cluster_operations, pool_id: str, keep_lo
 
     pool_exists = core_cluster_operations.batch_client.pool.exists(pool_id)
 
-    table_exists = core_cluster_operations.table_service.exists(helpers.convert_id_to_table_id(pool_id))
+    table_exists = core_cluster_operations.table_service.exists(pool_id)
 
     if job_exists:
         delete_object(core_cluster_operations.batch_client.job.delete, pool_id)
@@ -31,8 +31,7 @@ def delete_pool_and_job_and_table(core_cluster_operations, pool_id: str, keep_lo
         delete_object(core_cluster_operations.batch_client.pool.delete, pool_id)
 
     if table_exists:
-        print("table deleted")
-        delete_object(core_cluster_operations.delete_task_table, helpers.convert_id_to_table_id(pool_id))
+        delete_object(core_cluster_operations.delete_task_table, pool_id)
 
     if not keep_logs:
         cluster_data = core_cluster_operations.get_cluster_data(pool_id)

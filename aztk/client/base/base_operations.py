@@ -230,26 +230,37 @@ class BaseOperations:
         """Create an Azure Table Storage to track tasks
 
         Args:
-            id (:obj:`str`): the id of the cluster to run the command on
+            id (:obj:`str`): the id of the cluster
         """
         return task_table.create_task_table(self.table_service, id)
 
-    def get_task_table_entries(self, id):
+    def list_task_table_entries(self, id):
         """Create an Azure Table Storage to track tasks
 
         Args:
-            id (:obj:`str`): the id of the cluster to run the command on
+            id (:obj:`str`): the id of the cluster
 
         Returns:
             :obj:`[aztk.models.Task]`: a list of models representing all entries in the Task table
         """
-        return task_table.get_task_table_entries(self.table_service, id)
+        return task_table.list_task_table_entries(self.table_service, id)
+
+    def get_task_from_table(self, id, task_id):
+        """Create an Azure Table Storage to track tasks
+
+        Args:
+            id (:obj:`str`): the id of the cluster
+
+        Returns:
+            :obj:`[aztk.models.Task]`: the task with id task_id from the cluster's storage table
+        """
+        return task_table.get_task_from_table(self.table_service, id, task_id)
 
     def insert_task_into_task_table(self, id, task):
         """Create an Azure Table Storage to track tasks
 
         Args:
-            id (:obj:`str`): the id of the cluster to run the command on
+            id (:obj:`str`): the id of the cluster
 
         Returns:
             :obj:`aztk.models.Task`: a model representing an entry in the Task table
@@ -260,7 +271,7 @@ class BaseOperations:
         """Create an Azure Table Storage to track tasks
 
         Args:
-            id (:obj:`str`): the id of the cluster to run the command on
+            id (:obj:`str`): the id of the cluster
 
         Returns:
             :obj:`bool`: if True, the deletion was successful

@@ -58,12 +58,6 @@ def select_scheduling_target_node(spark_cluster_operations, cluster_id, scheduli
 
 def schedule_with_target(scheduling_target, task_sas_urls):
     for task_sas_url in task_sas_urls:
-        # this may be running on the "wrong" node
-        # need to detect scheduling_target for task
-        # then need to node_run on "correct node"
-        # this means paramiko MUST be installed on the node
-
-        # want to actually call a spark_client.cluster.submit
         task = common.download_task_definition(task_sas_url)
         task_working_dir = "/mnt/aztk/startup/tasks/workitems/{}".format(task.id)
 
