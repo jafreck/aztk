@@ -78,7 +78,6 @@ def get_log(base_operations, cluster_id: str, application_name: str, tail=False,
     task_id = application_name
 
     task = __wait_for_app_to_be_running(base_operations.batch_client, cluster_id, application_name)
-    scheduling_target = None
     scheduling_target = base_operations.get_cluster_configuration(cluster_id).scheduling_target
 
     if not __check_task_node_exist(base_operations.batch_client, cluster_id, task):
