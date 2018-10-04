@@ -65,7 +65,7 @@ pull_docker_container () {
 
 install_python_dependencies () {
     echo "Installing python dependencies"
-    pipenv install --python /usr/bin/python3.5m
+    pipenv install --python /usr/bin/python3.5m --ignore-pipfile
     pipenv run pip install --upgrade pip setuptools wheel
     pip --version
     echo "Finished installing python dependencies"

@@ -3,7 +3,7 @@ from aztk.internal import cluster_data
 
 from .helpers import (create_user_on_cluster, create_user_on_node, delete_user_on_cluster, delete_user_on_node,
                       generate_user_on_cluster, generate_user_on_node, get_application_log, get_remote_login_settings,
-                      node_run, run, ssh_into_node)
+                      node_run, run, ssh_into_node, task_table)
 
 
 class BaseOperations:
@@ -21,6 +21,7 @@ class BaseOperations:
     def __init__(self, context):
         self.batch_client = context["batch_client"]
         self.blob_client = context["blob_client"]
+        self.table_service = context["table_service"]
         self.secrets_configuration = context["secrets_configuration"]
 
     def get_cluster_configuration(self, id: str) -> models.ClusterConfiguration:
@@ -224,3 +225,44 @@ class BaseOperations:
             :obj:`aztk.models.ApplicationLog`: a model representing the output of the application.
         """
         return get_application_log.get_application_log(self, id, application_name, tail, current_bytes)
+
+    def create_task_table(self, id: str):
+        """Create an Azure Table Storage to track tasks
+
+        Args:
+            id (:obj:`str`): the id of the cluster to run the command on
+        """
+        return task_table.create_task_table(self.table_service, id)
+
+    def get_task_table_entries(self, id):
+        """Create an Azure Table Storage to track tasks
+
+        Args:
+            id (:obj:`str`): the id of the cluster to run the command on
+
+        Returns:
+            :obj:`[aztk.models.Task]`: a list of models representing all entries in the Task table
+        """
+        return task_table.get_task_table_entries(self.table_service, id)
+
+    def insert_task_into_task_table(self, id, task):
+        """Create an Azure Table Storage to track tasks
+
+        Args:
+            id (:obj:`str`): the id of the cluster to run the command on
+
+        Returns:
+            :obj:`aztk.models.Task`: a model representing an entry in the Task table
+        """
+        return task_table.insert_task_into_task_table(self.table_service, id, task)
+
+    def delete_task_table(self, id):
+        """Create an Azure Table Storage to track tasks
+
+        Args:
+            id (:obj:`str`): the id of the cluster to run the command on
+
+        Returns:
+            :obj:`bool`: if True, the deletion was successful
+        """
+        return task_table.delete_task_table(self.table_service, id)

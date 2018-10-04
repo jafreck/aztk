@@ -12,6 +12,7 @@ pycryptodomex = "==3.6.6"
 PyYAML = "==3.13"
 requests = "==2.19.1"
 paramiko = "==2.4.2"
+azure-cosmosdb-table = "==1.0.5"
 
 [dev-packages]
 

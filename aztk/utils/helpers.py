@@ -1,6 +1,7 @@
 from __future__ import print_function
 
 import datetime
+import hashlib
 import io
 import logging
 import os
@@ -387,3 +388,8 @@ def bool_env(value: bool):
         return "true"
     else:
         return "false"
+
+
+def convert_id_to_table_id(id):
+    # table storage doesn't allow names to begin with numbers
+    return 'a' + hashlib.sha256(id.encode()).hexdigest()[0:62]

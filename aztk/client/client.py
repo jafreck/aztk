@@ -36,9 +36,11 @@ class CoreClient:
         azure_api.validate_secrets(secrets_configuration)
         self.batch_client = azure_api.make_batch_client(secrets_configuration)
         self.blob_client = azure_api.make_blob_client(secrets_configuration)
+        self.table_service = azure_api.make_table_service(secrets_configuration)
         context = {
             "batch_client": self.batch_client,
             "blob_client": self.blob_client,
+            "table_service": self.table_service,
             "secrets_configuration": self.secrets_configuration,
         }
         return context

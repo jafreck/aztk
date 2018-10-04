@@ -13,6 +13,8 @@ from .secrets_configuration import (DockerConfiguration, SecretsConfiguration, S
                                     SharedKeyConfiguration)
 from .software import Software
 from .ssh_log import SSHLog
+from .task import Task
+from .task_state import TaskState
 from .toolkit import TOOLKIT_MAP, Toolkit
 from .user_configuration import UserConfiguration
 from .vm_image import VmImage

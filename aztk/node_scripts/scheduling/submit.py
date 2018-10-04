@@ -2,15 +2,20 @@ import logging
 import os
 import subprocess
 import sys
+import time
+import uuid
 from typing import List
 
 import requests
 import yaml
+from azure.cosmosdb.table.models import Entity
 
 import common
 from aztk import error
+from aztk.models import TaskState
 from aztk.node_scripts.core import config
 from aztk.node_scripts.scheduling import scheduling_target
+from aztk.utils import helpers
 from aztk.utils.command_builder import CommandBuilder
 
 # limit azure.storage logging
@@ -80,11 +85,37 @@ def ssh_submit(task_sas_url):
     application = common.load_application(os.path.join(os.environ["AZ_BATCH_TASK_WORKING_DIR"], "application.yaml"))
 
     cmd = __app_submit_cmd(application)
+
+    # update task table before running
+    insert_task_into_task_table(helpers.convert_id_to_table_id(config.pool_id), task)
+
     return_code = subprocess.call(cmd.to_str(), shell=True)
 
     common.upload_log(config.blob_client, application)
 
     return return_code
+
+
+def update_task_table(table_id, entity):
+    config.spark_client.cluster._core_cluster_operations.insert_task_into_task_table(table_id, entity)
+
+
+def insert_task_into_task_table(table_id, task):
+    entity = Entity()
+    entity.PartitionKey = 'id'
+    entity.RowKey = str(uuid.uuid4())
+    entity.id = task
+    entity.state = TaskState.Running
+    entity.start_time = time.time()
+    entity.end_time = None
+    entity.return_code = None
+
+    update_task_table(table_id, entity)
+
+
+def update_task_in_task_table(*args, **kwargs):
+    # needs to account for completion and failure
+    pass
 
 
 if __name__ == "__main__":

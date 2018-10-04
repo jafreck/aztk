@@ -1,39 +1,46 @@
+import hashlib
+
 import azure.batch.models as batch_models
 from msrest.exceptions import ClientRequestError
 
-from aztk.utils import BackOffPolicy, retry
+from aztk.utils import BackOffPolicy, helpers, retry
 
 
-def delete_pool_and_job(core_cluster_operations, pool_id: str, keep_logs: bool = False):
+def delete_pool_and_job_and_table(core_cluster_operations, pool_id: str, keep_logs: bool = False):
     """
         Delete a pool and it's associated job
         :param cluster_id: the pool to add the user to
         :return bool: deleted the pool if exists and job if exists
     """
     # job id is equal to pool id
-    job_id = pool_id
     job_exists = True
 
     try:
-        core_cluster_operations.batch_client.job.get(job_id)
+        core_cluster_operations.batch_client.job.get(pool_id)
     except batch_models.batch_error.BatchErrorException:
         job_exists = False
 
     pool_exists = core_cluster_operations.batch_client.pool.exists(pool_id)
 
+    table_exists = core_cluster_operations.table_service.exists(helpers.convert_id_to_table_id(pool_id))
+
     if job_exists:
-        delete_batch_object(core_cluster_operations.batch_client.job.delete, job_id)
+        delete_object(core_cluster_operations.batch_client.job.delete, pool_id)
 
     if pool_exists:
-        delete_batch_object(core_cluster_operations.batch_client.pool.delete, pool_id)
+        delete_object(core_cluster_operations.batch_client.pool.delete, pool_id)
+
+    if table_exists:
+        print("table deleted")
+        delete_object(core_cluster_operations.delete_task_table, helpers.convert_id_to_table_id(pool_id))
 
     if not keep_logs:
         cluster_data = core_cluster_operations.get_cluster_data(pool_id)
         cluster_data.delete_container(pool_id)
 
-    return job_exists or pool_exists
+    return job_exists or pool_exists or table_exists
 
 
 @retry(retry_count=4, retry_interval=1, backoff_policy=BackOffPolicy.exponential, exceptions=(ClientRequestError))
-def delete_batch_object(function, *args, **kwargs):
+def delete_object(function, *args, **kwargs):
     return function(*args, **kwargs)
