@@ -8,6 +8,7 @@ from typing import List
 
 import requests
 import yaml
+# pylint: disable=import-error,no-name-in-module
 from azure.cosmosdb.table.models import Entity
 
 import common
