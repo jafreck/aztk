@@ -6,7 +6,6 @@ import azure.storage.blob as blob
 import requests
 import yaml
 
-import common
 from aztk.node_scripts.core import config
 from aztk.node_scripts.scheduling import scheduling_target
 
