@@ -78,7 +78,7 @@ def upload_file_to_container(container_name,
 
 
 def upload_error_log(error, application_file_path):
-    application = common.load_application(application_file_path)
+    application = load_application(application_file_path)
     blob_client = config.blob_client
 
     error_log_path = os.path.join(os.environ["AZ_BATCH_TASK_WORKING_DIR"], "error.log")
