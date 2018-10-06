@@ -20,8 +20,9 @@ def __convert_entity_to_task(entity):
     )
 
 
-def __convert_task_to_entity(task):
+def __convert_task_to_entity(partition_key, task):
     return Entity(
+        PartitionKey=partition_key,
         RowKey=task.id,
         node_id=task.node_id,
         state=task.state,
@@ -77,7 +78,7 @@ def get_task_from_table(table_service, id, task_id):
     backoff_policy=BackOffPolicy.exponential,
     exceptions=(AzureMissingResourceHttpError))
 def insert_task_into_task_table(table_service, id, task):
-    return table_service.insert_entity(helpers.convert_id_to_table_id(id), __convert_task_to_entity(task))
+    return table_service.insert_entity(helpers.convert_id_to_table_id(id), __convert_task_to_entity(id, task))
 
 
 @retry(

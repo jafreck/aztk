@@ -8,12 +8,10 @@ from typing import List
 
 import requests
 import yaml
-# pylint: disable=import-error,no-name-in-module
-from azure.cosmosdb.table.models import Entity
 
 import common
 from aztk import error
-from aztk.models import TaskState
+from aztk.models import Task, TaskState
 from aztk.node_scripts.core import config
 from aztk.node_scripts.scheduling import scheduling_target
 from aztk.utils import helpers
@@ -80,15 +78,15 @@ def receive_submit_request(application_file_path):
 
 
 def ssh_submit(task_sas_url):
-    task = common.download_task_definition(task_sas_url)
-    scheduling_target.download_task_resource_files(task.id, task.resource_files)
+    task_definition = common.download_task_definition(task_sas_url)
+    scheduling_target.download_task_resource_files(task_definition.id, task_definition.resource_files)
 
     application = common.load_application(os.path.join(os.environ["AZ_BATCH_TASK_WORKING_DIR"], "application.yaml"))
 
     cmd = __app_submit_cmd(application)
 
     # update task table before running
-    insert_task_into_task_table(config.pool_id, task)
+    task = insert_task_into_task_table(config.pool_id, task_definition)
     exit_code = -1
     try:
         exit_code = subprocess.call(cmd.to_str(), shell=True)
@@ -104,19 +102,20 @@ def ssh_submit(task_sas_url):
     return exit_code
 
 
-def insert_task_into_task_table(cluster_id, task):
-    entity = Entity()
-    entity.PartitionKey = config.pool_id
-    entity.RowKey = task.id
-    entity.node_id = os.environ.get("AZ_BATCH_NODE_ID", None)
-    entity.state = TaskState.Running.value
-    entity.command_line = task.command_line
-    entity.start_time = time.time()
-    entity.end_time = None
-    entity.exit_code = None
-    entity.failure_info = None
+def insert_task_into_task_table(cluster_id, task_definition):
+    task = Task(
+        id=task_definition.id,
+        node_id=os.environ.get("AZ_BATCH_NODE_ID", None),
+        state=TaskState.Running.value,
+        command_line=task_definition.command_line,
+        start_time=time.time(),
+        end_time=None,
+        exit_code=None,
+        failure_info=None,
+    )
 
-    config.spark_client.cluster._core_cluster_operations.insert_task_into_task_table(cluster_id, entity)
+    config.spark_client.cluster._core_cluster_operations.insert_task_into_task_table(cluster_id, task)
+    return task
 
 
 def get_task(cluster_id, task_id):
