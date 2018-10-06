@@ -331,6 +331,12 @@ def test_scheduling_target():
 
         spark_client.cluster.submit(
             id=cluster_configuration.cluster_id, application=application_configuration, wait=True)
-        #TODO: assert for success
+        application_log = spark_client.cluster.get_application_log(
+            id=cluster_configuration.cluster_id,
+            application_name=application_configuration.name,
+            tail=False,
+            current_bytes=0)
+        assert application_log.exit_code == 0
+
     finally:
         clean_up_cluster(spark_client, cluster_configuration.cluster_id)

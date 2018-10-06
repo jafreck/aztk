@@ -108,7 +108,9 @@ def insert_task_into_task_table(cluster_id, task):
     entity = Entity()
     entity.PartitionKey = config.pool_id
     entity.RowKey = task.id
+    entity.node_id = os.environ.get("AZ_BATCH_NODE_ID", None)
     entity.state = TaskState.Running.value
+    entity.command_line = task.command_line
     entity.start_time = time.time()
     entity.end_time = None
     entity.exit_code = None
@@ -152,8 +154,9 @@ if __name__ == "__main__":
             return_code = ssh_submit(serialized_task_sas_url)
         except Exception as e:
             import traceback
-            print(traceback.format_exc())
-            common.upload_error_log(str(e), os.path.join(os.environ["AZ_BATCH_TASK_WORKING_DIR"], "application.yaml"))
+            print()
+            common.upload_error_log(traceback.format_exc() + str(e),
+                                    os.path.join(os.environ["AZ_BATCH_TASK_WORKING_DIR"], "application.yaml"))
     else:
         try:
             return_code = receive_submit_request(
