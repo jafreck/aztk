@@ -1,4 +1,6 @@
 from azure.common import AzureMissingResourceHttpError
+# pylint: disable=import-error,no-name-in-module
+from azure.cosmosdb.table.models import Entity
 
 from aztk.models import Task
 from aztk.utils import BackOffPolicy, helpers, retry
@@ -15,6 +17,19 @@ def __convert_entity_to_task(entity):
         start_time=entity.get("start_time", None),
         end_time=entity.get("end_time", None),
         failure_info=entity.get("failure_info", None),
+    )
+
+
+def __convert_task_to_entity(task):
+    return Entity(
+        RowKey=task.id,
+        node_id=task.node_id,
+        state=task.state,
+        command_line=task.command_line,
+        exit_code=task.exit_code,
+        start_time=task.start_time,
+        end_time=task.end_time,
+        failure_info=task.failure_info,
     )
 
 
@@ -62,7 +77,7 @@ def get_task_from_table(table_service, id, task_id):
     backoff_policy=BackOffPolicy.exponential,
     exceptions=(AzureMissingResourceHttpError))
 def insert_task_into_task_table(table_service, id, task):
-    return table_service.insert_entity(helpers.convert_id_to_table_id(id), task)
+    return table_service.insert_entity(helpers.convert_id_to_table_id(id), __convert_task_to_entity(task))
 
 
 @retry(

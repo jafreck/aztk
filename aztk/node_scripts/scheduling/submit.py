@@ -119,29 +119,27 @@ def insert_task_into_task_table(cluster_id, task):
     config.spark_client.cluster._core_cluster_operations.insert_task_into_task_table(cluster_id, entity)
 
 
-def get_table_entity(cluster_id, task_id):
+def get_task(cluster_id, task_id):
     return config.spark_client.cluster._core_cluster_operations.get_task_from_table(cluster_id, task_id)
 
 
 def mark_task_complete(cluster_id, task_id, exit_code):
-    entity = get_table_entity(cluster_id, task_id)
-    entity.end_time = time.time()
-    entity.exit_code = exit_code
-    entity.state = TaskState.Completed.value
-    config.spark_client.table_service.insert_or_replace_entity(helpers.convert_id_to_table_id(cluster_id), entity)
-    entity = get_table_entity(cluster_id, task_id)
-    print(entity)
+    task = get_task(cluster_id, task_id)
+    task.end_time = time.time()
+    task.exit_code = exit_code
+    task.state = TaskState.Completed.value
+    config.spark_client.cluster._core_cluster_operations.insert_task_into_task_table(cluster_id, task)
+    task = get_task(cluster_id, task_id)
 
 
 def mark_task_failure(cluster_id, task_id, exit_code, failure_info):
-    entity = get_table_entity(cluster_id, task_id)
-    entity.end_time = time.time()
-    entity.exit_code = exit_code
-    entity.state = TaskState.Completed.value
-    entity.failure_info = failure_info
-    config.spark_client.table_service.insert_or_replace_entity(helpers.convert_id_to_table_id(cluster_id), entity)
-    entity = get_table_entity(cluster_id, task_id)
-    print(entity)
+    task = get_task(cluster_id, task_id)
+    task.end_time = time.time()
+    task.exit_code = exit_code
+    task.state = TaskState.Completed.value
+    task.failure_info = failure_info
+    config.spark_client.cluster._core_cluster_operations.insert_task_into_task_table(cluster_id, task)
+    task = get_task(cluster_id, task_id)
 
 
 if __name__ == "__main__":
