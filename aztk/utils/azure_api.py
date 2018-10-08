@@ -3,8 +3,7 @@ import re
 import azure.batch.batch_auth as batch_auth
 import azure.batch.batch_service_client as batch
 import azure.storage.blob as blob
-from azure.common.credentials import \
-    ServicePrincipalCredentials  # pylint: disable=import-error,no-name-in-module
+from azure.common.credentials import ServicePrincipalCredentials
 from azure.cosmosdb.table.tableservice import TableService
 from azure.mgmt.batch import BatchManagementClient
 from azure.mgmt.storage import StorageManagementClient

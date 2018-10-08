@@ -4,11 +4,11 @@ from datetime import datetime
 
 import pytest
 from azure.batch.models import BatchErrorException
+from tests.integration_tests.spark.sdk.get_client import (get_spark_client, get_test_suffix)
 
 import aztk.spark
 from aztk.error import AztkError
 from aztk_cli import config
-from tests.integration_tests.spark.sdk.get_client import (get_spark_client, get_test_suffix)
 
 base_job_id = get_test_suffix("job")
 spark_client = get_spark_client()

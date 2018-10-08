@@ -7,17 +7,18 @@ from zipfile import ZipFile
 import azure.batch.models as batch_models
 import pytest
 from azure.batch.models import BatchErrorException
+from tests.integration_tests.spark.sdk.clean_up_cluster import clean_up_cluster
+from tests.integration_tests.spark.sdk.ensure_spark_processes import \
+    ensure_spark_processes
+from tests.integration_tests.spark.sdk.get_client import (get_spark_client,
+                                                          get_test_suffix)
+from tests.integration_tests.spark.sdk.wait_for_all_nodes import \
+    wait_for_all_nodes
 
 import aztk.spark
 from aztk.error import AztkError
 from aztk.utils import constants
 from aztk_cli import config
-from tests.integration_tests.spark.sdk.clean_up_cluster import clean_up_cluster
-from tests.integration_tests.spark.sdk.ensure_spark_processes import \
-    ensure_spark_processes
-from tests.integration_tests.spark.sdk.get_client import (get_spark_client, get_test_suffix)
-from tests.integration_tests.spark.sdk.wait_for_all_nodes import \
-    wait_for_all_nodes
 
 base_cluster_id = get_test_suffix("cluster")
 spark_client = get_spark_client()
@@ -309,7 +310,7 @@ def test_scheduling_target():
         file_shares=None,
         toolkit=aztk.spark.models.SparkToolkit(version="2.3.0"),
         spark_configuration=None,
-        scheduling_target=aztk.spark.models.SchedulingTarget.master)
+        scheduling_target=aztk.spark.models.SchedulingTarget.Master)
 
     application_configuration = aztk.spark.models.ApplicationConfiguration(
         name="pipy100",
