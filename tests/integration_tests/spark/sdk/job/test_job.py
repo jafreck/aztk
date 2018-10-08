@@ -250,14 +250,14 @@ def test_delete_job():
 def test_scheduling_target_submit():
     test_id = "scheduling-target-submit-"
     app1 = aztk.spark.models.ApplicationConfiguration(
-        name="pipy100",
+        name="pipy001",
         application="./examples/src/main/python/pi.py",
-        application_args=[10],
+        application_args=[],
     )
     app2 = aztk.spark.models.ApplicationConfiguration(
-        name="pipy101",
+        name="pipy002",
         application="./examples/src/main/python/pi.py",
-        application_args=[10],
+        application_args=[],
     )
     job_configuration = aztk.spark.models.JobConfiguration(
         id=test_id + base_job_id,
@@ -270,7 +270,11 @@ def test_scheduling_target_submit():
         scheduling_target=aztk.spark.models.SchedulingTarget.Master)
     try:
         job = spark_client.job.submit(job_configuration=job_configuration, wait=True)
-        #TODO: asserts for success
+
+        application_log = spark_client.job.get_application_log(id=job_configuration.id, application_name=app1.name)
+        assert application_log.exit_code == 0
+        assert application_log.log is not None
+        assert application_log.cluster_id == job_configuration.id
 
     except (AztkError, BatchErrorException) as e:
         raise e
