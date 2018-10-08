@@ -7,7 +7,6 @@ from aztk.utils import BackOffPolicy, helpers, retry
 
 
 def __convert_entity_to_task(entity):
-    print(entity)
     return Task(
         id=entity.get("RowKey", None),
         node_id=entity.get("node_id", None),
@@ -79,6 +78,15 @@ def get_task_from_table(table_service, id, task_id):
     exceptions=(AzureMissingResourceHttpError))
 def insert_task_into_task_table(table_service, id, task):
     return table_service.insert_entity(helpers.convert_id_to_table_id(id), __convert_task_to_entity(id, task))
+
+
+@retry(
+    retry_count=4,
+    retry_interval=1,
+    backoff_policy=BackOffPolicy.exponential,
+    exceptions=(AzureMissingResourceHttpError))
+def update_task_in_task_table(table_service, id, task):
+    return table_service.update_entity(helpers.convert_id_to_table_id(id), __convert_task_to_entity(id, task))
 
 
 @retry(

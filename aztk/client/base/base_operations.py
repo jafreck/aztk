@@ -1,9 +1,11 @@
 from aztk import models
 from aztk.internal import cluster_data
 
-from .helpers import (create_user_on_cluster, create_user_on_node, delete_user_on_cluster, delete_user_on_node,
-                      generate_user_on_cluster, generate_user_on_node, get_application_log, get_remote_login_settings,
-                      node_run, run, ssh_into_node, task_table)
+from .helpers import (create_user_on_cluster, create_user_on_node,
+                      delete_user_on_cluster, delete_user_on_node,
+                      generate_user_on_cluster, generate_user_on_node,
+                      get_application_log, get_remote_login_settings, node_run,
+                      run, ssh_into_node, task_table)
 
 
 class BaseOperations:
@@ -235,7 +237,7 @@ class BaseOperations:
         return task_table.create_task_table(self.table_service, id)
 
     def list_task_table_entries(self, id):
-        """Create an Azure Table Storage to track tasks
+        """list tasks in a storage table
 
         Args:
             id (:obj:`str`): the id of the cluster
@@ -246,7 +248,7 @@ class BaseOperations:
         return task_table.list_task_table_entries(self.table_service, id)
 
     def get_task_from_table(self, id, task_id):
-        """Create an Azure Table Storage to track tasks
+        """Create a storage table to track tasks
 
         Args:
             id (:obj:`str`): the id of the cluster
@@ -257,7 +259,7 @@ class BaseOperations:
         return task_table.get_task_from_table(self.table_service, id, task_id)
 
     def insert_task_into_task_table(self, id, task):
-        """Create an Azure Table Storage to track tasks
+        """Insert a task into the table
 
         Args:
             id (:obj:`str`): the id of the cluster
@@ -267,8 +269,19 @@ class BaseOperations:
         """
         return task_table.insert_task_into_task_table(self.table_service, id, task)
 
+    def update_task_in_task_table(self, id, task):
+        """Update a task in the table
+
+        Args:
+            id (:obj:`str`): the id of the cluster
+
+        Returns:
+            :obj:`aztk.models.Task`: a model representing an entry in the Task table
+        """
+        return task_table.update_task_in_task_table(self.table_service, id, task)
+
     def delete_task_table(self, id):
-        """Create an Azure Table Storage to track tasks
+        """Delete the table that tracks tasks
 
         Args:
             id (:obj:`str`): the id of the cluster

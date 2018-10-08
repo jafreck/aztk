@@ -84,18 +84,19 @@ def ssh_submit(task_sas_url):
 
     cmd = __app_submit_cmd(application)
 
-    # update task table before running
-    task = insert_task_into_task_table(config.pool_id, task_definition)
     exit_code = -1
     try:
+        # update task table before running
+        task = insert_task_into_task_table(config.pool_id, task_definition)
+        # run task and upload log
         exit_code = subprocess.call(cmd.to_str(), shell=True)
         common.upload_log(config.blob_client, application)
-        #TODO: separate logging and applicaiton output
-        print("completed application, updating storage table")
+        #TODO: enable logging
+        # print("completed application, updating storage table")
         mark_task_complete(config.pool_id, task.id, exit_code)
     except Exception as e:
-        #TODO: separate logging and applicaiton output
-        print("application failed, updating storage table")
+        #TODO: enable logging
+        # print("application failed, updating storage table")
         mark_task_failure(config.pool_id, task.id, exit_code, str(e))
 
     return exit_code
@@ -126,7 +127,7 @@ def mark_task_complete(cluster_id, task_id, exit_code):
     task.end_time = time.time()
     task.exit_code = exit_code
     task.state = TaskState.Completed.value
-    config.spark_client.cluster._core_cluster_operations.insert_task_into_task_table(cluster_id, task)
+    config.spark_client.cluster._core_cluster_operations.update_task_in_task_table(cluster_id, task)
     task = get_task(cluster_id, task_id)
 
 
@@ -136,7 +137,7 @@ def mark_task_failure(cluster_id, task_id, exit_code, failure_info):
     task.exit_code = exit_code
     task.state = TaskState.Completed.value
     task.failure_info = failure_info
-    config.spark_client.cluster._core_cluster_operations.insert_task_into_task_table(cluster_id, task)
+    config.spark_client.cluster._core_cluster_operations.update_task_in_task_table(cluster_id, task)
     task = get_task(cluster_id, task_id)
 
 
@@ -150,7 +151,6 @@ if __name__ == "__main__":
             return_code = ssh_submit(serialized_task_sas_url)
         except Exception as e:
             import traceback
-            print()
             common.upload_error_log(traceback.format_exc() + str(e),
                                     os.path.join(os.environ["AZ_BATCH_TASK_WORKING_DIR"], "application.yaml"))
     else:
