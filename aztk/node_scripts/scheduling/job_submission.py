@@ -4,10 +4,9 @@ import sys
 import azure.batch.models as batch_models
 import yaml
 
-import common
-import scheduling_target
 from aztk.node_scripts.core import config
 from aztk.node_scripts.install.pick_master import get_master_node_id
+from aztk.node_scripts.scheduling import common, scheduling_target
 from aztk.utils import constants
 
 

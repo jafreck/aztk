@@ -9,11 +9,10 @@ from typing import List
 import requests
 import yaml
 
-import common
 from aztk import error
 from aztk.models import Task, TaskState
 from aztk.node_scripts.core import config
-from aztk.node_scripts.scheduling import scheduling_target
+from aztk.node_scripts.scheduling import common, scheduling_target
 from aztk.utils import helpers
 from aztk.utils.command_builder import CommandBuilder
 
