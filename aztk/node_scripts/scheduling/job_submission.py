@@ -57,8 +57,8 @@ def select_scheduling_target_node(spark_cluster_operations, cluster_id, scheduli
 
 def schedule_with_target(scheduling_target, task_sas_urls):
     for task_sas_url in task_sas_urls:
-        task = common.download_task_definition(task_sas_url)
-        task_working_dir = "/mnt/aztk/startup/tasks/workitems/{}".format(task.id)
+        task_definition = common.download_task_definition(task_sas_url)
+        task_working_dir = "/mnt/aztk/startup/tasks/workitems/{}".format(task_definition.id)
 
         task_cmd = (
             r"source ~/.bashrc; "
@@ -67,8 +67,8 @@ def schedule_with_target(scheduling_target, task_sas_urls):
             r"export AZ_BATCH_TASK_WORKING_DIR={0};"
             r"export STORAGE_LOGS_CONTAINER={1};"
             r"cd $AZ_BATCH_TASK_WORKING_DIR; "
-            r'nohup $AZTK_WORKING_DIR/.aztk-env/.venv/bin/python $AZTK_WORKING_DIR/aztk/node_scripts/scheduling/submit.py "{2}" >> {3} 2>&1'.
-            format(task_working_dir, config.pool_id, task.blob_source, constants.SPARK_SUBMIT_LOGS_FILE))
+            r'$AZTK_WORKING_DIR/.aztk-env/.venv/bin/python $AZTK_WORKING_DIR/aztk/node_scripts/scheduling/submit.py "{2}" >> {3} 2>&1'.
+            format(task_working_dir, config.pool_id, task_sas_url, constants.SPARK_SUBMIT_LOGS_FILE))
         node_id = select_scheduling_target_node(config.spark_client.cluster, config.pool_id, scheduling_target)
         node_run_output = config.spark_client.cluster.node_run(
             config.pool_id, node_id, task_cmd, timeout=120, block=False)
@@ -81,6 +81,8 @@ if __name__ == "__main__":
         scheduling_target = None
 
     if scheduling_target:
+        print("sys.argv", sys.argv)
+        print("sys.argv[2:]", sys.argv[2:])
         task_sas_urls = [task_sas_url for task_sas_url in sys.argv[2:]]
         schedule_with_target(scheduling_target, task_sas_urls)
     else:
