@@ -6,7 +6,7 @@ from aztk.utils import constants, helpers
 
 
 def submit_job(
-        job_client,
+        core_job_operations,
         job_configuration,
         start_task,
         job_manager_task,
@@ -25,11 +25,14 @@ def submit_job(
             :param vm_image_model -> aztk_sdk.models.VmImage
             :returns None
         """
-    job_client.get_cluster_data(job_configuration.id).save_cluster_config(job_configuration.to_cluster_config())
+    core_job_operations.get_cluster_data(job_configuration.id).save_cluster_config(
+        job_configuration.to_cluster_config())
+
+    core_job_operations.create_task_table(job_configuration.id)
 
     # get a verified node agent sku
     sku_to_use, image_ref_to_use = helpers.select_latest_verified_vm_image_with_node_agent_sku(
-        vm_image_model.publisher, vm_image_model.offer, vm_image_model.sku, job_client.batch_client)
+        vm_image_model.publisher, vm_image_model.offer, vm_image_model.sku, core_job_operations.batch_client)
 
     # set up subnet if necessary
     network_conf = None
@@ -40,7 +43,7 @@ def submit_job(
     auto_pool_specification = batch_models.AutoPoolSpecification(
         pool_lifetime_option=batch_models.PoolLifetimeOption.job_schedule,
         auto_pool_id_prefix=job_configuration.id,
-        keep_alive=False,
+        keep_alive=True,
         pool=batch_models.PoolSpecification(
             display_name=job_configuration.id,
             virtual_machine_configuration=batch_models.VirtualMachineConfiguration(
@@ -77,6 +80,6 @@ def submit_job(
     # create job schedule and add task
     setup = batch_models.JobScheduleAddParameter(id=job_configuration.id, schedule=schedule, job_specification=job_spec)
 
-    job_client.batch_client.job_schedule.add(setup)
+    core_job_operations.batch_client.job_schedule.add(setup)
 
-    return job_client.batch_client.job_schedule.get(job_schedule_id=job_configuration.id)
+    return core_job_operations.batch_client.job_schedule.get(job_schedule_id=job_configuration.id)

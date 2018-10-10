@@ -4,11 +4,9 @@ from aztk import error
 from aztk.spark import models
 from aztk.utils import helpers
 
-from .get_recent_job import get_recent_job
-
 
 def _list_applications(core_job_operations, job_id):
-    recent_run_job = get_recent_job(core_job_operations, job_id)
+    recent_run_job = core_job_operations.get_recent_job(job_id)
     # get application names from Batch job metadata
     applications = {}
     for metadata_item in recent_run_job.metadata:
@@ -16,8 +14,9 @@ def _list_applications(core_job_operations, job_id):
             for app_name in metadata_item.value.split("\n"):
                 applications[app_name] = None
 
-    # get tasks from Batch job
-    for task in core_job_operations.batch_client.task.list(recent_run_job.id):
+    tasks = core_job_operations.list_tasks(job_id)
+    print("_list_applications:tasks=", tasks)
+    for task in tasks:
         if task.id != job_id:
             applications[task.id] = task
 

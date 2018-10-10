@@ -105,9 +105,11 @@ def get_spark_client():
         return Client(secrets_configuration=models.SecretsConfiguration(shared_key=shared_key_configuration))
 
 
-batch_client = get_batch_client()
-blob_client = get_blob_client()
 spark_client = get_spark_client()
+# note: the batch_client and blob_client in _core_cluster_operations
+# is the same as in _core_job_operations
+batch_client = spark_client.cluster._core_cluster_operations.batch_client
+blob_client = spark_client.cluster._core_cluster_operations.blob_client
 
 log.info("Pool id is %s", pool_id)
 log.info("Node id is %s", node_id)

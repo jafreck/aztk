@@ -157,35 +157,16 @@ class ApplicationConfiguration:
 
 
 class Application:
-    def __init__(self, cloud_task: batch_models.CloudTask):
-        self.name = cloud_task.id
-        self.last_modified = cloud_task.last_modified
-        self.creation_time = cloud_task.creation_time
-        self.state = cloud_task.state.name
-        self.state_transition_time = cloud_task.state_transition_time
-        self.exit_code = cloud_task.execution_info.exit_code
-        if cloud_task.previous_state:
-            self.previous_state = cloud_task.previous_state.name
-            self.previous_state_transition_time = cloud_task.previous_state_transition_time
-
-        self._execution_info = cloud_task.execution_info
-        self._node_info = cloud_task.node_info
-        self._stats = cloud_task.stats
-        self._multi_instance_settings = cloud_task.multi_instance_settings
-        self._display_name = cloud_task.display_name
-        self._exit_conditions = cloud_task.exit_conditions
-        self._command_line = cloud_task.command_line
-        self._resource_files = cloud_task.resource_files
-        self._output_files = cloud_task.output_files
-        self._environment_settings = cloud_task.environment_settings
-        self._affinity_info = cloud_task.affinity_info
-        self._constraints = cloud_task.constraints
-        self._user_identity = cloud_task.user_identity
-        self._depends_on = cloud_task.depends_on
-        self._application_package_references = cloud_task.application_package_references
-        self._authentication_token_settings = cloud_task.authentication_token_settings
-        self._url = cloud_task.url
-        self._e_tag = cloud_task.e_tag
+    def __init__(self, task: aztk.models.Task):
+        self.name = task.id
+        self.node_id = task.node_id
+        self.state = task.state
+        self.state_transition_time = task.state_transition_time
+        self.command_line = task.command_line
+        self.exit_code = task.exit_code
+        self.start_time = task.start_time
+        self.end_time = task.end_time
+        self.failure_info = task.failure_info
 
 
 class JobConfiguration:
@@ -281,7 +262,7 @@ class Job:
     def __init__(
             self,
             cloud_job_schedule: batch_models.CloudJobSchedule,
-            cloud_tasks: List[batch_models.CloudTask] = None,
+            tasks: List[aztk.models.Task] = None,
             pool: batch_models.CloudPool = None,
             nodes: batch_models.ComputeNodePaged = None,
     ):
@@ -290,7 +271,7 @@ class Job:
         self.state = cloud_job_schedule.state.name
         self.state_transition_time = cloud_job_schedule.state_transition_time
         self.creation_time = cloud_job_schedule.creation_time
-        self.applications = [Application(task) for task in (cloud_tasks or [])]
+        self.applications = [Application(task) for task in (tasks or [])]
         if pool:
             self.cluster = Cluster(aztk.models.Cluster(pool, nodes))
         else:

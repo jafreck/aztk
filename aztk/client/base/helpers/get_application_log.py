@@ -86,10 +86,9 @@ def wait_for_scheduling_target_task(base_operations, cluster_id, application_nam
 def get_log(base_operations, cluster_id: str, application_name: str, tail=False, current_bytes: int = 0):
     job_id = cluster_id
     task_id = application_name
+    cluster_configuration = base_operations.get_cluster_configuration(cluster_id)
 
-    scheduling_target = base_operations.get_cluster_configuration(cluster_id).scheduling_target
-
-    if scheduling_target:
+    if cluster_configuration.scheduling_target:
         task = wait_for_scheduling_target_task(base_operations, cluster_id, application_name)
         return get_log_from_storage(base_operations.blob_client, cluster_id, application_name, task)
     else:

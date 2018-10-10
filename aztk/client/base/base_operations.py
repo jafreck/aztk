@@ -1,11 +1,9 @@
 from aztk import models
 from aztk.internal import cluster_data
 
-from .helpers import (create_user_on_cluster, create_user_on_node,
-                      delete_user_on_cluster, delete_user_on_node,
-                      generate_user_on_cluster, generate_user_on_node,
-                      get_application_log, get_remote_login_settings, node_run,
-                      run, ssh_into_node, task_table)
+from .helpers import (create_user_on_cluster, create_user_on_node, delete_user_on_cluster, delete_user_on_node,
+                      generate_user_on_cluster, generate_user_on_node, get_application_log, get_recent_job,
+                      get_remote_login_settings, list_tasks, node_run, run, ssh_into_node, task_table)
 
 
 class BaseOperations:
@@ -290,3 +288,24 @@ class BaseOperations:
             :obj:`bool`: if True, the deletion was successful
         """
         return task_table.delete_task_table(self.table_service, id)
+
+    def list_tasks(self, id):
+        """list tasks in a storage table
+
+        Args:
+            id (:obj:`str`): the id of the cluster
+
+        Returns:
+            :obj:`[aztk.models.Task]`: a list of models representing all entries in the Task table
+        """
+        return list_tasks.list_tasks(self, id)
+
+    def get_recent_job(self, id):
+        """Get the most recently run job in an Azure Batch job schedule
+
+        Args:
+            id (:obj:`str`): the id of the job schedule
+        Returns:
+            :obj:`[azure.batch.models.Job]`: the most recently run job on the job schedule
+        """
+        return get_recent_job.get_recent_job(self, id)

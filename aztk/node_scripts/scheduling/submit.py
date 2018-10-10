@@ -1,8 +1,8 @@
+import datetime
 import logging
 import os
 import subprocess
 import sys
-import time
 import uuid
 from typing import List
 
@@ -85,30 +85,33 @@ def ssh_submit(task_sas_url):
     cmd = __app_submit_cmd(application)
 
     exit_code = -1
+    aztk_cluster_id = os.environ.get("AZTK_CLUSTER_ID")
     try:
         # update task table before running
-        task = insert_task_into_task_table(config.pool_id, task_definition)
+        task = insert_task_into_task_table(aztk_cluster_id, task_definition)
         # run task and upload log
         exit_code = subprocess.call(cmd.to_str(), shell=True)
         common.upload_log(config.blob_client, application)
         #TODO: enable logging
         # print("completed application, updating storage table")
-        mark_task_complete(config.pool_id, task.id, exit_code)
+        mark_task_complete(aztk_cluster_id, task.id, exit_code)
     except Exception as e:
         #TODO: enable logging
         # print("application failed, updating storage table")
-        mark_task_failure(config.pool_id, task.id, exit_code, str(e))
+        mark_task_failure(aztk_cluster_id, task_definition.id, exit_code, str(e))
 
     return exit_code
 
 
 def insert_task_into_task_table(cluster_id, task_definition):
+    current_time = datetime.datetime.utcnow()
     task = Task(
         id=task_definition.id,
         node_id=os.environ.get("AZ_BATCH_NODE_ID", None),
-        state=TaskState.Running.value,
+        state=TaskState.Running,
+        state_transition_time=current_time,
         command_line=task_definition.command_line,
-        start_time=time.time(),
+        start_time=current_time,
         end_time=None,
         exit_code=None,
         failure_info=None,
@@ -123,22 +126,28 @@ def get_task(cluster_id, task_id):
 
 
 def mark_task_complete(cluster_id, task_id, exit_code):
+    current_time = datetime.datetime.utcnow()
+
     task = get_task(cluster_id, task_id)
-    task.end_time = time.time()
+    task.end_time = current_time
     task.exit_code = exit_code
-    task.state = TaskState.Completed.value
+    task.state = TaskState.Completed
+    task.state_transition_time = current_time
+
     config.spark_client.cluster._core_cluster_operations.update_task_in_task_table(cluster_id, task)
-    task = get_task(cluster_id, task_id)
 
 
 def mark_task_failure(cluster_id, task_id, exit_code, failure_info):
+    current_time = datetime.datetime.utcnow()
+
     task = get_task(cluster_id, task_id)
-    task.end_time = time.time()
+    task.end_time = current_time
     task.exit_code = exit_code
-    task.state = TaskState.Completed.value
+    task.state = TaskState.Failed
+    task.state_transition_time = current_time
     task.failure_info = failure_info
+
     config.spark_client.cluster._core_cluster_operations.update_task_in_task_table(cluster_id, task)
-    task = get_task(cluster_id, task_id)
 
 
 if __name__ == "__main__":
