@@ -74,14 +74,13 @@ def schedule_with_target(scheduling_target, task_sas_urls):
         node_id = select_scheduling_target_node(config.spark_client.cluster, config.pool_id, scheduling_target)
         node_run_output = config.spark_client.cluster.node_run(
             config.pool_id, node_id, task_cmd, timeout=120, block=False)
-
     # block job_manager_task until scheduling_target task completion
     wait_until_tasks_complete(aztk_cluster_id)
 
 
 def wait_until_tasks_complete(id):
-    applications = config.spark_client.job.list_applications(id=id)
     while True:
+        applications = config.spark_client.job.list_applications(id=id)
         for application_id in applications:
             if not applications[application_id]:
                 time.sleep(3)

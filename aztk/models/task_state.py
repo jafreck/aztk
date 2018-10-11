@@ -5,3 +5,4 @@ class TaskState(Enum):
     Running = "running"
     Completed = "completed"
     Failed = "failed"
+    Preparing = "preparing"
