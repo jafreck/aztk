@@ -15,7 +15,6 @@ def _list_applications(core_job_operations, job_id):
                 applications[app_name] = None
 
     tasks = core_job_operations.list_tasks(job_id)
-    print("_list_applications:tasks=", tasks)
     for task in tasks:
         if task.id != job_id:
             applications[task.id] = task
@@ -23,6 +22,9 @@ def _list_applications(core_job_operations, job_id):
     return applications
 
 
+# TODO: this needs to be changed to return a list of aztk.model.Task
+#       currently, it returns a dictionary indicating whether
+#       a task has been scheduled or not
 def list_applications(core_job_operations, job_id):
     try:
         applications = _list_applications(core_job_operations, job_id)

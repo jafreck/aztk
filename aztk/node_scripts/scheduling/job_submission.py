@@ -80,12 +80,17 @@ def schedule_with_target(scheduling_target, task_sas_urls):
 
 
 def wait_until_tasks_complete(id):
-    # race condition here
     applications = config.spark_client.job.list_applications(id=id)
-    print("Applications to wait for: ", applications)
-    while (any(applications[application].state not in [TaskState.Completed, TaskState.Failed]
-               for application in applications)):
-        time.sleep(3)
+    while True:
+        for application_id in applications:
+            if not applications[application_id]:
+                time.sleep(3)
+                config.spark_client.job.list_applications(id=id)
+                break
+        else:
+            if all(applications[application_id].state in [TaskState.Completed, TaskState.Failed]
+                   for application_id in applications):
+                return
 
 
 if __name__ == "__main__":

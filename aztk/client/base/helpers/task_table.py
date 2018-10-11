@@ -2,7 +2,7 @@ from azure.common import AzureMissingResourceHttpError
 # pylint: disable=import-error,no-name-in-module
 from azure.cosmosdb.table.models import Entity
 
-from aztk.models import Task
+from aztk.models import Task, TaskState
 from aztk.utils import BackOffPolicy, helpers, retry
 
 
@@ -10,7 +10,7 @@ def __convert_entity_to_task(entity):
     return Task(
         id=entity.get("RowKey", None),
         node_id=entity.get("node_id", None),
-        state=entity.get("state", None),
+        state=TaskState(entity.get("state", None)),
         state_transition_time=entity.get("state_transition_time", None),
         command_line=entity.get("command_line", None),
         exit_code=entity.get("exit_code", None),
@@ -25,7 +25,7 @@ def __convert_task_to_entity(partition_key, task):
         PartitionKey=partition_key,
         RowKey=task.id,
         node_id=task.node_id,
-        state=task.state,
+        state=task.state.value,
         state_transition_time=task.state_transition_time,
         command_line=task.command_line,
         exit_code=task.exit_code,
