@@ -1,5 +1,5 @@
 import azure.batch.models as batch_models
-import azure.batch.models.batch_error as batch_error
+from azure.batch.models import BatchErrorException
 
 from aztk import error
 from aztk.utils import helpers
@@ -12,13 +12,13 @@ def _delete(core_job_operations, spark_job_operations, job_id, keep_logs: bool =
     try:
         core_job_operations.batch_client.job.delete(recent_run_job.id)
         deleted_job_or_job_schedule = True
-    except batch_models.batch_error.BatchErrorException:
+    except batch_models.BatchErrorException:
         pass
     # delete job_schedule
     try:
         core_job_operations.batch_client.job_schedule.delete(job_id)
         deleted_job_or_job_schedule = True
-    except batch_models.batch_error.BatchErrorException:
+    except batch_models.BatchErrorException:
         pass
 
     # delete storage container
@@ -36,5 +36,5 @@ def _delete(core_job_operations, spark_job_operations, job_id, keep_logs: bool =
 def delete(core_job_operations, spark_job_operations, job_id: str, keep_logs: bool = False):
     try:
         return _delete(core_job_operations, spark_job_operations, job_id, keep_logs)
-    except batch_error.BatchErrorException as e:
+    except BatchErrorException as e:
         raise error.AztkError(helpers.format_batch_exception(e))

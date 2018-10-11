@@ -1,4 +1,4 @@
-import azure.batch.models.batch_error as batch_error
+from azure.batch.models import BatchErrorException
 
 from aztk import error
 from aztk.spark import models
@@ -24,5 +24,5 @@ def get_job(core_job_operations, job_id):
     try:
         job, tasks, pool, nodes = _get_job(core_job_operations, job_id)
         return models.Job(job, tasks, pool, nodes)
-    except batch_error.BatchErrorException as e:
+    except BatchErrorException as e:
         raise error.AztkError(helpers.format_batch_exception(e))

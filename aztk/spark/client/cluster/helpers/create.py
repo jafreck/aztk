@@ -1,5 +1,5 @@
 import azure.batch.models as batch_models
-import azure.batch.models.batch_error as batch_error
+from azure.batch.models import BatchErrorException
 
 from aztk import error
 from aztk import models as base_models
@@ -75,5 +75,5 @@ def create_cluster(core_cluster_operations,
 
         return cluster
 
-    except batch_error.BatchErrorException as e:
+    except BatchErrorException as e:
         raise error.AztkError(helpers.format_batch_exception(e))

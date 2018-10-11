@@ -1,5 +1,5 @@
 import azure.batch.models as batch_models
-import azure.batch.models.batch_error as batch_error
+from azure.batch.models import BatchErrorException
 
 from aztk import error
 from aztk.spark import models
@@ -11,7 +11,7 @@ def _get_application(core_job_operations, job_id, application_name):
     recent_run_job = core_job_operations.get_recent_job(job_id)
     try:
         return core_job_operations.batch_client.task.get(job_id=recent_run_job.id, task_id=application_name)
-    except batch_models.batch_error.BatchErrorException:
+    except batch_models.BatchErrorException:
         raise error.AztkError(
             "The Spark application {0} is still being provisioned or does not exist.".format(application_name))
 
@@ -19,5 +19,5 @@ def _get_application(core_job_operations, job_id, application_name):
 def get_application(core_job_opertaions, job_id, application_name):
     try:
         return models.Application(_get_application(core_job_opertaions, job_id, application_name))
-    except batch_error.BatchErrorException as e:
+    except BatchErrorException as e:
         raise error.AztkError(helpers.format_batch_exception(e))

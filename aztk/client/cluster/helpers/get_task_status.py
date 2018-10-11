@@ -1,4 +1,4 @@
-import azure.batch.models.batch_error as batch_error
+from azure.batch.models import BatchErrorException
 
 from aztk import error
 from aztk.models import TaskState
@@ -17,5 +17,5 @@ def get_task_status(core_cluster_operations, cluster_id: str, task_id: str):
         else:
             task = core_cluster_operations.batch_client.task.get(cluster_id, task_id)
         return task.state.name
-    except batch_error.BatchErrorException as e:
+    except BatchErrorException as e:
         raise error.AztkError(helpers.format_batch_exception(e))

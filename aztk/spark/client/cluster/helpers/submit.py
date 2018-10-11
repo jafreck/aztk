@@ -1,5 +1,5 @@
 import azure.batch.models as batch_models
-import azure.batch.models.batch_error as batch_error
+from azure.batch.models import BatchErrorException
 import yaml
 
 from aztk import error
@@ -111,5 +111,5 @@ def submit(
 ):
     try:
         submit_application(core_cluster_operations, spark_cluster_operations, cluster_id, application, remote, wait)
-    except batch_error.BatchErrorException as e:
+    except BatchErrorException as e:
         raise error.AztkError(helpers.format_batch_exception(e))

@@ -17,7 +17,7 @@ def delete_pool_and_job_and_table(core_cluster_operations, pool_id: str, keep_lo
 
     try:
         core_cluster_operations.batch_client.job.get(pool_id)
-    except batch_models.batch_error.BatchErrorException:
+    except batch_models.BatchErrorException:
         job_exists = False
 
     pool_exists = core_cluster_operations.batch_client.pool.exists(pool_id)

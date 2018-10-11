@@ -1,5 +1,5 @@
 import azure.batch.models as batch_models
-import azure.batch.models.batch_error as batch_error
+from azure.batch.models import BatchErrorException
 import yaml
 
 from aztk import error
@@ -125,5 +125,5 @@ def submit_job(core_job_operations,
 
         return models.Job(job)
 
-    except batch_error.BatchErrorException as e:
+    except BatchErrorException as e:
         raise error.AztkError(helpers.format_batch_exception(e))

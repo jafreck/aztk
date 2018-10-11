@@ -44,7 +44,7 @@ class ClusterData:
         except azure.common.AzureMissingResourceHttpError:
             raise error.AztkError("Cluster {} doesn't have cluster configuration in storage".format(self.cluster_id))
         except yaml.YAMLError:
-            raise error.AztkErro("Cluster {} contains invalid cluster configuration in blob".format(self.cluster_id))
+            raise error.AztkError("Cluster {} contains invalid cluster configuration in blob".format(self.cluster_id))
 
     @retry(retry_count=4, retry_interval=1, backoff_policy=BackOffPolicy.exponential, exceptions=(ClientRequestError))
     def upload_file(self, blob_path: str, local_path: str) -> BlobData:

@@ -2,7 +2,7 @@ import time
 
 import azure
 import azure.batch.models as batch_models
-import azure.batch.models.batch_error as batch_error
+from azure.batch.models import BatchErrorException
 
 from aztk import error, models
 from aztk.models import Task, TaskState
@@ -15,7 +15,7 @@ def __check_task_node_exist(batch_client, cluster_id: str, task: Task) -> bool:
     try:
         batch_client.compute_node.get(cluster_id, task.node_id)
         return True
-    except batch_error.BatchErrorException:
+    except BatchErrorException:
         return False
 
 
@@ -39,7 +39,7 @@ def __get_output_file_properties(batch_client, cluster_id: str, application_name
         try:
             file = helpers.get_file_properties(cluster_id, application_name, output_file, batch_client)
             return file
-        except batch_error.BatchErrorException as e:
+        except BatchErrorException as e:
             if e.response.status_code == 404:
                 # TODO: log
                 time.sleep(5)
@@ -131,5 +131,5 @@ def get_log(base_operations, cluster_id: str, application_name: str, tail=False,
 def get_application_log(base_operations, cluster_id: str, application_name: str, tail=False, current_bytes: int = 0):
     try:
         return get_log(base_operations, cluster_id, application_name, tail, current_bytes)
-    except batch_error.BatchErrorException as e:
+    except BatchErrorException as e:
         raise error.AztkError(helpers.format_batch_exception(e))
