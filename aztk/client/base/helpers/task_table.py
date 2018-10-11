@@ -2,7 +2,7 @@ from azure.common import AzureConflictHttpError, AzureMissingResourceHttpError
 # pylint: disable=import-error,no-name-in-module
 from azure.cosmosdb.table.models import Entity
 
-from aztk import error
+from aztk.error import AztkError
 from aztk.models import Task, TaskState
 from aztk.utils import BackOffPolicy, helpers, retry, try_func
 
@@ -36,7 +36,7 @@ def __convert_task_to_entity(partition_key, task):
     )
 
 
-@try_func(exception_formatter=None, raise_exception=error.AztkError, catch_exceptions=(AzureConflictHttpError))
+@try_func(exception_formatter=None, raise_exception=AztkError, catch_exceptions=(AzureConflictHttpError))
 @retry(
     retry_count=4,
     retry_interval=1,
@@ -55,7 +55,7 @@ def create_task_table(table_service, id):
     retry_interval=1,
     backoff_policy=BackOffPolicy.exponential,
     exceptions=(AzureMissingResourceHttpError))
-@try_func(exception_formatter=None, raise_exception=error.AztkError, catch_exceptions=(AzureConflictHttpError))
+@try_func(exception_formatter=None, raise_exception=AztkError, catch_exceptions=(AzureConflictHttpError))
 def list_task_table_entries(table_service, id):
     tasks = [
         __convert_entity_to_task(task_row)
@@ -69,7 +69,7 @@ def list_task_table_entries(table_service, id):
     retry_interval=1,
     backoff_policy=BackOffPolicy.exponential,
     exceptions=(AzureMissingResourceHttpError))
-@try_func(exception_formatter=None, raise_exception=error.AztkError, catch_exceptions=(AzureConflictHttpError))
+@try_func(exception_formatter=None, raise_exception=AztkError, catch_exceptions=(AzureConflictHttpError))
 def get_task_from_table(table_service, id, task_id):
     entity = table_service.get_entity(helpers.convert_id_to_table_id(id), id, task_id)
     # TODO: enable logger
@@ -82,7 +82,7 @@ def get_task_from_table(table_service, id, task_id):
     retry_interval=1,
     backoff_policy=BackOffPolicy.exponential,
     exceptions=(AzureMissingResourceHttpError))
-@try_func(exception_formatter=None, raise_exception=error.AztkError, catch_exceptions=(AzureConflictHttpError))
+@try_func(exception_formatter=None, raise_exception=AztkError, catch_exceptions=(AzureConflictHttpError))
 def insert_task_into_task_table(table_service, id, task):
     return table_service.insert_entity(helpers.convert_id_to_table_id(id), __convert_task_to_entity(id, task))
 
@@ -92,7 +92,7 @@ def insert_task_into_task_table(table_service, id, task):
     retry_interval=1,
     backoff_policy=BackOffPolicy.exponential,
     exceptions=(AzureMissingResourceHttpError))
-@try_func(exception_formatter=None, raise_exception=error.AztkError, catch_exceptions=(AzureConflictHttpError))
+@try_func(exception_formatter=None, raise_exception=AztkError, catch_exceptions=(AzureConflictHttpError))
 def update_task_in_task_table(table_service, id, task):
     return table_service.update_entity(helpers.convert_id_to_table_id(id), __convert_task_to_entity(id, task))
 
@@ -102,6 +102,6 @@ def update_task_in_task_table(table_service, id, task):
     retry_interval=1,
     backoff_policy=BackOffPolicy.exponential,
     exceptions=(AzureMissingResourceHttpError))
-@try_func(exception_formatter=None, raise_exception=error.AztkError, catch_exceptions=(AzureConflictHttpError))
+@try_func(exception_formatter=None, raise_exception=AztkError, catch_exceptions=(AzureConflictHttpError))
 def delete_task_table(table_service, id):
     return table_service.delete_table(helpers.convert_id_to_table_id(id))
