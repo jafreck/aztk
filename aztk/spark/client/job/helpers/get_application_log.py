@@ -8,7 +8,8 @@ from aztk.utils import helpers
 
 def _get_application_log(core_job_operations, spark_job_operations, job_id, application_name):
     scheduling_target = core_job_operations.get_cluster_configuration(job_id).scheduling_target
-    if scheduling_target:
+    print("_get_application_log scheduling_target:", scheduling_target)
+    if scheduling_target is not models.SchedulingTarget.Any:
         return core_job_operations.get_application_log(job_id, application_name)
 
     # TODO: change where the logs are uploaded so they aren't overwritten on scheduled runs

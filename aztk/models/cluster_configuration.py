@@ -73,6 +73,3 @@ class ClusterConfiguration(Model):
             raise error.InvalidModelError(
                 "You must configure a VNET to use AZTK in mixed mode (dedicated and low priority nodes). "
                 "Set the VNET's subnet_id in your cluster.yaml or with a parameter (--subnet-id).")
-
-        if self.scheduling_target == SchedulingTarget.Dedicated and self.size == 0:
-            raise error.InvalidModelError("Scheduling target cannot be Dedicated if dedicated vm size is 0")

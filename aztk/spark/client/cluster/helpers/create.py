@@ -14,10 +14,7 @@ POOL_ADMIN_USER_IDENTITY = batch_models.UserIdentity(
 
 
 def _default_scheduling_target(vm_count: int):
-    if vm_count == 0:
-        return models.SchedulingTarget.Any
-    else:
-        return models.SchedulingTarget.Dedicated
+    return models.SchedulingTarget.Any
 
 
 def _apply_default_for_cluster_config(configuration: models.ClusterConfiguration):

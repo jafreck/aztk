@@ -3,7 +3,8 @@ import subprocess
 from datetime import datetime
 
 from azure.batch.models import BatchErrorException
-from tests.integration_tests.spark.sdk.get_client import (get_spark_client, get_test_suffix)
+from tests.integration_tests.spark.sdk.get_client import (get_spark_client,
+                                                          get_test_suffix)
 
 import aztk.spark
 from aztk.error import AztkError
@@ -248,7 +249,7 @@ def test_delete_job():
 
 
 def test_scheduling_target_submit():
-    test_id = "test-starget-"
+    test_id = "starget-"
     app1 = aztk.spark.models.ApplicationConfiguration(
         name="pipy001",
         application="./examples/src/main/python/pi.py",

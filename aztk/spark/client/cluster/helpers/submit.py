@@ -1,6 +1,6 @@
 import azure.batch.models as batch_models
-from azure.batch.models import BatchErrorException
 import yaml
+from azure.batch.models import BatchErrorException
 
 from aztk import error
 from aztk.error import AztkError
@@ -88,7 +88,7 @@ def submit_application(
     task = affinitize_task_to_master(core_cluster_operations, spark_cluster_operations, cluster_id, task)
 
     scheduling_target = get_cluster_scheduling_target(core_cluster_operations, cluster_id)
-    if scheduling_target:
+    if scheduling_target is not models.SchedulingTarget.Any:
         schedule_with_target(core_cluster_operations, spark_cluster_operations, cluster_id, scheduling_target, task,
                              wait)
     else:

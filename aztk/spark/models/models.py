@@ -253,9 +253,6 @@ class JobConfiguration:
                 "You must configure a VNET to use AZTK in mixed mode (dedicated and low priority nodes) "
                 "and pass the subnet_id in your configuration..")
 
-        if self.scheduling_target == SchedulingTarget.Dedicated and self.max_dedicated_nodes == 0:
-            raise error.InvalidModelError("Scheduling target cannot be Dedicated if dedicated vm size is 0")
-
 
 class JobState:
     complete = "completed"
