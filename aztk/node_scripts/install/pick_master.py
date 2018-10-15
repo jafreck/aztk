@@ -3,7 +3,7 @@
 """
 import azure.batch.batch_service_client as batch
 import azure.batch.models as batchmodels
-import azure.batch.models.batch_error as batcherror
+from azure.batch.models.batch_error import BatchErrorException
 from msrest.exceptions import ClientRequestError
 
 from aztk.node_scripts.core import config
@@ -40,7 +40,7 @@ def try_assign_self_as_master(client: batch.BatchServiceClient, pool: batchmodel
             batchmodels.PoolPatchOptions(if_match=pool.e_tag),
         )
         return True
-    except (batcherror.BatchErrorException, ClientRequestError):
+    except (BatchErrorException, ClientRequestError):
         print("Couldn't assign itself as master the pool because the pool was modified since last get.")
         return False
 
