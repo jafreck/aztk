@@ -3,7 +3,7 @@ from aztk.internal import cluster_data
 
 from .helpers import (create_user_on_cluster, create_user_on_node, delete_user_on_cluster, delete_user_on_node,
                       generate_user_on_cluster, generate_user_on_node, get_application_log, get_recent_job,
-                      get_remote_login_settings, list_tasks, node_run, run, ssh_into_node, task_table)
+                      get_remote_login_settings, get_task_status, list_tasks, node_run, run, ssh_into_node, task_table)
 
 
 class BaseOperations:
@@ -309,3 +309,15 @@ class BaseOperations:
             :obj:`[azure.batch.models.Job]`: the most recently run job on the job schedule
         """
         return get_recent_job.get_recent_job(self, id)
+
+    def get_task_status(self, id: str, task_name: str):
+        """Get the status of a submitted task
+
+        Args:
+            id (:obj:`str`): the name of the cluster the task was submitted to
+            task_name (:obj:`str`): the name of the task to get
+
+        Returns:
+            :obj:`str`: the status state of the task
+        """
+        return get_task_status.get_task_status(self, id, task_name)

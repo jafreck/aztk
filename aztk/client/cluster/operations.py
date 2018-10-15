@@ -1,7 +1,7 @@
 from aztk.client.base import BaseOperations
 from aztk.models import ClusterConfiguration
 
-from .helpers import (copy, create, delete, get, get_task_status, list, wait_for_task_to_complete)
+from .helpers import copy, create, delete, get, list, wait_for_task_to_complete
 
 
 class CoreClusterOperations(BaseOperations):
@@ -95,15 +95,3 @@ class CoreClusterOperations(BaseOperations):
             :obj:`None`
         """
         return wait_for_task_to_complete.wait_for_task_to_complete(self, id, task_name)
-
-    def get_task_status(self, id: str, task_name: str):
-        """Get the status of a submitted task
-
-        Args:
-            id (:obj:`str`): the name of the cluster the task was submitted to
-            task_name (:obj:`str`): the name of the task to get
-
-        Returns:
-            :obj:`str`: the status state of the task
-        """
-        return get_task_status.get_task_status(self, id, task_name)
