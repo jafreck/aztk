@@ -1,6 +1,6 @@
 import azure.batch.models as batch_models
-from azure.batch.models import BatchErrorException
 import yaml
+from azure.batch.models import BatchErrorException
 
 from aztk import error
 from aztk import models as base_models
@@ -12,6 +12,10 @@ from aztk.utils.command_builder import CommandBuilder
 
 
 def __app_cmd(scheduling_target=None, resource_files=None):
+    resource_file_sas_list = None
+    if resource_files:
+        resource_file_sas_list = ' '.join(['\\\"{}\\\"'.format(task_def.blob_source) for task_def in resource_files])
+
     docker_exec = CommandBuilder("sudo docker exec")
     docker_exec.add_argument("-i")
     docker_exec.add_option("-e", "AZ_BATCH_TASK_WORKING_DIR=$AZ_BATCH_TASK_WORKING_DIR")
@@ -22,7 +26,7 @@ def __app_cmd(scheduling_target=None, resource_files=None):
         r"export PYTHONPATH=$PYTHONPATH:\$AZTK_WORKING_DIR; "
         r"cd \$AZ_BATCH_TASK_WORKING_DIR; "
         r'\$AZTK_WORKING_DIR/.aztk-env/.venv/bin/python \$AZTK_WORKING_DIR/aztk/node_scripts/scheduling/job_submission.py {0} {1}"'.
-        format(scheduling_target, ' '.join(['\\\"{}\\\"'.format(task_def.blob_source) for task_def in resource_files])))
+        format(scheduling_target, resource_file_sas_list))
     return docker_exec.to_str()
 
 

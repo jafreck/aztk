@@ -10,8 +10,7 @@ from azure.batch.models import BatchErrorException
 from tests.integration_tests.spark.sdk.clean_up_cluster import clean_up_cluster
 from tests.integration_tests.spark.sdk.ensure_spark_processes import \
     ensure_spark_processes
-from tests.integration_tests.spark.sdk.get_client import (get_spark_client,
-                                                          get_test_suffix)
+from tests.integration_tests.spark.sdk.get_client import (get_spark_client, get_test_suffix)
 from tests.integration_tests.spark.sdk.wait_for_all_nodes import \
     wait_for_all_nodes
 
@@ -20,7 +19,7 @@ from aztk.error import AztkError
 from aztk.utils import constants
 from aztk_cli import config
 
-base_cluster_id = get_test_suffix("cluster")
+base_cluster_id = get_test_suffix("c")
 spark_client = get_spark_client()
 
 
@@ -300,7 +299,7 @@ def test_debug_tool():
 
 
 def test_scheduling_target():
-    test_id = "test-scheduling-target-"
+    test_id = "test-starget-"
     cluster_configuration = aztk.spark.models.ClusterConfiguration(
         cluster_id=test_id + base_cluster_id,
         size=2,

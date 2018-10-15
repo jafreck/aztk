@@ -9,7 +9,7 @@ import aztk.spark
 from aztk.error import AztkError
 from aztk_cli import config
 
-base_job_id = get_test_suffix("job")
+base_job_id = get_test_suffix("j")
 spark_client = get_spark_client()
 
 
@@ -248,7 +248,7 @@ def test_delete_job():
 
 
 def test_scheduling_target_submit():
-    test_id = "scheduling-target-submit-"
+    test_id = "test-starget-"
     app1 = aztk.spark.models.ApplicationConfiguration(
         name="pipy001",
         application="./examples/src/main/python/pi.py",

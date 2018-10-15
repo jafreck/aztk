@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import List
 
 import azure.batch.models as batch_models
@@ -156,11 +157,18 @@ class ApplicationConfiguration:
         self.max_retry_count = max_retry_count
 
 
+class ApplicationState(Enum):
+    Running = "running"
+    Completed = "completed"
+    Failed = "failed"
+    Preparing = "preparing"
+
+
 class Application:
     def __init__(self, task: aztk.models.Task):
         self.name = task.id
         self.node_id = task.node_id
-        self.state = task.state
+        self.state = ApplicationState(task.state)
         self.state_transition_time = task.state_transition_time
         self.command_line = task.command_line
         self.exit_code = task.exit_code

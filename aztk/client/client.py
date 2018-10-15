@@ -423,7 +423,7 @@ class CoreClient:
         auto_pool_specification = batch_models.AutoPoolSpecification(
             pool_lifetime_option=batch_models.PoolLifetimeOption.job_schedule,
             auto_pool_id_prefix=job_configuration.id,
-            keep_alive=False,
+            keep_alive=True,
             pool=batch_models.PoolSpecification(
                 display_name=job_configuration.id,
                 virtual_machine_configuration=batch_models.VirtualMachineConfiguration(
