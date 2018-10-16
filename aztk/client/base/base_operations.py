@@ -321,3 +321,26 @@ class BaseOperations:
             :obj:`str`: the status state of the task
         """
         return get_task_status.get_task_status(self, id, task_name)
+
+    def list_batch_tasks(self, id: str):
+        """Get the status of a submitted task
+
+        Args:
+            id (:obj:`str`): the name of the cluster the task was submitted to
+
+        Returns:
+            :obj:`str`: the status state of the task
+        """
+        return task_table.list_batch_tasks(self.batch_client, id)
+
+    def get_batch_task(self, id: str, task_name: str):
+        """Get the status of a submitted task
+
+        Args:
+            id (:obj:`str`): the name of the cluster the task was submitted to
+            task_name (:obj:`str`): the name of the task to get
+
+        Returns:
+            :obj:`str`: the status state of the task
+        """
+        return task_table.get_batch_task(self.batch_client, id, task_name)

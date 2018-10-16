@@ -3,8 +3,7 @@ import subprocess
 from datetime import datetime
 
 from azure.batch.models import BatchErrorException
-from tests.integration_tests.spark.sdk.get_client import (get_spark_client,
-                                                          get_test_suffix)
+from tests.integration_tests.spark.sdk.get_client import (get_spark_client, get_test_suffix)
 
 import aztk.spark
 from aztk.error import AztkError
@@ -286,6 +285,7 @@ def test_scheduling_target_submit():
 
 def clean_up_job(job_id):
     try:
-        spark_client.job.delete(job_id)
+        pass
+        # spark_client.job.delete(job_id)
     except Exception:
         pass

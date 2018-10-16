@@ -1,3 +1,4 @@
+from azure.batch.models import BatchErrorException
 from azure.common import AzureConflictHttpError, AzureMissingResourceHttpError
 # pylint: disable=import-error,no-name-in-module
 from azure.cosmosdb.table.models import Entity
@@ -34,6 +35,18 @@ def __convert_task_to_entity(partition_key, task):
         end_time=task.end_time,
         failure_info=task.failure_info,
     )
+
+
+def __convert_batch_task_to_aztk_task(batch_task):
+    task = Task()
+    task.id = batch_task.id
+    task.state = batch_task.state
+    task.command_line = batch_task.command_line
+    task.exit_code = batch_task.execution_info.exit_code
+    task.start_time = batch_task.execution_info.start_time
+    task.end_time = batch_task.execution_info.end_time
+    task.failure_info = batch_task.execution_info.failure_info.message
+    return task
 
 
 @try_func(exception_formatter=None, raise_exception=AztkError, catch_exceptions=(AzureConflictHttpError))
@@ -105,3 +118,26 @@ def update_task_in_task_table(table_service, id, task):
 @try_func(exception_formatter=None, raise_exception=AztkError, catch_exceptions=(AzureConflictHttpError))
 def delete_task_table(table_service, id):
     return table_service.delete_table(helpers.convert_id_to_table_id(id))
+
+
+@retry(
+    retry_count=4,
+    retry_interval=1,
+    backoff_policy=BackOffPolicy.exponential,
+    exceptions=(AzureMissingResourceHttpError, BatchErrorException))
+@try_func(
+    exception_formatter=None, raise_exception=AztkError, catch_exceptions=(BatchErrorException, AzureConflictHttpError))
+def get_batch_task(batch_client, id, application_id):
+    return __convert_batch_task_to_aztk_task(batch_client.task.get(id, application_id))
+
+
+@retry(
+    retry_count=4,
+    retry_interval=1,
+    backoff_policy=BackOffPolicy.exponential,
+    exceptions=(AzureMissingResourceHttpError, BatchErrorException))
+@try_func(
+    exception_formatter=None, raise_exception=AztkError, catch_exceptions=(BatchErrorException, AzureConflictHttpError))
+def list_batch_tasks(batch_client, id):
+    tasks = [__convert_batch_task_to_aztk_task(task) for task in batch_client.task.list(id)]
+    return tasks
