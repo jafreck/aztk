@@ -16,6 +16,6 @@ def get_task_status(core_cluster_operations, cluster_id: str, task_id: str):
             return TaskState(entity.state).value
         else:
             task = core_cluster_operations.get_batch_task(cluster_id, task_id)
-        return task.state.name
+        return task.state
     except BatchErrorException as e:
         raise error.AztkError(helpers.format_batch_exception(e))

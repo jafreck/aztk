@@ -169,7 +169,7 @@ def test_get_application_log():
 
         assert application_log.exit_code == 0
         assert application_log.name == application_configuration.name == "pipy100"
-        assert application_log.application_state == "completed"
+        assert application_log.application_state == aztk.spark.models.ApplicationState.Completed
         assert application_log.log is not None
         assert application_log.total_bytes is not None
 

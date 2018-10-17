@@ -255,7 +255,6 @@ class JobConfiguration:
 
 
 class JobState:
-    complete = "completed"
     active = "active"
     completed = "completed"
     disabled = "disabled"
@@ -273,7 +272,7 @@ class Job:
     ):
         self.id = cloud_job_schedule.id
         self.last_modified = cloud_job_schedule.last_modified
-        self.state = cloud_job_schedule.state.name
+        self.state = JobState(cloud_job_schedule.state.name)
         self.state_transition_time = cloud_job_schedule.state_transition_time
         self.creation_time = cloud_job_schedule.creation_time
         self.applications = [Application(task) for task in (tasks or [])]
