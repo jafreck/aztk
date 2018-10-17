@@ -254,7 +254,7 @@ class JobConfiguration:
                 "and pass the subnet_id in your configuration..")
 
 
-class JobState:
+class JobState(Enum):
     active = "active"
     completed = "completed"
     disabled = "disabled"
