@@ -31,7 +31,7 @@ def __wait_for_app_to_be_running(base_operations, cluster_id: str, application_n
             # TODO: log
             time.sleep(5)
         else:
-            return base_operations.get_task_from_table(id=cluster_id, task_id=application_name)
+            return base_operations.get_batch_task(id=cluster_id, task_id=application_name)
 
 
 def __get_output_file_properties(batch_client, cluster_id: str, application_name: str):
@@ -88,12 +88,12 @@ def get_log(base_operations, cluster_id: str, application_name: str, tail=False,
     task_id = application_name
     cluster_configuration = base_operations.get_cluster_configuration(cluster_id)
 
-    if cluster_configuration.scheduling_target:
+    if cluster_configuration.scheduling_target is not models.SchedulingTarget.Any:
         task = wait_for_scheduling_target_task(base_operations, cluster_id, application_name)
         return get_log_from_storage(base_operations.blob_client, cluster_id, application_name, task)
     else:
-        batch_task, task = __wait_for_app_to_be_running(base_operations, cluster_id, application_name)
-        if not __check_task_node_exist(base_operations.batch_client, cluster_id, batch_task):
+        task = __wait_for_app_to_be_running(base_operations, cluster_id, application_name)
+        if not __check_task_node_exist(base_operations.batch_client, cluster_id, task):
             return get_log_from_storage(base_operations.blob_client, cluster_id, application_name, task)
 
     file = __get_output_file_properties(base_operations.batch_client, cluster_id, application_name)

@@ -4,8 +4,7 @@ import azure.batch.models as batch_models
 
 from aztk.spark import models
 
-from .helpers import (generate_application_task, generate_cluster_start_task,
-                      get_application, list_applications)
+from .helpers import (generate_application_task, generate_cluster_start_task, get_application, list_applications)
 
 
 class SparkBaseOperations:
@@ -83,7 +82,8 @@ class SparkBaseOperations:
         Returns:
             :obj:`aztk.spark.models.Application`: object representing that state and output of an application
         """
-        return get_application.get_application(self, id, application_name)
+        # TODO: switch to self._core_operations
+        return get_application.get_application(self._core_job_operations, id, application_name)
 
     def list_applications(self, id):
         """Get information on a submitted application

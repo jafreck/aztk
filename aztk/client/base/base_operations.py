@@ -333,14 +333,14 @@ class BaseOperations:
         """
         return task_table.list_batch_tasks(self.batch_client, id)
 
-    def get_batch_task(self, id: str, task_name: str):
+    def get_batch_task(self, id: str, task_id: str):
         """Get the status of a submitted task
 
         Args:
             id (:obj:`str`): the name of the cluster the task was submitted to
-            task_name (:obj:`str`): the name of the task to get
+            task_id (:obj:`str`): the name of the task to get
 
         Returns:
             :obj:`str`: the status state of the task
         """
-        return task_table.get_batch_task(self.batch_client, id, task_name)
+        return task_table.get_batch_task(self.batch_client, id, task_id)

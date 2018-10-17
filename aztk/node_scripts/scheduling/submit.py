@@ -66,14 +66,18 @@ def receive_submit_request(application_file_path):
     """
         Handle the request to submit a task
     """
+    print("running receive_submit_request")
     blob_client = config.blob_client
     application = common.load_application(application_file_path)
 
     cmd = __app_submit_cmd(application)
-
-    return_code = subprocess.call(cmd.to_str(), shell=True)
-    common.upload_log(blob_client, application)
-    return return_code
+    try:
+        exit_code = subprocess.call(cmd.to_str(), shell=True)
+        common.upload_log(blob_client, application)
+    except Exception as e:
+        common.upload_error_log(str(e), os.path.join(os.environ["AZ_BATCH_TASK_WORKING_DIR"], "application.yaml"))
+    print("finished receive_submit_request")
+    return exit_code
 
 
 def ssh_submit(task_sas_url):
@@ -151,24 +155,17 @@ def mark_task_failure(cluster_id, task_id, exit_code, failure_info):
 
 
 if __name__ == "__main__":
-    return_code = 1
+    exit_code = 1
 
     if len(sys.argv) == 2:
         serialized_task_sas_url = sys.argv[1]
 
         try:
-            return_code = ssh_submit(serialized_task_sas_url)
+            exit_code = ssh_submit(serialized_task_sas_url)
         except Exception as e:
             import traceback
             common.upload_error_log(traceback.format_exc() + str(e),
                                     os.path.join(os.environ["AZ_BATCH_TASK_WORKING_DIR"], "application.yaml"))
     else:
-        try:
-            return_code = receive_submit_request(
-                os.path.join(os.environ["AZ_BATCH_TASK_WORKING_DIR"], "application.yaml"))
-        except Exception as e:
-            common.upload_error_log(str(e), os.path.join(os.environ["AZ_BATCH_TASK_WORKING_DIR"], "application.yaml"))
-
-        # force batch task exit code to match spark exit code
-        # TODO: make this valuable to ssh_submit
-        sys.exit(return_code)
+        exit_code = receive_submit_request(os.path.join(os.environ["AZ_BATCH_TASK_WORKING_DIR"], "application.yaml"))
+        sys.exit(exit_code)

@@ -23,7 +23,6 @@ def _get_job(core_job_operations, job_id):
 def get_job(core_job_operations, job_id):
     try:
         job, tasks, pool, nodes = _get_job(core_job_operations, job_id)
-        print("get_job tasks:", tasks)
         return models.Job(job, tasks, pool, nodes)
     except BatchErrorException as e:
         raise error.AztkError(helpers.format_batch_exception(e))

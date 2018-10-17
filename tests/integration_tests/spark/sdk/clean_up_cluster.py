@@ -8,6 +8,7 @@ def clean_up_cluster(spark_client, id):
     try:
         cluster = spark_client.cluster.get(id)
         nodes = [node for node in cluster.nodes]
+        print([node.state for node in nodes])
         if not any([
                 node.state in [batch_models.ComputeNodeState.unusable, batch_models.ComputeNodeState.start_task_failed]
                 for node in nodes

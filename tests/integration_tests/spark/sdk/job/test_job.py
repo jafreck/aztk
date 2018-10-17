@@ -175,7 +175,7 @@ def test_get_application():
         application = spark_client.job.get_application(id=job_configuration.id, application_name=app1.name)
         assert isinstance(application, aztk.spark.models.Application)
         assert application.exit_code == 0
-        assert application.state == "completed"
+        assert application.state == aztk.spark.models.ApplicationState.Completed
         assert application.name == "pipy100"
     except (AztkError, BatchErrorException) as e:
         raise e

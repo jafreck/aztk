@@ -26,7 +26,8 @@ def __app_cmd(scheduling_target=None, resource_files=None):
         r"export PYTHONPATH=$PYTHONPATH:\$AZTK_WORKING_DIR; "
         r"cd \$AZ_BATCH_TASK_WORKING_DIR; "
         r'\$AZTK_WORKING_DIR/.aztk-env/.venv/bin/python \$AZTK_WORKING_DIR/aztk/node_scripts/scheduling/job_submission.py {0} {1}"'.
-        format(scheduling_target, resource_file_sas_list))
+        format(scheduling_target if scheduling_target else "", resource_file_sas_list
+               if resource_file_sas_list else ""))
     return docker_exec.to_str()
 
 

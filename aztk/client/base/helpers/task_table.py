@@ -40,12 +40,15 @@ def __convert_task_to_entity(partition_key, task):
 def __convert_batch_task_to_aztk_task(batch_task):
     task = Task()
     task.id = batch_task.id
+    task.node_id = batch_task.node_info.node_id
     task.state = batch_task.state
+    task.state_transition_time = batch_task.state_transition_time
     task.command_line = batch_task.command_line
     task.exit_code = batch_task.execution_info.exit_code
     task.start_time = batch_task.execution_info.start_time
     task.end_time = batch_task.execution_info.end_time
-    task.failure_info = batch_task.execution_info.failure_info.message
+    if batch_task.execution_info.failure_info:
+        task.failure_info = batch_task.execution_info.failure_info.message
     return task
 
 
@@ -127,8 +130,8 @@ def delete_task_table(table_service, id):
     exceptions=(AzureMissingResourceHttpError, BatchErrorException))
 @try_func(
     exception_formatter=None, raise_exception=AztkError, catch_exceptions=(BatchErrorException, AzureConflictHttpError))
-def get_batch_task(batch_client, id, application_id):
-    return __convert_batch_task_to_aztk_task(batch_client.task.get(id, application_id))
+def get_batch_task(batch_client, id, task_id):
+    return __convert_batch_task_to_aztk_task(batch_client.task.get(id, task_id))
 
 
 @retry(

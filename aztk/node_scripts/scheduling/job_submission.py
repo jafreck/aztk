@@ -5,10 +5,10 @@ import time
 import azure.batch.models as batch_models
 import yaml
 
-from aztk.models import TaskState
 from aztk.node_scripts.core import config
 from aztk.node_scripts.install.pick_master import get_master_node_id
 from aztk.node_scripts.scheduling import common, scheduling_target
+from aztk.spark.models import ApplicationState
 from aztk.utils import constants
 
 
@@ -22,7 +22,7 @@ def read_downloaded_tasks():
     for task_definition in tasks_path:
         with open(task_definition, "r", encoding="UTF-8") as stream:
             try:
-                task = yaml.load(stream)
+                tasks.append(yaml.load(stream))
             except yaml.YAMLError as exc:
                 print(exc)
     return tasks
@@ -72,6 +72,7 @@ def schedule_with_target(scheduling_target, task_sas_urls):
             r'$AZTK_WORKING_DIR/.aztk-env/.venv/bin/python $AZTK_WORKING_DIR/aztk/node_scripts/scheduling/submit.py "{2}" >> {3} 2>&1'.
             format(task_working_dir, aztk_cluster_id, task_sas_url, constants.SPARK_SUBMIT_LOGS_FILE))
         node_id = select_scheduling_target_node(config.spark_client.cluster, config.pool_id, scheduling_target)
+        print("Application cmd:", task_cmd)
         node_run_output = config.spark_client.cluster.node_run(
             config.pool_id, node_id, task_cmd, timeout=120, block=False)
     # block job_manager_task until scheduling_target task completion
@@ -87,7 +88,7 @@ def wait_until_tasks_complete(id):
                 config.spark_client.job.list_applications(id=id)
                 break
         else:
-            if all(applications[application_id].state in [TaskState.Completed, TaskState.Failed]
+            if all(applications[application_id].state in [ApplicationState.Completed, ApplicationState.Failed]
                    for application_id in applications):
                 return
 
@@ -99,8 +100,10 @@ if __name__ == "__main__":
         scheduling_target = None
 
     if scheduling_target:
+        print("scheduling with target")
         task_sas_urls = [task_sas_url for task_sas_url in sys.argv[2:]]
         schedule_with_target(scheduling_target, task_sas_urls)
     else:
+        print("scheduling with batch")
         tasks = read_downloaded_tasks()
         schedule_tasks(tasks)
