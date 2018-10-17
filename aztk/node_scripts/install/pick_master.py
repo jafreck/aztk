@@ -3,7 +3,7 @@
 """
 import azure.batch.batch_service_client as batch
 import azure.batch.models as batchmodels
-from azure.batch.models.batch_error import BatchErrorException
+from azure.batch.models import BatchErrorException
 from msrest.exceptions import ClientRequestError
 
 from aztk.node_scripts.core import config
