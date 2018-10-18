@@ -1,24 +1,18 @@
-import azure.batch.models as batch_models
 from azure.batch.models import BatchErrorException
+from msrest.exceptions import ClientRequestError
 
 from aztk import error
-from aztk.utils import helpers
+from aztk.utils import BackOffPolicy, helpers, retry
 
 
 def _delete(core_job_operations, spark_job_operations, job_id, keep_logs: bool = False):
-    recent_run_job = core_job_operations.get_recent_job(job_id)
-    deleted_job_or_job_schedule = False
-    # delete job
-    try:
-        core_job_operations.batch_client.job.delete(recent_run_job.id)
-        deleted_job_or_job_schedule = True
-    except batch_models.BatchErrorException:
-        pass
+    deleted_job_schedule = False
+
     # delete job_schedule
     try:
         core_job_operations.batch_client.job_schedule.delete(job_id)
-        deleted_job_or_job_schedule = True
-    except batch_models.BatchErrorException:
+        deleted_job_schedule = True
+    except BatchErrorException:
         pass
 
     # delete storage container
@@ -30,9 +24,10 @@ def _delete(core_job_operations, spark_job_operations, job_id, keep_logs: bool =
     if table_exists:
         core_job_operations.delete_task_table(job_id)
 
-    return deleted_job_or_job_schedule
+    return deleted_job_schedule
 
 
+@retry(retry_count=4, retry_interval=1, backoff_policy=BackOffPolicy.exponential, exceptions=(ClientRequestError))
 def delete(core_job_operations, spark_job_operations, job_id: str, keep_logs: bool = False):
     try:
         return _delete(core_job_operations, spark_job_operations, job_id, keep_logs)

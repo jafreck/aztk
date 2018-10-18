@@ -1,6 +1,6 @@
 import hashlib
 
-import azure.batch.models as batch_models
+from azure.batch.models import BatchErrorException
 from msrest.exceptions import ClientRequestError
 
 from aztk.utils import BackOffPolicy, helpers, retry
@@ -17,7 +17,7 @@ def delete_pool_and_job_and_table(core_cluster_operations, pool_id: str, keep_lo
 
     try:
         core_cluster_operations.batch_client.job.get(pool_id)
-    except batch_models.BatchErrorException:
+    except BatchErrorException:
         job_exists = False
 
     pool_exists = core_cluster_operations.batch_client.pool.exists(pool_id)

@@ -289,6 +289,6 @@ class ApplicationLog(aztk.models.ApplicationLog):
             cluster_id=application_log.cluster_id,  # TODO: change to something cluster/job agnostic
             log=application_log.log,
             total_bytes=application_log.total_bytes,
-            application_state=application_log.application_state,
+            application_state=ApplicationState(application_log.application_state.value),
             exit_code=application_log.exit_code,
         )

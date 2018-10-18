@@ -10,7 +10,7 @@ from aztk.utils import helpers
 def _wait_until_job_finished(core_job_operations, job_id):
     job_state = core_job_operations.batch_client.job_schedule.get(job_id).state
 
-    while job_state != batch_models.JobScheduleState.completed:
+    while job_state not in [batch_models.JobScheduleState.completed, batch_models.JobScheduleState.terminating]:
         time.sleep(3)
         job_state = core_job_operations.batch_client.job_schedule.get(job_id).state
 
