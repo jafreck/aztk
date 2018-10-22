@@ -26,7 +26,8 @@ def create_pool_and_job_and_table(
     # update storage with the necessary values
     core_cluster_operations.get_cluster_data(cluster_conf.cluster_id).save_cluster_config(cluster_conf)
 
-    core_cluster_operations.create_task_table(cluster_conf.cluster_id)
+    if cluster_conf.scheduling_target != models.SchedulingTarget.Any:
+        core_cluster_operations.create_task_table(cluster_conf.cluster_id)
 
     # reuse pool_id as job_id
     pool_id = cluster_conf.cluster_id
