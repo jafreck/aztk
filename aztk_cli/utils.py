@@ -293,7 +293,7 @@ def print_cluster_summary(cluster: models.Cluster):
 def application_summary(applications):
     states = {"scheduling": 0}
     for state in models.ApplicationState:
-        states[state.name] = 0
+        states[state] = 0
 
     warn_scheduling = False
 
@@ -309,7 +309,7 @@ def application_summary(applications):
     log.info("-" * 42)
     for state in states:
         if states[state] > 0:
-            log.info(print_format.format(state + ":", states[state]))
+            log.info(print_format.format(state.value + ":", states[state]))
 
     if warn_scheduling:
         log.warning("\nNo Spark applications will be scheduled until the master is selected.")
@@ -331,7 +331,7 @@ def print_applications(applications):
             log.info(
                 print_format.format(
                     application.name,
-                    application.state,
+                    application.state.value,
                     utc_to_local(application.state_transition_time),
                     application.exit_code if application.exit_code is not None else "-",
                 ))
@@ -345,7 +345,7 @@ def print_application(application: models.Application):
     log.info("")
     log.info("Application         %s", application.name)
     log.info("-" * 42)
-    log.info(print_format.format("State", application.state))
+    log.info(print_format.format("State", application.state.value))
     log.info(print_format.format("State transition time", utc_to_local(application.state_transition_time)))
     log.info("")
 
