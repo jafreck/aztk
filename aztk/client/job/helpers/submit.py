@@ -28,7 +28,8 @@ def submit_job(
     core_job_operations.get_cluster_data(job_configuration.id).save_cluster_config(
         job_configuration.to_cluster_config())
 
-    core_job_operations.create_task_table(job_configuration.id)
+    if job_configuration.scheduling_target != models.SchedulingTarget.Any:
+        core_job_operations.create_task_table(job_configuration.id)
 
     # get a verified node agent sku
     sku_to_use, image_ref_to_use = helpers.select_latest_verified_vm_image_with_node_agent_sku(
