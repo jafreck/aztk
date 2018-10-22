@@ -103,7 +103,7 @@ class ClusterOperations(SparkBaseOperations):
             application_name (:obj:`str`): the name of the application to get
 
         Returns:
-            :obj:`str`: the state of the application
+            :obj:`aztk.spark.models.ApplicationState`: the state of the application
         """
         return get_application_state.get_application_state(self._core_cluster_operations, id, application_name)
 
