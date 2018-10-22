@@ -116,7 +116,7 @@ class Client(CoreClient):
 
     @deprecated("0.10.0")
     def get_application_status(self, cluster_id: str, app_name: str):
-        return self.cluster.get_application_status(id=cluster_id, application_name=app_name)
+        return self.cluster.get_application_state(id=cluster_id, application_name=app_name)
 
     @deprecated("0.10.0")
     def cluster_run(self, cluster_id: str, command: str, host=False, internal: bool = False, timeout=None):

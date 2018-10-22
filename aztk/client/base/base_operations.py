@@ -1,9 +1,12 @@
 from aztk import models
 from aztk.internal import cluster_data
 
-from .helpers import (create_user_on_cluster, create_user_on_node, delete_user_on_cluster, delete_user_on_node,
-                      generate_user_on_cluster, generate_user_on_node, get_application_log, get_recent_job,
-                      get_remote_login_settings, get_task_status, list_tasks, node_run, run, ssh_into_node, task_table)
+from .helpers import (create_user_on_cluster, create_user_on_node,
+                      delete_user_on_cluster, delete_user_on_node,
+                      generate_user_on_cluster, generate_user_on_node,
+                      get_application_log, get_recent_job,
+                      get_remote_login_settings, get_task_state, list_tasks,
+                      node_run, run, ssh_into_node, task_table)
 
 
 class BaseOperations:
@@ -310,7 +313,7 @@ class BaseOperations:
         """
         return get_recent_job.get_recent_job(self, id)
 
-    def get_task_status(self, id: str, task_name: str):
+    def get_task_state(self, id: str, task_name: str):
         """Get the status of a submitted task
 
         Args:
@@ -320,7 +323,7 @@ class BaseOperations:
         Returns:
             :obj:`str`: the status state of the task
         """
-        return get_task_status.get_task_status(self, id, task_name)
+        return get_task_state.get_task_state(self, id, task_name)
 
     def list_batch_tasks(self, id: str):
         """Get the status of a submitted task

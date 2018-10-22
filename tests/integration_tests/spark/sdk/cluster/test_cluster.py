@@ -125,7 +125,6 @@ def test_submit():
 
         spark_client.cluster.submit(
             id=cluster_configuration.cluster_id, application=application_configuration, wait=True)
-        #TODO: assert for success
     finally:
         clean_up_cluster(spark_client, cluster_configuration.cluster_id)
 
@@ -187,7 +186,7 @@ def test_create_user_ssh_key():
     pass
 
 
-def test_get_application_status_complete():
+def test_get_application_state_complete():
     test_id = "test-app-status-complete-"
     cluster_configuration = aztk.spark.models.ClusterConfiguration(
         cluster_id=test_id + base_cluster_id,
@@ -218,10 +217,10 @@ def test_get_application_status_complete():
 
         spark_client.cluster.submit(
             id=cluster_configuration.cluster_id, application=application_configuration, wait=True)
-        status = spark_client.cluster.get_application_status(
+        state = spark_client.cluster.get_application_state(
             id=cluster_configuration.cluster_id, application_name=application_configuration.name)
 
-        assert status == "completed"
+        assert state == aztk.spark.models.ApplicationState.Completed
 
     finally:
         clean_up_cluster(spark_client, cluster_configuration.cluster_id)

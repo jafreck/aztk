@@ -2,6 +2,7 @@ from datetime import timedelta
 
 import azure.batch.models as batch_models
 
+from aztk import models
 from aztk.utils import constants, helpers
 
 

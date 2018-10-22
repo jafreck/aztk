@@ -3,7 +3,7 @@ from aztk.spark import models
 from aztk.spark.client.base import SparkBaseOperations
 
 from .helpers import (copy, create, create_user, delete, diagnostics, download, get, get_application_log,
-                      get_application_status, get_configuration, get_remote_login_settings, list, node_run, run,
+                      get_application_state, get_configuration, get_remote_login_settings, list, node_run, run,
                       ssh_into_master, submit, wait)
 
 
@@ -95,17 +95,17 @@ class ClusterOperations(SparkBaseOperations):
         """
         return create_user.create_user(self._core_cluster_operations, self, id, username, ssh_key, password)
 
-    def get_application_status(self, id: str, application_name: str):
-        """Get the status of a submitted application
+    def get_application_state(self, id: str, application_name: str):
+        """Get the state of a submitted application
 
         Args:
             id (:obj:`str`): the name of the cluster the application was submitted to
             application_name (:obj:`str`): the name of the application to get
 
         Returns:
-            :obj:`str`: the status state of the application
+            :obj:`str`: the state of the application
         """
-        return get_application_status.get_application_status(self._core_cluster_operations, id, application_name)
+        return get_application_state.get_application_state(self._core_cluster_operations, id, application_name)
 
     def run(self, id: str, command: str, host=False, internal: bool = False, timeout=None):
         """Run a bash command on every node in the cluster

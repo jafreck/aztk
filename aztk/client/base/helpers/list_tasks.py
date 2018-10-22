@@ -1,7 +1,6 @@
 from aztk.models import SchedulingTarget, Task
 
-from .get_recent_job import \
-    get_recent_job  # TODO: move this function to azkt.client
+from .get_recent_job import get_recent_job
 from .task_table import list_task_table_entries
 
 

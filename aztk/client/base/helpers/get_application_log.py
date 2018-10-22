@@ -25,9 +25,9 @@ def __wait_for_app_to_be_running(base_operations, cluster_id: str, application_n
     """
 
     while True:
-        application_state = base_operations.get_task_status(cluster_id, application_name)
+        task_state = base_operations.get_task_state(cluster_id, application_name)
 
-        if application_state in [batch_models.TaskState.active, batch_models.TaskState.preparing]:
+        if task_state in [batch_models.TaskState.active, batch_models.TaskState.preparing]:
             # TODO: log
             time.sleep(5)
         else:
@@ -74,12 +74,12 @@ def get_log_from_storage(blob_client, container_name, application_name, task):
 
 
 def wait_for_scheduling_target_task(base_operations, cluster_id, application_name):
-    application_state = base_operations.get_task_status(cluster_id, application_name)
+    application_state = base_operations.get_task_state(cluster_id, application_name)
     while TaskState(application_state) not in [TaskState.Completed, TaskState.Failed]:
         time.sleep(3)
         # TODO: enable logger
         # log.debug("{} {}: application not yet complete".format(cluster_id, application_name))
-        application_state = base_operations.get_task_status(cluster_id, application_name)
+        application_state = base_operations.get_task_state(cluster_id, application_name)
     return base_operations.get_task_from_table(cluster_id, application_name)
 
 

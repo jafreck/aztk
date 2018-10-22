@@ -5,6 +5,7 @@ from datetime import datetime
 from zipfile import ZipFile
 
 import azure.batch.models as batch_models
+import pytest
 from azure.batch.models import BatchErrorException
 from tests.integration_tests.spark.sdk.clean_up_cluster import clean_up_cluster
 from tests.integration_tests.spark.sdk.ensure_spark_processes import \
@@ -15,7 +16,6 @@ from tests.integration_tests.spark.sdk.wait_for_all_nodes import \
     wait_for_all_nodes
 
 import aztk.spark
-import pytest
 from aztk.error import AztkError
 from aztk.utils import constants
 from aztk_cli import config
@@ -230,7 +230,7 @@ def test_create_user_ssh_key():
     pass
 
 
-def test_get_application_status_complete():
+def test_get_application_state_complete():
     test_id = "test-app-status-complete-deprecated-"
     cluster_configuration = aztk.spark.models.ClusterConfiguration(
         cluster_id=test_id + base_cluster_id,
@@ -266,7 +266,7 @@ def test_get_application_status_complete():
             status = spark_client.get_application_status(
                 cluster_id=cluster_configuration.cluster_id, app_name=application_configuration.name)
 
-        assert status == "completed"
+        assert status == aztk.spark.models.ApplicationState.Completed
 
     finally:
         clean_up_cluster(spark_client, cluster_configuration.cluster_id)
