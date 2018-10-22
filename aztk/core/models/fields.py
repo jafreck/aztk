@@ -257,19 +257,3 @@ class Datetime(Field):
         super().__init__(aztk_validators.InstanceOf(model), *args, **kwargs)
 
         self.model = model
-
-    # def __set__(self, instance, value):
-    #     if value is not None and not isinstance(value, self.model):
-    #         try:
-    #             value = self.model(value)
-    #         except ValueError:
-    #             available = [e.value for e in self.model]
-    #             raise InvalidModelFieldError("{0} is not a valid option. Use one of {1}".format(value, available))
-    #     super().__set__(instance, value)
-
-    # def serialize(self, instance):
-    #     val = super().serialize(instance)
-    #     if val is not None:
-    #         return val.value
-    #     else:
-    #         return None
