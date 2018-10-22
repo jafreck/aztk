@@ -166,7 +166,6 @@ def get_application_log(spark_client, job_id, application_name):
     try:
         task = spark_client.batch_client.task.get(job_id=recent_run_job.id, task_id=application_name)
     except batch_models.BatchErrorException as e:
-        print(e)
         # see if the application is written to metadata of pool
         applications = list_applications(spark_client, job_id)
         for application in applications:

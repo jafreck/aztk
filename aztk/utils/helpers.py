@@ -259,7 +259,7 @@ def wrap_commands_in_shell(commands):
     :rtype: str
     :return: a shell wrapping commands
     """
-    return "/bin/bash -c 'set -e; set -o pipefail; {}; wait'".format(";".join(commands))
+    return "/bin/bash -c 'set -e -o pipefail; {};'".format(";".join(commands))
 
 
 def get_connection_info(pool_id, node_id, batch_client):

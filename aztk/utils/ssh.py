@@ -123,13 +123,12 @@ def node_exec_command(node_id,
         return NodeOutput(node_id, None, e)
     if container_name:
         if not block:
-            cmd = "sudo docker exec 2>&1 -td {0} /bin/bash -c 'set -e; set -o pipefail; {1}; wait'".format(
+            cmd = "sudo docker exec 2>&1 -td {0} /bin/bash -c 'set -e -o pipefail; {1};'".format(
                 container_name, command)
         else:
-            cmd = "sudo docker exec 2>&1 -t {0} /bin/bash -c 'set -e; set -o pipefail; {1}; wait'".format(
-                container_name, command)
+            cmd = "sudo docker exec 2>&1 -t {0} /bin/bash -c 'set -e -o pipefail; {1};'".format(container_name, command)
     else:
-        cmd = "/bin/bash 2>&1 -c 'set -e; set -o pipefail; {0}; wait;'".format(command)
+        cmd = "/bin/bash 2>&1 -c 'set -e -o pipefail; {0};'".format(command)
 
     _, stdout, _ = client.exec_command(cmd, timeout=timeout)
     return_code = stdout.channel.recv_exit_status()

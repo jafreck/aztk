@@ -72,7 +72,6 @@ def schedule_with_target(scheduling_target, task_sas_urls):
             r'$AZTK_WORKING_DIR/.aztk-env/.venv/bin/python $AZTK_WORKING_DIR/aztk/node_scripts/scheduling/submit.py "{2}" >> {3} 2>&1'.
             format(task_working_dir, aztk_cluster_id, task_sas_url, constants.SPARK_SUBMIT_LOGS_FILE))
         node_id = select_scheduling_target_node(config.spark_client.cluster, config.pool_id, scheduling_target)
-        print("Application cmd:", task_cmd)
         node_run_output = config.spark_client.cluster.node_run(
             config.pool_id, node_id, task_cmd, timeout=120, block=False)
     # block job_manager_task until scheduling_target task completion

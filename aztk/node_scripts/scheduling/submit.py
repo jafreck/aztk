@@ -3,17 +3,10 @@ import logging
 import os
 import subprocess
 import sys
-import uuid
-from typing import List
 
-import requests
-import yaml
-
-from aztk import error
 from aztk.models import Task, TaskState
 from aztk.node_scripts.core import config
 from aztk.node_scripts.scheduling import common, scheduling_target
-from aztk.utils import helpers
 from aztk.utils.command_builder import CommandBuilder
 
 # limit azure.storage logging
@@ -66,17 +59,16 @@ def receive_submit_request(application_file_path):
     """
         Handle the request to submit a task
     """
-    print("running receive_submit_request")
     blob_client = config.blob_client
     application = common.load_application(application_file_path)
 
     cmd = __app_submit_cmd(application)
+    exit_code = -1
     try:
         exit_code = subprocess.call(cmd.to_str(), shell=True)
         common.upload_log(blob_client, application)
     except Exception as e:
         common.upload_error_log(str(e), os.path.join(os.environ["AZ_BATCH_TASK_WORKING_DIR"], "application.yaml"))
-    print("finished receive_submit_request")
     return exit_code
 
 
@@ -168,4 +160,5 @@ if __name__ == "__main__":
                                     os.path.join(os.environ["AZ_BATCH_TASK_WORKING_DIR"], "application.yaml"))
     else:
         exit_code = receive_submit_request(os.path.join(os.environ["AZ_BATCH_TASK_WORKING_DIR"], "application.yaml"))
+        # print("exit code", exit_code)
         sys.exit(exit_code)
