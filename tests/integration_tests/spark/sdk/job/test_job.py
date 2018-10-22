@@ -285,7 +285,6 @@ def test_scheduling_target_submit():
 
 def clean_up_job(job_id):
     try:
-        pass
-        # spark_client.job.delete(job_id)
+        spark_client.job.delete(job_id)
     except Exception:
         pass
