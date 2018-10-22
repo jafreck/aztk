@@ -5,7 +5,6 @@ from datetime import datetime
 from zipfile import ZipFile
 
 import azure.batch.models as batch_models
-import pytest
 from azure.batch.models import BatchErrorException
 from tests.integration_tests.spark.sdk.clean_up_cluster import clean_up_cluster
 from tests.integration_tests.spark.sdk.ensure_spark_processes import \
@@ -16,6 +15,7 @@ from tests.integration_tests.spark.sdk.wait_for_all_nodes import \
     wait_for_all_nodes
 
 import aztk.spark
+import pytest
 from aztk.error import AztkError
 from aztk.utils import constants
 from aztk_cli import config
@@ -212,7 +212,7 @@ def test_get_application_log():
 
         assert application_log.exit_code == 0
         assert application_log.name == application_configuration.name == "pipy100"
-        assert application_log.application_state == "completed"
+        assert application_log.application_state == aztk.spark.models.ApplicationState.Completed
         assert application_log.log is not None
         assert application_log.total_bytes is not None
 
