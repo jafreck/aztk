@@ -271,6 +271,13 @@ def test_scheduling_target_submit():
     try:
         job = spark_client.job.submit(job_configuration=job_configuration, wait=True)
 
+        application = spark_client.job.get_application(id=job.id, application_name=app2.name)
+        assert application.failure_info is None
+        assert application.name == "pipy002"
+        assert application.node_id is not None
+        assert application.end_time > application.start_time
+        assert application.state == aztk.spark.models.ApplicationState.Completed
+
         application_log = spark_client.job.get_application_log(id=job_configuration.id, application_name=app1.name)
         assert application_log.exit_code == 0
         assert application_log.log is not None

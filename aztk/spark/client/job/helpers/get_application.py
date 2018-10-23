@@ -11,7 +11,7 @@ def _get_application(core_operations, job_id, application_name):
     recent_run_job = core_operations.get_recent_job(job_id)
     scheduling_target = core_operations.get_cluster_configuration(job_id).scheduling_target
     if scheduling_target is not models.SchedulingTarget.Any:
-        return models.Application(core_operations.get_task_from_table(job_id, application_name))
+        return core_operations.get_task_from_table(job_id, application_name)
     try:
         return core_operations.get_batch_task(id=recent_run_job.id, task_id=application_name)
     except batch_models.BatchErrorException:
