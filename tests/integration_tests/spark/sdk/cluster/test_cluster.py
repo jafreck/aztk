@@ -24,7 +24,7 @@ spark_client = get_spark_client()
 
 
 def test_create_cluster():
-    test_id = "test-create-"
+    test_id = "create-"
     # TODO: make Cluster Configuration more robust, test each value
     cluster_configuration = aztk.spark.models.ClusterConfiguration(
         cluster_id=test_id + base_cluster_id,
@@ -52,7 +52,7 @@ def test_create_cluster():
 
 
 def test_list_clusters():
-    test_id = "test-list-"
+    test_id = "list-"
     cluster_configuration = aztk.spark.models.ClusterConfiguration(
         cluster_id=test_id + base_cluster_id,
         size=2,
@@ -73,7 +73,7 @@ def test_list_clusters():
 
 
 def test_get_remote_login_settings():
-    test_id = "test-get-remote-login-"
+    test_id = "get-remote-login-"
     cluster_configuration = aztk.spark.models.ClusterConfiguration(
         cluster_id=test_id + base_cluster_id,
         size=2,
@@ -95,7 +95,7 @@ def test_get_remote_login_settings():
 
 
 def test_submit():
-    test_id = "test-submit-"
+    test_id = "submit-"
     cluster_configuration = aztk.spark.models.ClusterConfiguration(
         cluster_id=test_id + base_cluster_id,
         size=2,
@@ -130,7 +130,7 @@ def test_submit():
 
 
 def test_get_application_log():
-    test_id = "test-get-app-log-"
+    test_id = "get-app-log-"
     cluster_configuration = aztk.spark.models.ClusterConfiguration(
         cluster_id=test_id + base_cluster_id,
         size=2,
@@ -187,7 +187,7 @@ def test_create_user_ssh_key():
 
 
 def test_get_application_state_complete():
-    test_id = "test-app-status-complete-"
+    test_id = "app-status-complete-"
     cluster_configuration = aztk.spark.models.ClusterConfiguration(
         cluster_id=test_id + base_cluster_id,
         size=2,
@@ -227,7 +227,7 @@ def test_get_application_state_complete():
 
 
 def test_delete_cluster():
-    test_id = "test-delete-"
+    test_id = "delete-"
     cluster_configuration = aztk.spark.models.ClusterConfiguration(
         cluster_id=test_id + base_cluster_id,
         size=2,
@@ -249,7 +249,7 @@ def test_delete_cluster():
 
 
 def test_spark_processes_up():
-    test_id = "test-spark-processes-up-"
+    test_id = "spark-processes-up-"
     cluster_configuration = aztk.spark.models.ClusterConfiguration(
         cluster_id=test_id + base_cluster_id,
         size=2,
@@ -268,7 +268,7 @@ def test_spark_processes_up():
 
 
 def test_debug_tool():
-    test_id = "test-debug-tool-"
+    test_id = "debug-tool-"
     cluster_configuration = aztk.spark.models.ClusterConfiguration(
         cluster_id=test_id + base_cluster_id,
         size=2,
@@ -298,7 +298,7 @@ def test_debug_tool():
 
 
 def test_scheduling_target():
-    test_id = "test-starget-"
+    test_id = "starget-"
     cluster_configuration = aztk.spark.models.ClusterConfiguration(
         cluster_id=test_id + base_cluster_id,
         size=2,
@@ -336,6 +336,10 @@ def test_scheduling_target():
             tail=False,
             current_bytes=0)
         assert application_log.exit_code == 0
+
+        application_state = spark_client.cluster.get_application_state(
+            id=cluster_configuration.id, application_name="pipy100")
+        assert application_state == aztk.spark.models.ApplicationState.Completed
 
     finally:
         clean_up_cluster(spark_client, cluster_configuration.cluster_id)
