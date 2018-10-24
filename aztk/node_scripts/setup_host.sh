@@ -42,8 +42,11 @@ install_prerequisites () {
 
 install_docker_compose () {
     echo "Installing Docker-Compose"
+    url=https://github.com/docker/compose/releases/download/1.19.0/docker-compose-`uname -s`-`uname -m`
     for i in {1..5}; do
-        sudo curl -L https://github.com/docker/compose/releases/download/1.19.0/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose && break || sleep 2;
+        sudo curl -L $url -o /usr/local/bin/docker-compose && break ||
+        echo "ERROR: failed to download docker-compose ... retrying in $($i**2) seconds" &&
+        sleep $i**2;
     done
     sudo chmod +x /usr/local/bin/docker-compose
     echo "Finished installing Docker-Compose"
