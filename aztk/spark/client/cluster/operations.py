@@ -88,7 +88,7 @@ class ClusterOperations(SparkBaseOperations):
         Returns:
             :obj:`None`
         """
-        return submit.submit(self._core_cluster_operations, self, id, application, remote, wait)
+        return submit.submit(self._core_cluster_operations, self, id, application, remote, wait, internal)
 
     def create_user(self, id: str, username: str, password: str = None, ssh_key: str = None):
         """Create a user on every node in the cluster
