@@ -63,7 +63,14 @@ class ClusterOperations(SparkBaseOperations):
         """
         return list.list_clusters(self._core_cluster_operations)
 
-    def submit(self, id: str, application: models.ApplicationConfiguration, remote: bool = False, wait: bool = False):
+    def submit(
+            self,
+            id: str,
+            application: models.ApplicationConfiguration,
+            remote: bool = False,
+            wait: bool = False,
+            internal: bool = False,
+    ):
         """Submit an application to a cluster.
 
         Args:
@@ -72,6 +79,9 @@ class ClusterOperations(SparkBaseOperations):
             remote (:obj:`bool`): If True, the application file will not be uploaded, it is assumed to be reachable
                 by the cluster already. This is useful when your application is stored in a mounted Azure File Share
                 and not the client. Defaults to False.
+            internal (:obj:`bool`): if True, this will connect to the node using its internal IP.
+                Only use this if running within the same VNET as the cluster. This only applies if the cluster's
+                SchedulingTarget is not set to SchedulingTarget.Any. Defaults to False.
             wait (:obj:`bool`, optional): If True, this function blocks until the application has completed.
                 Defaults to False.
 
