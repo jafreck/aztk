@@ -1,4 +1,6 @@
-##  (2018-10-28)
+# Changelog
+
+##   0.10.0 (2018-10-29)
 **Breaking Changes**
 * remove deprecated SDK APIcode (#671) ([fc50536](https://github.com/Azure/aztk/commit/fc50536)), closes [#671](https://github.com/Azure/aztk/issues/671)
 * Remove custom scripts (#673) ([9e32b4b](https://github.com/Azure/aztk/commit/9e32b4b)), closes [#673](https://github.com/Azure/aztk/issues/673)
@@ -8,9 +10,6 @@
 * Spark retry docker pull (#672) ([18b74e4](https://github.com/Azure/aztk/commit/18b74e4)), closes [#672](https://github.com/Azure/aztk/issues/672)
 * Spark scheduling target (#661) ([4408c4f](https://github.com/Azure/aztk/commit/4408c4f)), closes [#661](https://github.com/Azure/aztk/issues/661)
 * Spark submit scheduling internal (#674) ([8c2bf0c](https://github.com/Azure/aztk/commit/8c2bf0c)), closes [#674](https://github.com/Azure/aztk/issues/674)
-
-
-# Changelog
 
 ##  0.9.1 (2018-10-5)
 **Bug Fixes**
