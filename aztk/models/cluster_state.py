@@ -5,4 +5,4 @@ class ClusterState(Enum):
     deleting = "deleting"
     resizing = "resizing"
     steady = "steady"
-    stopping = "stopping"
+    stopping_resize = "stopping"
