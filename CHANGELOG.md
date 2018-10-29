@@ -2,7 +2,7 @@
 
 ##   0.10.0 (2018-10-29)
 **Breaking Changes**
-* remove deprecated SDK APIcode (#671) ([fc50536](https://github.com/Azure/aztk/commit/fc50536)), closes [#671](https://github.com/Azure/aztk/issues/671)
+* Remove deprecated SDK API code (#671) ([fc50536](https://github.com/Azure/aztk/commit/fc50536)), closes [#671](https://github.com/Azure/aztk/issues/671)
 * Remove custom scripts (#673) ([9e32b4b](https://github.com/Azure/aztk/commit/9e32b4b)), closes [#673](https://github.com/Azure/aztk/issues/673)
 * Replaced states with Enums for ClusterState, JobState, ApplicationState (#677) ([e486536](https://github.com/Azure/aztk/commit/e486536)), closes [#677](https://github.com/Azure/aztk/issues/677)
 
