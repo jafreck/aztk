@@ -226,7 +226,6 @@ class JobConfig:
 
         spark_configuration = config.get("spark_configuration")
         if spark_configuration:
-            print(_convert_to_path)
             self.spark_defaults_conf = _convert_to_path(spark_configuration.get("spark_defaults_conf"))
             self.spark_env_sh = _convert_to_path(spark_configuration.get("spark_env_sh"))
             self.core_site_xml = _convert_to_path(spark_configuration.get("core_site_xml"))
