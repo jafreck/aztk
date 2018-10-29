@@ -234,6 +234,7 @@ class JobConfig:
     def _read_config_file(self, path: str = aztk.utils.constants.DEFAULT_SPARK_JOB_CONFIG):
         """
             Reads the Job config file in the .aztk/ directory (.aztk/job.yaml)
+
         """
         if not path or not os.path.isfile(path):
             return
