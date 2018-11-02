@@ -116,7 +116,11 @@ def stream_upload_to_storage(
         blob_client (`azure.storage.common.CloudStorageAccount`)
         stream (`obj:IOBase`): opened stream to upload as the blob content
     """
+    from azure.storage.blob.appendblobservice import AppendBlobService
+    AppendBlobService.MAX_BLOCK_SIZE = 10 * 1024
+
     append_blob_client = blob_client.create_append_blob_service()
+
     append_blob_client.create_blob(
         container_name=os.environ["STORAGE_LOGS_CONTAINER"],
         blob_name=application_name + "/output.log",
@@ -130,7 +134,8 @@ def stream_upload_to_storage(
 
 
 def run_command(spark_client, command, application_name):
-    process = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE)
+    print("running common.py run_command")
+    process = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     stream_upload_to_storage(spark_client.blob_client, process.stdout, application_name)
     rc = process.poll()
     return rc

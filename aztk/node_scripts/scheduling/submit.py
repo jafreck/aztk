@@ -1,10 +1,8 @@
-import datetime
 import logging
 import os
 import subprocess
 import sys
 
-from aztk.models import Task, TaskState
 from aztk.node_scripts.core import config
 from aztk.node_scripts.scheduling import common, scheduling_target
 from aztk.utils.command_builder import CommandBuilder
@@ -84,66 +82,20 @@ def ssh_submit(task_sas_url):
     aztk_cluster_id = os.environ.get("AZTK_CLUSTER_ID")
     try:
         # update task table before running
-        task = insert_task_into_task_table(aztk_cluster_id, task_definition)
+        task = scheduling_target.insert_task_into_task_table(aztk_cluster_id, task_definition)
         # run task and upload log
-        exit_code = common.run_command(config.spark_client, cmd.to_str(), application.application_name)
+        exit_code = common.run_command(config.spark_client, cmd.to_str(), application.name)
         # common.upload_log(config.blob_client, application)
         #TODO: enable logging
         # print("completed application, updating storage table")
-        mark_task_complete(aztk_cluster_id, task.id, exit_code)
+        scheduling_target.mark_task_complete(aztk_cluster_id, task.id, exit_code)
     except Exception as e:
         #TODO: enable logging
         # print("application failed, updating storage table")
-        mark_task_failure(aztk_cluster_id, task_definition.id, exit_code, str(e))
+        import traceback
+        scheduling_target.mark_task_failure(aztk_cluster_id, task_definition.id, exit_code, traceback.format_exc(e))
 
     return exit_code
-
-
-def insert_task_into_task_table(cluster_id, task_definition):
-    current_time = datetime.datetime.utcnow()
-    task = Task(
-        id=task_definition.id,
-        node_id=os.environ.get("AZ_BATCH_NODE_ID", None),
-        state=TaskState.Running,
-        state_transition_time=current_time,
-        command_line=task_definition.command_line,
-        start_time=current_time,
-        end_time=None,
-        exit_code=None,
-        failure_info=None,
-    )
-
-    config.spark_client.cluster._core_cluster_operations.insert_task_into_task_table(cluster_id, task)
-    return task
-
-
-def get_task(cluster_id, task_id):
-    return config.spark_client.cluster._core_cluster_operations.get_task_from_table(cluster_id, task_id)
-
-
-def mark_task_complete(cluster_id, task_id, exit_code):
-    current_time = datetime.datetime.utcnow()
-
-    task = get_task(cluster_id, task_id)
-    task.end_time = current_time
-    task.exit_code = exit_code
-    task.state = TaskState.Completed
-    task.state_transition_time = current_time
-
-    config.spark_client.cluster._core_cluster_operations.update_task_in_task_table(cluster_id, task)
-
-
-def mark_task_failure(cluster_id, task_id, exit_code, failure_info):
-    current_time = datetime.datetime.utcnow()
-
-    task = get_task(cluster_id, task_id)
-    task.end_time = current_time
-    task.exit_code = exit_code
-    task.state = TaskState.Failed
-    task.state_transition_time = current_time
-    task.failure_info = failure_info
-
-    config.spark_client.cluster._core_cluster_operations.update_task_in_task_table(cluster_id, task)
 
 
 if __name__ == "__main__":

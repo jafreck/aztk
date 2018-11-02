@@ -1,10 +1,13 @@
 import concurrent.futures
+import datetime
 import os
 import time
 
 import requests
 
 from aztk import error
+from aztk.models import Task, TaskState
+from aztk.node_scripts.core import config
 
 
 def http_request_wrapper(func, *args, timeout=None, max_execution_time=300, **kwargs):
@@ -51,3 +54,50 @@ def download_task_resource_files(task_id, resource_files):
         raise error.AztkError(errors)
     else:
         return [result.result() for result in done]
+
+
+def insert_task_into_task_table(cluster_id, task_definition):
+    current_time = datetime.datetime.utcnow()
+    task = Task(
+        id=task_definition.id,
+        node_id=os.environ.get("AZ_BATCH_NODE_ID", None),
+        state=TaskState.Running,
+        state_transition_time=current_time,
+        command_line=task_definition.command_line,
+        start_time=current_time,
+        end_time=None,
+        exit_code=None,
+        failure_info=None,
+    )
+
+    config.spark_client.cluster._core_cluster_operations.insert_task_into_task_table(cluster_id, task)
+    return task
+
+
+def get_task(cluster_id, task_id):
+    return config.spark_client.cluster._core_cluster_operations.get_task_from_table(cluster_id, task_id)
+
+
+def mark_task_complete(cluster_id, task_id, exit_code):
+    current_time = datetime.datetime.utcnow()
+
+    task = get_task(cluster_id, task_id)
+    task.end_time = current_time
+    task.exit_code = exit_code
+    task.state = TaskState.Completed
+    task.state_transition_time = current_time
+
+    config.spark_client.cluster._core_cluster_operations.update_task_in_task_table(cluster_id, task)
+
+
+def mark_task_failure(cluster_id, task_id, exit_code, failure_info):
+    current_time = datetime.datetime.utcnow()
+
+    task = get_task(cluster_id, task_id)
+    task.end_time = current_time
+    task.exit_code = exit_code
+    task.state = TaskState.Failed
+    task.state_transition_time = current_time
+    task.failure_info = failure_info
+
+    config.spark_client.cluster._core_cluster_operations.update_task_in_task_table(cluster_id, task)
