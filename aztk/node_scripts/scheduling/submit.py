@@ -93,7 +93,7 @@ def ssh_submit(task_sas_url):
         #TODO: enable logging
         # print("application failed, updating storage table")
         import traceback
-        scheduling_target.mark_task_failure(aztk_cluster_id, task_definition.id, exit_code, traceback.format_exc(e))
+        scheduling_target.mark_task_failure(aztk_cluster_id, task_definition.id, exit_code, traceback.format_exc())
 
     return exit_code
 
