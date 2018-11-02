@@ -65,19 +65,21 @@ def wait_for_task_to_complete(job_id: str, task_id: str, batch_client):
 
 def upload_text_to_container(container_name: str, application_name: str, content: str, file_path: str,
                              blob_client=None) -> batch_models.ResourceFile:
+    block_blob_client = blob_client.create_block_blob_service()
+
     blob_name = file_path
     blob_path = application_name + "/" + blob_name    # + '/' + time_stamp + '/' + blob_name
-    blob_client.create_container(container_name, fail_on_exist=False)
-    blob_client.create_blob_from_text(container_name, blob_path, content)
+    block_blob_client.create_container(container_name, fail_on_exist=False)
+    block_blob_client.create_blob_from_text(container_name, blob_path, content)
 
-    sas_token = blob_client.generate_blob_shared_access_signature(
+    sas_token = block_blob_client.generate_blob_shared_access_signature(
         container_name,
         blob_path,
         permission=blob.BlobPermissions.READ,
         expiry=datetime.datetime.utcnow() + datetime.timedelta(days=365),
     )
 
-    sas_url = blob_client.make_blob_url(container_name, blob_path, sas_token=sas_token)
+    sas_url = block_blob_client.make_blob_url(container_name, blob_path, sas_token=sas_token)
 
     return batch_models.ResourceFile(file_path=blob_name, blob_source=sas_url)
 
@@ -91,7 +93,7 @@ def upload_file_to_container(container_name,
     """
     Uploads a local file to an Azure Blob storage container.
     :param blob_client: A blob service client.
-    :type blocblob_clientk_blob_client: `azure.storage.blob.BlockBlobService`
+    :type blob_client: `azure.storage.common.CloudStorageAccount`
     :param str container_name: The name of the Azure Blob storage container.
     :param str file_path: The local path to the file.
     :param str node_path: Path on the local node. By default will be the same as file_path
@@ -99,6 +101,8 @@ def upload_file_to_container(container_name,
     :return: A ResourceFile initialized with a SAS URL appropriate for Batch
     tasks.
     """
+    block_blob_client = blob_client.create_block_blob_service()
+
     file_path = normalize_path(file_path)
     blob_name = None
     if use_full_path:
@@ -110,18 +114,18 @@ def upload_file_to_container(container_name,
     if not node_path:
         node_path = blob_name
 
-    blob_client.create_container(container_name, fail_on_exist=False)
+    block_blob_client.create_container(container_name, fail_on_exist=False)
 
-    blob_client.create_blob_from_path(container_name, blob_path, file_path)
+    block_blob_client.create_blob_from_path(container_name, blob_path, file_path)
 
-    sas_token = blob_client.generate_blob_shared_access_signature(
+    sas_token = block_blob_client.generate_blob_shared_access_signature(
         container_name,
         blob_path,
         permission=blob.BlobPermissions.READ,
         expiry=datetime.datetime.utcnow() + datetime.timedelta(days=7),
     )
 
-    sas_url = blob_client.make_blob_url(container_name, blob_path, sas_token=sas_token)
+    sas_url = block_blob_client.make_blob_url(container_name, blob_path, sas_token=sas_token)
 
     return batch_models.ResourceFile(file_path=node_path, blob_source=sas_url)
 

@@ -9,7 +9,6 @@ import azure.storage.blob as blob
 import requests
 import yaml
 from azure.storage.common import CloudStorageAccount
-from tests.integration_tests.spark.sdk.get_client import get_spark_client
 
 from aztk.node_scripts.core import config
 from aztk.node_scripts.scheduling import scheduling_target
