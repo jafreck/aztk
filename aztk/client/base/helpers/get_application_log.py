@@ -49,6 +49,18 @@ def __get_output_file_properties(batch_client, cluster_id: str, application_name
 
 
 # TODO: stream log from storage
+# TODO: find a way to flush memory or return a generator for blob content in Application
+'''
+def stream_log_from_storage(): # for the cli
+    last_read_byte = 0
+    while task not completed:
+        blob = get_blob_to_text(start_range=last_read_byte)
+        print(blob.content, end='')
+        last_read_byte = last_read_byte + blob.properties.content_length
+
+'''
+
+
 def get_log_from_storage(blob_client, container_name, application_name, task):
     """
         Args:
@@ -57,7 +69,7 @@ def get_log_from_storage(blob_client, container_name, application_name, task):
             container_name (:obj:`str`): the name of the Azure Blob storage container to get data from
             application_name (:obj:`str`): the name of the application to get logs for
             task (:obj:`aztk.models.Task`): the aztk task for for this application
-            
+
     """
     try:
         block_blob_client = blob_client.create_block_blob_service()
@@ -98,37 +110,6 @@ def get_log(base_operations, cluster_id: str, application_name: str, tail=False,
         task = __wait_for_app_to_be_running(base_operations, cluster_id, application_name)
         if not __check_task_node_exist(base_operations.batch_client, cluster_id, task):
             return get_log_from_storage(base_operations.blob_client, cluster_id, application_name, task)
-
-    file = __get_output_file_properties(base_operations.batch_client, cluster_id, application_name)
-    target_bytes = file.content_length
-
-    if target_bytes != current_bytes:
-        ocp_range = None
-
-        if tail:
-            ocp_range = "bytes={0}-{1}".format(current_bytes, target_bytes - 1)
-
-        stream = base_operations.batch_client.file.get_from_task(
-            job_id, task_id, output_file, batch_models.FileGetFromTaskOptions(ocp_range=ocp_range))
-        content = helpers.read_stream_as_string(stream)
-
-        return models.ApplicationLog(
-            name=application_name,
-            cluster_id=cluster_id,
-            application_state=task.state,
-            log=content,
-            total_bytes=target_bytes,
-            exit_code=task.exit_code,
-        )
-    else:
-        return models.ApplicationLog(
-            name=application_name,
-            cluster_id=cluster_id,
-            application_state=task.state,
-            log="",
-            total_bytes=target_bytes,
-            exit_code=task.exit_code,
-        )
 
 
 def get_application_log(base_operations, cluster_id: str, application_name: str, tail=False, current_bytes: int = 0):
