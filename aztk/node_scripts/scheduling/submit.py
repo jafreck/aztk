@@ -3,7 +3,7 @@ import os
 import subprocess
 import sys
 
-from aztk.node_scripts.core import config
+from aztk.node_scripts.core import config, log
 from aztk.node_scripts.scheduling import common, scheduling_target
 from aztk.utils.command_builder import CommandBuilder
 
@@ -47,9 +47,7 @@ def __app_submit_cmd(application):
         os.path.expandvars(application.application) + " " +
         " ".join(["'" + str(app_arg) + "'" for app_arg in (application.application_args or [])]))
 
-    with open("spark-submit.txt", mode="w", encoding="UTF-8") as stream:
-        stream.write(spark_submit_cmd.to_str())
-
+    log.info("Spark submit cmd: %s", spark_submit_cmd.to_str())
     return spark_submit_cmd
 
 
@@ -63,8 +61,7 @@ def receive_submit_request(application_file_path):
     cmd = __app_submit_cmd(application)
     exit_code = -1
     try:
-        exit_code = subprocess.call(cmd.to_str(), shell=True)
-        common.upload_log(blob_client, application)
+        exit_code = common.run_command(config.spark_client, cmd.to_str(), application.name)
     except Exception as e:
         common.upload_error_log(str(e), os.path.join(os.environ["AZ_BATCH_TASK_WORKING_DIR"], "application.yaml"))
     return exit_code
@@ -85,13 +82,10 @@ def ssh_submit(task_sas_url):
         task = scheduling_target.insert_task_into_task_table(aztk_cluster_id, task_definition)
         # run task and upload log
         exit_code = common.run_command(config.spark_client, cmd.to_str(), application.name)
-        # common.upload_log(config.blob_client, application)
-        #TODO: enable logging
-        # print("completed application, updating storage table")
+        log("completed application, updating storage table")
         scheduling_target.mark_task_complete(aztk_cluster_id, task.id, exit_code)
     except Exception as e:
-        #TODO: enable logging
-        # print("application failed, updating storage table")
+        log("application failed, updating storage table")
         import traceback
         scheduling_target.mark_task_failure(aztk_cluster_id, task_definition.id, exit_code, traceback.format_exc())
 
@@ -112,5 +106,5 @@ if __name__ == "__main__":
                                     os.path.join(os.environ["AZ_BATCH_TASK_WORKING_DIR"], "application.yaml"))
     else:
         exit_code = receive_submit_request(os.path.join(os.environ["AZ_BATCH_TASK_WORKING_DIR"], "application.yaml"))
-        # print("exit code", exit_code)
+        log.info("Exit code: %s", str(exit_code))
         sys.exit(exit_code)

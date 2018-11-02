@@ -3,14 +3,15 @@ import os
 from aztk.internal import cluster_data
 from aztk.models.plugins import PluginTarget
 from aztk.node_scripts import wait_until_master_selected
-from aztk.node_scripts.core import config
-from aztk.node_scripts.install import (create_user, pick_master, plugins, spark, spark_container)
+from aztk.node_scripts.core import config, log
+from aztk.node_scripts.install import (create_user, pick_master, plugins,
+                                       spark, spark_container)
 
 
 def read_cluster_config():
     data = cluster_data.ClusterData(config.blob_client, config.cluster_id)
     cluster_config = data.read_cluster_config()
-    print("Got cluster config", cluster_config)
+    log.info("Got cluster config: %s", cluster_config)
     return cluster_config
 
 
@@ -62,11 +63,11 @@ def setup_spark_container():
     """
     is_master = os.environ.get("AZTK_IS_MASTER") == "true"
     is_worker = os.environ.get("AZTK_IS_WORKER") == "true"
-    print("Setting spark container. Master: ", is_master, ", Worker: ", is_worker)
+    log.info("Setting spark container. Master: %s, Worker: %s", is_master, is_worker)
 
-    print("Copying spark setup config")
+    log.info("Copying spark setup config")
     spark.setup_conf()
-    print("Done copying spark setup config")
+    log.info("Done copying spark setup config")
 
     spark.setup_connection()
 

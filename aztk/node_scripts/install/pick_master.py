@@ -6,7 +6,7 @@ import azure.batch.models as batchmodels
 from azure.batch.models import BatchErrorException
 from msrest.exceptions import ClientRequestError
 
-from aztk.node_scripts.core import config
+from aztk.node_scripts.core import config, log
 
 MASTER_NODE_METADATA_KEY = "_spark_master_node"
 
@@ -41,7 +41,7 @@ def try_assign_self_as_master(client: batch.BatchServiceClient, pool: batchmodel
         )
         return True
     except (BatchErrorException, ClientRequestError):
-        print("Couldn't assign itself as master the pool because the pool was modified since last get.")
+        log.info("Couldn't assign itself as master the pool because the pool was modified since last get.")
         return False
 
 
@@ -61,17 +61,17 @@ def find_master(client: batch.BatchServiceClient) -> bool:
 
         if master:
             if master == config.node_id:
-                print("Node is already the master '{0}'".format(master))
+                log.info("Node is already the master '{0}'".format(master))
                 return True
             else:
-                print("Pool already has a master '{0}'. This node will be a worker".format(master))
+                log.info("Pool already has a master '{0}'. This node will be a worker".format(master))
                 return False
         else:
-            print("Pool has no master. Trying to assign itself! ({0}/5)".format(i + 1))
+            log.info("Pool has no master. Trying to assign itself! ({0}/5)".format(i + 1))
             result = try_assign_self_as_master(client, pool)
 
             if result:
-                print("Assignment was successful! Node {0} is the new master.".format(config.node_id))
+                log.info("Assignment was successful! Node {0} is the new master.".format(config.node_id))
                 return True
 
     raise CannotAllocateMasterError("Unable to assign node as a master in 5 tries")

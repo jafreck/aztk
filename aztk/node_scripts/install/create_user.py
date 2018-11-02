@@ -1,10 +1,13 @@
 import os
+from datetime import datetime, timedelta, timezone
+
 import azure.batch.models as batch_models
-from azure.batch.models import BatchErrorException
-from Cryptodome.PublicKey import RSA
-from Cryptodome.Cipher import AES, PKCS1_OAEP
-from datetime import datetime, timezone, timedelta
 import yaml
+from azure.batch.models import BatchErrorException
+from Cryptodome.Cipher import AES, PKCS1_OAEP
+from Cryptodome.PublicKey import RSA
+
+from aztk.node_scripts.core import log
 """
     Creates a user if the user configuration file at $AZTK_WORKING_DIR/user.yaml exists
 """
@@ -14,7 +17,7 @@ def create_user(batch_client):
     path = os.path.join(os.environ["AZTK_WORKING_DIR"], "user.yaml")
 
     if not os.path.isfile(path):
-        print("No user to create.")
+        log.info("No user to create.")
         return
 
     with open(path, "r", encoding="UTF-8") as file:
@@ -35,7 +38,8 @@ def create_user(batch_client):
             ),
         )
     except BatchErrorException as e:
-        print(e)
+        import traceback
+        log.info(traceback.format_exc())
 
 
 def decrypt_password(user_conf):
