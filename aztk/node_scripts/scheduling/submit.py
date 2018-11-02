@@ -86,8 +86,8 @@ def ssh_submit(task_sas_url):
         # update task table before running
         task = insert_task_into_task_table(aztk_cluster_id, task_definition)
         # run task and upload log
-        exit_code = subprocess.call(cmd.to_str(), shell=True)
-        common.upload_log(config.blob_client, application)
+        exit_code = common.run_command(config.spark_client, cmd.to_str(), application.application_name)
+        # common.upload_log(config.blob_client, application)
         #TODO: enable logging
         # print("completed application, updating storage table")
         mark_task_complete(aztk_cluster_id, task.id, exit_code)

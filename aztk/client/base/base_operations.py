@@ -12,7 +12,7 @@ class BaseOperations:
     Attributes:
         batch_client (:obj:`azure.batch.batch_service_client.BatchServiceClient`): Client used to interact with the
             Azure Batch service.
-        blob_client (:obj:`azure.storage.blob.BlockBlobService`):  Client used to interact with the Azure Storage
+        blob_client (:obj:`azure.storage.blob.CloudStorageAccount`):  Client used to interact with the Azure Storage
             Blob service.
         secrets_configuration (:obj:`aztk.models.SecretsConfiguration`):
             Model that holds AZTK secrets used to authenticate with Azure and the clusters.

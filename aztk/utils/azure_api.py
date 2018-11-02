@@ -108,9 +108,8 @@ def make_blob_client(secrets):
             account_name=accountname,
         ).keys[0].value)
         storage_client = CloudStorageAccount(accountname, key)
-        blob_client = storage_client.create_block_blob_service()
 
-    return blob_client
+    return storage_client
 
 
 def make_table_service(secrets):

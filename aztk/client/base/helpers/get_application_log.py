@@ -51,7 +51,7 @@ def __get_output_file_properties(batch_client, cluster_id: str, application_name
 def get_log_from_storage(blob_client, container_name, application_name, task):
     """
         Args:
-            blob_client (:obj:`azure.storage.blob.BlockBlobService`):  Client used to interact with the Azure Storage
+            block_blob_client (:obj:`azure.storage.blob.CloudStorageAccount`):  Client used to interact with the Azure Storage
                 Blob service.
             container_name (:obj:`str`): the name of the Azure Blob storage container to get data from
             application_name (:obj:`str`): the name of the application to get logs for
@@ -59,7 +59,9 @@ def get_log_from_storage(blob_client, container_name, application_name, task):
             
     """
     try:
-        blob = blob_client.get_blob_to_text(container_name, application_name + "/" + constants.SPARK_SUBMIT_LOGS_FILE)
+        block_blob_client = blob_client.create_block_blob_client()
+        blob = block_blob_client.get_blob_to_text(container_name,
+                                                  application_name + "/" + constants.SPARK_SUBMIT_LOGS_FILE)
     except azure.common.AzureMissingResourceHttpError:
         raise error.AztkError("Logs not found in your storage account. They were either deleted or never existed.")
 
