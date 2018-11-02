@@ -4,8 +4,7 @@ from aztk.internal import cluster_data
 from aztk.models.plugins import PluginTarget
 from aztk.node_scripts import wait_until_master_selected
 from aztk.node_scripts.core import config, log
-from aztk.node_scripts.install import (create_user, pick_master, plugins,
-                                       spark, spark_container)
+from aztk.node_scripts.install import (create_user, pick_master, plugins, spark, spark_container)
 
 
 def read_cluster_config():
