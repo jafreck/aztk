@@ -48,6 +48,7 @@ def __get_output_file_properties(batch_client, cluster_id: str, application_name
                 raise e
 
 
+# TODO: stream log from storage
 def get_log_from_storage(blob_client, container_name, application_name, task):
     """
         Args:
