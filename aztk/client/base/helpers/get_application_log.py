@@ -59,7 +59,7 @@ def get_log_from_storage(blob_client, container_name, application_name, task):
             
     """
     try:
-        block_blob_client = blob_client.create_block_blob_client()
+        block_blob_client = blob_client.create_block_blob_service()
         blob = block_blob_client.get_blob_to_text(container_name,
                                                   application_name + "/" + constants.SPARK_SUBMIT_LOGS_FILE)
     except azure.common.AzureMissingResourceHttpError:
