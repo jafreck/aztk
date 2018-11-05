@@ -31,7 +31,7 @@ def wait_for_batch_task(base_operations, cluster_id: str, application_name: str)
 def wait_for_scheduling_target_task(base_operations, cluster_id, application_name):
     # TODO: ensure get_task_state not None or throw
     task = base_operations.get_task_from_table(cluster_id, application_name)
-    while task.state not in [TaskState.Completed, TaskState.Failed, Task.Running]:
+    while task.state not in [TaskState.Completed, TaskState.Failed, TaskState.Running]:
         time.sleep(3)
         # TODO: enable logger
         # log.debug("{} {}: application not yet complete".format(cluster_id, application_name))
