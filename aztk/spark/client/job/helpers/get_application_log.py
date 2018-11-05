@@ -38,8 +38,7 @@ def _get_application_log(core_job_operations, spark_job_operations, job_id, appl
 
 
 def get_job_application_log(core_job_operations, spark_job_operations, job_id, application_name):
-    try:
+    from aztk.utils import batch_error_manager
+    with batch_error_manager():
         return models.ApplicationLog(
             _get_application_log(core_job_operations, spark_job_operations, job_id, application_name))
-    except BatchErrorException as e:
-        raise error.AztkError(helpers.format_batch_exception(e))

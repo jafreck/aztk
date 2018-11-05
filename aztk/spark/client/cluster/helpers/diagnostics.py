@@ -1,9 +1,7 @@
 import os
 
-from azure.batch.models import BatchErrorException
-
 from aztk import error
-from aztk.utils import helpers
+from aztk.utils import batch_error_manager
 
 
 def _run(spark_cluster_operations, cluster_id, output_directory=None, brief=False):
@@ -40,8 +38,6 @@ def _build_diagnostic_ssh_command(brief):
 
 
 def run_cluster_diagnostics(spark_cluster_operations, cluster_id, output_directory=None, brief=False):
-    try:
+    with batch_error_manager():
         output = _run(spark_cluster_operations, cluster_id, output_directory, brief)
         return output
-    except BatchErrorException as e:
-        raise error.AztkError(helpers.format_batch_exception(e))

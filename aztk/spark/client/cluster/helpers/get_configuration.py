@@ -1,11 +1,6 @@
-from azure.batch.models import BatchErrorException
-
-from aztk import error
-from aztk.utils import helpers
+from aztk.utils import batch_error_manager
 
 
 def get_configuration(core_cluster_operations, cluster_id: str):
-    try:
+    with batch_error_manager():
         return core_cluster_operations.get_cluster_configuration(cluster_id)
-    except BatchErrorException as e:
-        raise error.AztkError(helpers.format_batch_exception(e))

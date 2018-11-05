@@ -1,12 +1,10 @@
 import azure.batch.models as batch_models
-from azure.batch.models import BatchErrorException
 
-from aztk import error
 from aztk import models as base_models
 from aztk.internal.cluster_data import NodeData
 from aztk.spark import models
 from aztk.spark.utils import constants, util
-from aztk.utils import helpers
+from aztk.utils import batch_error_manager
 
 POOL_ADMIN_USER_IDENTITY = batch_models.UserIdentity(
     auto_user=batch_models.AutoUserSpecification(
@@ -43,7 +41,7 @@ def create_cluster(core_cluster_operations,
     cluster_conf.validate()
 
     cluster_data = core_cluster_operations.get_cluster_data(cluster_conf.cluster_id)
-    try:
+    with batch_error_manager():
         zip_resource_files = None
         node_data = NodeData(cluster_conf).add_core().done()
         zip_resource_files = cluster_data.upload_node_data(node_data).to_resource_file()
@@ -71,6 +69,3 @@ def create_cluster(core_cluster_operations,
             cluster = spark_cluster_operations.get(cluster.id)
 
         return cluster
-
-    except BatchErrorException as e:
-        raise error.AztkError(helpers.format_batch_exception(e))

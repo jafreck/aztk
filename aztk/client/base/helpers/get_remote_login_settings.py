@@ -1,7 +1,5 @@
-from azure.batch.models import BatchErrorException
-
-from aztk import error, models
-from aztk.utils import helpers
+from aztk import models
+from aztk.utils import batch_error_manager
 
 
 def _get_remote_login_settings(base_client, pool_id: str, node_id: str):
@@ -16,7 +14,5 @@ def _get_remote_login_settings(base_client, pool_id: str, node_id: str):
 
 
 def get_remote_login_settings(base_client, cluster_id: str, node_id: str):
-    try:
+    with batch_error_manager():
         return _get_remote_login_settings(base_client, cluster_id, node_id)
-    except BatchErrorException as e:
-        raise error.AztkError(helpers.format_batch_exception(e))

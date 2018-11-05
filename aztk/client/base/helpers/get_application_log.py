@@ -1,25 +1,19 @@
+import tempfile
 import time
 
 import azure
 import azure.batch.models as batch_models
-from azure.batch.models import BatchErrorException
 
 from aztk import error, models
 from aztk.models import Task, TaskState
-from aztk.utils import constants, helpers
-
-output_file = constants.TASK_WORKING_DIR + "/" + constants.SPARK_SUBMIT_LOGS_FILE
+from aztk.utils import batch_error_manager, constants
 
 
-def __check_task_node_exist(batch_client, cluster_id: str, task: Task) -> bool:
-    try:
-        batch_client.compute_node.get(cluster_id, task.node_id)
-        return True
-    except BatchErrorException:
-        return False
+def convert_application_name_to_blob_path(application_name):
+    return application_name + "/" + constants.SPARK_SUBMIT_LOGS_FILE
 
 
-def __wait_for_app_to_be_running(base_operations, cluster_id: str, application_name: str) -> Task:
+def wait_for_batch_task(base_operations, cluster_id: str, application_name: str) -> Task:
     """
         Wait for the batch task to leave the waiting state into running(or completed if it was fast enough)
     """
@@ -34,86 +28,106 @@ def __wait_for_app_to_be_running(base_operations, cluster_id: str, application_n
             return base_operations.get_batch_task(id=cluster_id, task_id=application_name)
 
 
-def __get_output_file_properties(batch_client, cluster_id: str, application_name: str):
-    while True:
-        try:
-            file = helpers.get_file_properties(cluster_id, application_name, output_file, batch_client)
-            return file
-        except BatchErrorException as e:
-            if e.response.status_code == 404:
-                # TODO: log
-                time.sleep(5)
-                continue
-            else:
-                raise e
+def wait_for_scheduling_target_task(base_operations, cluster_id, application_name):
+    # TODO: ensure get_task_state not None or throw
+    task = base_operations.get_task_from_table(cluster_id, application_name)
+    while task.state not in [TaskState.Completed, TaskState.Failed, Task.Running]:
+        time.sleep(3)
+        # TODO: enable logger
+        # log.debug("{} {}: application not yet complete".format(cluster_id, application_name))
+        task = base_operations.get_task_from_table(cluster_id, application_name)
+    return task
 
 
-# TODO: stream log from storage
-# TODO: find a way to flush memory or return a generator for blob content in Application
-'''
-def stream_log_from_storage(): # for the cli
-    last_read_byte = 0
-    while task not completed:
-        blob = get_blob_to_text(start_range=last_read_byte)
-        print(blob.content, end='')
-        last_read_byte = last_read_byte + blob.properties.content_length
-
-'''
-
-
-def get_log_from_storage(blob_client, container_name, application_name, task):
-    """
-        Args:
-            block_blob_client (:obj:`azure.storage.blob.CloudStorageAccount`):  Client used to interact with the Azure Storage
-                Blob service.
-            container_name (:obj:`str`): the name of the Azure Blob storage container to get data from
-            application_name (:obj:`str`): the name of the application to get logs for
-            task (:obj:`aztk.models.Task`): the aztk task for for this application
-
-    """
+def get_blob_from_storage(block_blob_client, container_name, application_name, stream, start_range):
     try:
-        block_blob_client = blob_client.create_block_blob_service()
-        blob = block_blob_client.get_blob_to_text(container_name,
-                                                  application_name + "/" + constants.SPARK_SUBMIT_LOGS_FILE)
+        return block_blob_client.get_blob_to_stream(
+            container_name,
+            convert_application_name_to_blob_path(application_name),
+            stream,
+            start_range=start_range,
+        )
     except azure.common.AzureMissingResourceHttpError:
         raise error.AztkError("Logs not found in your storage account. They were either deleted or never existed.")
 
+
+def get_log_from_storage(blob_client, container_name, application_name, task, current_bytes):
+    stream = tempfile.SpooledTemporaryFile(max_size=2 * 1024 * 1024)
+    blob = get_blob_from_storage(blob_client.create_block_blob_service, container_name, application_name, stream,
+                                 current_bytes)
     return models.ApplicationLog(
         name=application_name,
         cluster_id=container_name,
         application_state=task.state,
-        log=blob.content,
+        log=stream,
         total_bytes=blob.properties.content_length,
         exit_code=task.exit_code,
     )
 
 
-def wait_for_scheduling_target_task(base_operations, cluster_id, application_name):
-    application_state = base_operations.get_task_state(cluster_id, application_name)
-    while TaskState(application_state) not in [TaskState.Completed, TaskState.Failed]:
-        time.sleep(3)
-        # TODO: enable logger
-        # log.debug("{} {}: application not yet complete".format(cluster_id, application_name))
-        application_state = base_operations.get_task_state(cluster_id, application_name)
-    return base_operations.get_task_from_table(cluster_id, application_name)
+def stream_log_from_storage(base_operations, container_name, application_name, task):
+    """
+        Args:
+            base_operations (:obj:`aztk.client.base.BaseOperations`):  Base aztk client
+            container_name (:obj:`str`): the name of the Azure Blob storage container to get data from
+            application_name (:obj:`str`): the name of the application to get logs for
+            task (:obj:`aztk.models.Task`): the aztk task for for this application
+    """
+    stream = tempfile.SpooledTemporaryFile(max_size=2 * 1024 * 1024)
+    last_read_byte = 0
+
+    block_blob_client = base_operations.blob_client.create_block_blob_service()
+    blob = get_blob_from_storage(
+        block_blob_client,
+        container_name,
+        convert_application_name_to_blob_path(application_name),
+        stream,
+        start_range=last_read_byte,
+    )
+
+    while task.state not in [TaskState.Completed, TaskState.Failed]:
+        task = base_operations.get_task_from_table(task.id, application_name)    #TODO: is this a race condiition?
+        last_read_byte = blob.properties.content_length
+        blob = get_blob_from_storage(
+            block_blob_client,
+            container_name,
+            convert_application_name_to_blob_path(application_name),
+            stream,
+            start_range=last_read_byte,
+        )
+
+    return models.ApplicationLog(
+        name=application_name,
+        cluster_id=container_name,
+        application_state=task.state,
+        log=stream,
+        total_bytes=blob.properties.content_length,
+        exit_code=task.exit_code,
+    )
 
 
 def get_log(base_operations, cluster_id: str, application_name: str, tail=False, current_bytes: int = 0):
-    job_id = cluster_id
-    task_id = application_name
     cluster_configuration = base_operations.get_cluster_configuration(cluster_id)
 
     if cluster_configuration.scheduling_target is not models.SchedulingTarget.Any:
         task = wait_for_scheduling_target_task(base_operations, cluster_id, application_name)
-        return get_log_from_storage(base_operations.blob_client, cluster_id, application_name, task)
     else:
-        task = __wait_for_app_to_be_running(base_operations, cluster_id, application_name)
-        if not __check_task_node_exist(base_operations.batch_client, cluster_id, task):
-            return get_log_from_storage(base_operations.blob_client, cluster_id, application_name, task)
+        task = wait_for_batch_task(base_operations, cluster_id, application_name)
+
+    return get_log_from_storage(base_operations.blob_client, cluster_id, application_name, task, current_bytes)
+
+
+def stream_log(base_operations, cluster_id: str, application_name: str):
+    cluster_configuration = base_operations.get_cluster_configuration(cluster_id)
+
+    if cluster_configuration.scheduling_target is not models.SchedulingTarget.Any:
+        task = wait_for_scheduling_target_task(base_operations, cluster_id, application_name)
+    else:
+        task = wait_for_batch_task(base_operations, cluster_id, application_name)
+
+    return stream_log_from_storage(base_operations, cluster_id, application_name, task)
 
 
 def get_application_log(base_operations, cluster_id: str, application_name: str, tail=False, current_bytes: int = 0):
-    try:
+    with batch_error_manager():
         return get_log(base_operations, cluster_id, application_name, tail, current_bytes)
-    except BatchErrorException as e:
-        raise error.AztkError(helpers.format_batch_exception(e))

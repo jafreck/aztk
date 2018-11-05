@@ -10,7 +10,6 @@ def _list_jobs(core_job_operations):
 
 
 def list_jobs(core_job_operations):
-    try:
+    from aztk.utils import batch_error_manager
+    with batch_error_manager():
         return [models.Job(cloud_job_schedule) for cloud_job_schedule in _list_jobs(core_job_operations)]
-    except BatchErrorException as e:
-        raise error.AztkError(helpers.format_batch_exception(e))

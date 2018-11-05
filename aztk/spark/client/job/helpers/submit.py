@@ -1,13 +1,12 @@
 import azure.batch.models as batch_models
 import yaml
-from azure.batch.models import BatchErrorException
 
 from aztk import error
 from aztk import models as base_models
 from aztk.internal.cluster_data import NodeData
 from aztk.spark import models
 from aztk.spark.models import SchedulingTarget
-from aztk.utils import helpers
+from aztk.utils import batch_error_manager, helpers
 from aztk.utils.command_builder import CommandBuilder
 
 
@@ -78,7 +77,7 @@ def submit_job(core_job_operations,
                spark_job_operations,
                job_configuration: models.JobConfiguration,
                wait: bool = False):
-    try:
+    with batch_error_manager():
         job_configuration = _apply_default_for_job_config(job_configuration)
         job_configuration.validate()
         cluster_data = core_job_operations.get_cluster_data(job_configuration.id)
@@ -126,6 +125,3 @@ def submit_job(core_job_operations,
             spark_job_operations.wait(id=job_configuration.id)
 
         return models.Job(job)
-
-    except BatchErrorException as e:
-        raise error.AztkError(helpers.format_batch_exception(e))

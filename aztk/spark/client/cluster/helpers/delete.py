@@ -1,11 +1,6 @@
-from azure.batch.models import BatchErrorException
-
-from aztk import error
-from aztk.utils import helpers
+from aztk.utils import batch_error_manager
 
 
 def delete_cluster(core_cluster_operations, cluster_id: str, keep_logs: bool = False):
-    try:
+    with batch_error_manager():
         return core_cluster_operations.delete(cluster_id, keep_logs)
-    except BatchErrorException as e:
-        raise error.AztkError(helpers.format_batch_exception(e))

@@ -1,7 +1,4 @@
-from azure.batch.models import BatchErrorException
-
-from aztk import error
-from aztk.utils import helpers
+from aztk.utils import batch_error_manager
 
 
 def cluster_copy(
@@ -13,7 +10,7 @@ def cluster_copy(
         internal: bool = False,
         timeout: int = None,
 ):
-    try:
+    with batch_error_manager():
         container_name = None if host else "spark"
         return core_cluster_operations.copy(
             cluster_id,
@@ -24,5 +21,3 @@ def cluster_copy(
             internal=internal,
             timeout=timeout,
         )
-    except BatchErrorException as e:
-        raise error.AztkError(helpers.format_batch_exception(e))

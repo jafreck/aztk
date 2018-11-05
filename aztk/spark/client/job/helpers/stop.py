@@ -1,7 +1,4 @@
-from azure.batch.models import BatchErrorException
-
-from aztk import error
-from aztk.utils import helpers
+from aztk.utils import batch_error_manager
 
 
 def _stop(core_job_operations, job_id):
@@ -13,7 +10,5 @@ def _stop(core_job_operations, job_id):
 
 
 def stop(self, job_id):
-    try:
+    with batch_error_manager():
         return _stop(self, job_id)
-    except BatchErrorException as e:
-        raise error.AztkError(helpers.format_batch_exception(e))

@@ -26,11 +26,10 @@ def _list_applications(core_job_operations, job_id):
 #       currently, it returns a dictionary indicating whether
 #       a task has been scheduled or not
 def list_applications(core_job_operations, job_id):
-    try:
+    from aztk.utils import batch_error_manager
+    with batch_error_manager():
         applications = _list_applications(core_job_operations, job_id)
         for item in applications:
             if applications[item]:
                 applications[item] = models.Application(applications[item])
         return applications
-    except BatchErrorException as e:
-        raise error.AztkError(helpers.format_batch_exception(e))

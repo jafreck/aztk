@@ -29,7 +29,6 @@ def _delete(core_job_operations, spark_job_operations, job_id, keep_logs: bool =
 
 @retry(retry_count=4, retry_interval=1, backoff_policy=BackOffPolicy.exponential, exceptions=(ClientRequestError))
 def delete(core_job_operations, spark_job_operations, job_id: str, keep_logs: bool = False):
-    try:
+    from aztk.utils import batch_error_manager
+    with batch_error_manager():
         return _delete(core_job_operations, spark_job_operations, job_id, keep_logs)
-    except BatchErrorException as e:
-        raise error.AztkError(helpers.format_batch_exception(e))

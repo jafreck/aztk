@@ -1,9 +1,5 @@
-import azure.batch.models as batch_models
-from azure.batch.models import BatchErrorException
-
-from aztk import error
 from aztk.spark import models
-from aztk.utils import helpers
+from aztk.utils import batch_error_manager
 
 
 def _list_applications(core_operations, id):
@@ -17,7 +13,5 @@ def _list_applications(core_operations, id):
 
 
 def list_applications(core_operations, id):
-    try:
+    with batch_error_manager():
         return models.Application(_list_applications(core_operations, id))
-    except BatchErrorException as e:
-        raise error.AztkError(helpers.format_batch_exception(e))

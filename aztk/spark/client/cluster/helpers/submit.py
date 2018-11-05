@@ -1,11 +1,9 @@
 import azure.batch.models as batch_models
 import yaml
-from azure.batch.models import BatchErrorException
 
-from aztk import error
 from aztk.error import AztkError
 from aztk.spark import models
-from aztk.utils import constants, helpers
+from aztk.utils import batch_error_manager, constants, helpers
 
 
 def __get_node(core_cluster_operations, node_id: str, cluster_id: str) -> batch_models.ComputeNode:
@@ -119,8 +117,7 @@ def submit(
         wait: bool = False,
         internal: bool = False,
 ):
-    try:
+    with batch_error_manager():
+
         submit_application(core_cluster_operations, spark_cluster_operations, cluster_id, application, remote, wait,
                            internal)
-    except BatchErrorException as e:
-        raise error.AztkError(helpers.format_batch_exception(e))
