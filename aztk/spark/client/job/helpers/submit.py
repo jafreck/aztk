@@ -1,7 +1,6 @@
 import azure.batch.models as batch_models
 import yaml
 
-from aztk import error
 from aztk import models as base_models
 from aztk.internal.cluster_data import NodeData
 from aztk.spark import models
