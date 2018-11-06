@@ -1,9 +1,8 @@
 import azure.batch.models as batch_models
-from azure.batch.models import BatchErrorException
 
 from aztk import error
+from aztk.models import TaskState
 from aztk.spark import models
-from aztk.utils import helpers
 
 
 def _get_application_log(core_job_operations, spark_job_operations, job_id, application_name):
@@ -28,9 +27,9 @@ def _get_application_log(core_job_operations, spark_job_operations, job_id, appl
         raise error.AztkError("The application {0} does not exist".format(application_name))
     else:
         if task.state in (
-                batch_models.TaskState.active,
-                batch_models.TaskState.running,
-                batch_models.TaskState.preparing,
+                TaskState.active,
+                TaskState.running,
+                TaskState.preparing,
         ):
             raise error.AztkError("The application {0} has not yet finished executing.".format(application_name))
 

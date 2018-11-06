@@ -3,7 +3,8 @@ from aztk.internal import cluster_data
 
 from .helpers import (create_user_on_cluster, create_user_on_node, delete_user_on_cluster, delete_user_on_node,
                       generate_user_on_cluster, generate_user_on_node, get_application_log, get_recent_job,
-                      get_remote_login_settings, get_task_state, list_tasks, node_run, run, ssh_into_node, task_table)
+                      get_remote_login_settings, get_task, get_task_state, list_tasks, node_run, run, ssh_into_node,
+                      task_table)
 
 
 class BaseOperations:
@@ -234,28 +235,6 @@ class BaseOperations:
         """
         return task_table.create_task_table(self.table_service, id)
 
-    def list_task_table_entries(self, id):
-        """list tasks in a storage table
-
-        Args:
-            id (:obj:`str`): the id of the cluster
-
-        Returns:
-            :obj:`[aztk.models.Task]`: a list of models representing all entries in the Task table
-        """
-        return task_table.list_task_table_entries(self.table_service, id)
-
-    def get_task_from_table(self, id, task_id):
-        """Create a storage table to track tasks
-
-        Args:
-            id (:obj:`str`): the id of the cluster
-
-        Returns:
-            :obj:`[aztk.models.Task]`: the task with id task_id from the cluster's storage table
-        """
-        return task_table.get_task_from_table(self.table_service, id, task_id)
-
     def insert_task_into_task_table(self, id, task):
         """Insert a task into the table
 
@@ -322,25 +301,16 @@ class BaseOperations:
         """
         return get_task_state.get_task_state(self, id, task_name)
 
-    def list_batch_tasks(self, id: str):
-        """Get the status of a submitted task
+    def get_task(self, id: str, task_id: str):
+        """Get a task submitted to a cluster
 
         Args:
-            id (:obj:`str`): the name of the cluster the task was submitted to
+            id (:obj:`str`): the id of the cluster
 
         Returns:
-            :obj:`[aztk.models.Task]`: list of aztk tasks
+            :obj:`[aztk.models.Task]`: the submitted task with id task_id
         """
-        return task_table.list_batch_tasks(self.batch_client, id)
+        get_task.get_task(self, id, task_id)
 
-    def get_batch_task(self, id: str, task_id: str):
-        """Get the status of a submitted task
-
-        Args:
-            id (:obj:`str`): the name of the cluster the task was submitted to
-            task_id (:obj:`str`): the name of the task to get
-
-        Returns:
-            :obj:`aztk.models.Task`: aztk Task representing the Batch Task
-        """
-        return task_table.get_batch_task(self.batch_client, id, task_id)
+    def update_task(self, id: str, task_id: str):
+        pass

@@ -75,7 +75,7 @@ def insert_task_into_task_table(cluster_id, task_definition):
 
 
 def get_task(cluster_id, task_id):
-    return config.spark_client.cluster._core_cluster_operations.get_task_from_table(cluster_id, task_id)
+    return config.spark_client.cluster._core_cluster_operations.get_task(cluster_id, task_id)
 
 
 def mark_task_complete(cluster_id, task_id, exit_code):

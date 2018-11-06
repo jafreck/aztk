@@ -80,6 +80,6 @@ class SparkBaseOperations:
             application_name (:obj:`str`): the name of the application to get
 
         Returns:
-            :obj:`aztk.spark.models.Application`: object representing that state and output of an application
+            :obj:`List[aztk.spark.models.Application]`: A list of the applications submitted in the job
         """
         return list_applications.list_applications(self, id)

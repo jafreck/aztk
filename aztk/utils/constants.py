@@ -65,3 +65,7 @@ AZTK_CLUSTER_CONFIG_METADATA_KEY = "_aztk_cluster_config"
 
 TASK_WORKING_DIR = "wd"
 SPARK_SUBMIT_LOGS_FILE = "output.log"
+"""
+    log streaming
+"""
+STREAMING_DOWNLOAD_CHUNK_SIZE = 1048576    # 1024 * 1024

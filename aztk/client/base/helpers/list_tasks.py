@@ -1,7 +1,9 @@
+from azure.batch.models import BatchErrorException
+
 from aztk.models import SchedulingTarget
 
 from .get_recent_job import get_recent_job
-from .task_table import list_task_table_entries
+from .task_table import list_batch_tasks, list_task_table_entries
 
 
 def list_tasks(core_base_operations, id):
@@ -19,8 +21,9 @@ def list_tasks(core_base_operations, id):
     if scheduling_target is not SchedulingTarget.Any:
         return list_task_table_entries(core_base_operations.table_service, id)
     else:
-        # note: this currently only works for job_schedules
-        # cluster impl is planned to move to job schedules
-        recent_run_job = get_recent_job(core_base_operations, id)
-        tasks = core_base_operations.list_batch_tasks(id=recent_run_job.id)
+        try:
+            recent_run_job = get_recent_job(core_base_operations, id)
+            tasks = list_batch_tasks(batch_client=core_base_operations.batch_client, id=recent_run_job.id)
+        except BatchErrorException:
+            tasks = list_batch_tasks(batch_client=core_base_operations.batch_client, id=id)
         return tasks
