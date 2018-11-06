@@ -41,20 +41,28 @@ def wait_for_scheduling_target_task(base_operations, cluster_id, application_nam
 
 def get_blob_from_storage(block_blob_client, container_name, application_name, stream, start_range):
     try:
-        return block_blob_client.get_blob_to_stream(
+        blob = block_blob_client.get_blob_to_stream(
             container_name,
             convert_application_name_to_blob_path(application_name),
             stream,
             start_range=start_range,
         )
+        stream.seek(0)
+        return blob
     except azure.common.AzureMissingResourceHttpError:
         raise error.AztkError("Logs not found in your storage account. They were either deleted or never existed.")
+    except azure.common.AzureHttpError as e:
+        if e.error_code == "InvalidRange":
+            # the blob has no data, should not throw here
+            raise error.AztkError("The application {} log has no data yet.".format(application_name))
+        raise
 
 
 def get_log_from_storage(blob_client, container_name, application_name, task, current_bytes):
-    stream = tempfile.SpooledTemporaryFile(max_size=2 * 1024 * 1024)
-    blob = get_blob_from_storage(blob_client.create_block_blob_service, container_name, application_name, stream,
+    stream = tempfile.TemporaryFile()
+    blob = get_blob_from_storage(blob_client.create_block_blob_service(), container_name, application_name, stream,
                                  current_bytes)
+    stream.seek(0)
     return models.ApplicationLog(
         name=application_name,
         cluster_id=container_name,
@@ -86,7 +94,7 @@ def stream_log_from_storage(base_operations, container_name, application_name, t
     )
 
     while task.state not in [TaskState.Completed, TaskState.Failed]:
-        task = base_operations.get_task_from_table(task.id, application_name)    #TODO: is this a race condiition?
+        task = base_operations.get_task_from_table(task.id, application_name)
         last_read_byte = blob.properties.content_length
         blob = get_blob_from_storage(
             block_blob_client,
@@ -95,6 +103,8 @@ def stream_log_from_storage(base_operations, container_name, application_name, t
             stream,
             start_range=last_read_byte,
         )
+
+    stream.seek(0)
 
     return models.ApplicationLog(
         name=application_name,
