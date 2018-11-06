@@ -118,7 +118,7 @@ def stream_upload_to_storage(
         application_name (`str`): the name of the application to uploads logs for
     """
     from azure.storage.blob.appendblobservice import AppendBlobService
-    AppendBlobService.MAX_BLOCK_SIZE = 10 * 1024
+    AppendBlobService.MAX_BLOCK_SIZE = 1024 * 1024
 
     append_blob_client = blob_client.create_append_blob_service()
 
