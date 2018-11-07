@@ -1,10 +1,10 @@
 from aztk import models
 from aztk.internal import cluster_data
 
-from .helpers import (create_user_on_cluster, create_user_on_node, delete_user_on_cluster, delete_user_on_node,
-                      generate_user_on_cluster, generate_user_on_node, get_application_log, get_recent_job,
-                      get_remote_login_settings, get_task, get_task_state, list_tasks, node_run, run, ssh_into_node,
-                      task_table)
+from .helpers import (create_batch_resources, create_user_on_cluster, create_user_on_node, delete_user_on_cluster,
+                      delete_user_on_node, generate_user_on_cluster, generate_user_on_node, get_application_log,
+                      get_recent_job, get_remote_login_settings, get_task, get_task_state, list_tasks, node_run, run,
+                      ssh_into_node, task_table)
 
 
 class BaseOperations:
@@ -75,6 +75,42 @@ class BaseOperations:
             :obj:`None`
         """
         ssh_into_node.ssh_into_node(self, id, node_id, username, ssh_key, password, port_forward_list, internal)
+
+    def create_batch_resources(
+            self,
+            id,
+            start_task,
+            job_manager_task,
+            vm_size,
+            vm_image_model,
+            on_all_tasks_complete,
+            mixed_mode,
+            software_metadata_key,
+            size_dedicated,
+            size_low_priority,
+            subnet_id,
+    ):
+        """Create the underlying batch resources for a cluster or a job
+        Args:
+            ...
+        Returns:
+            ...
+        """
+
+        return create_batch_resources.create_batch_resources(
+            self.batch_client,
+            id,
+            start_task,
+            job_manager_task,
+            vm_size,
+            vm_image_model,
+            on_all_tasks_complete,
+            mixed_mode,
+            software_metadata_key,
+            size_dedicated,
+            size_low_priority,
+            subnet_id,
+        )
 
     def create_user_on_node(self, id, node_id, username, ssh_key=None, password=None):
         """Create a user on a node
@@ -227,6 +263,16 @@ class BaseOperations:
         """
         return get_application_log.get_application_log(self, id, application_name, tail, current_bytes)
 
+    def get_recent_job(self, id):
+        """Get the most recently run job in an Azure Batch job schedule
+
+        Args:
+            id (:obj:`str`): the id of the job schedule
+        Returns:
+            :obj:`[azure.batch.models.Job]`: the most recently run job on the job schedule
+        """
+        return get_recent_job.get_recent_job(self, id)
+
     def create_task_table(self, id: str):
         """Create an Azure Table Storage to track tasks
 
@@ -279,16 +325,6 @@ class BaseOperations:
         """
         return list_tasks.list_tasks(self, id)
 
-    def get_recent_job(self, id):
-        """Get the most recently run job in an Azure Batch job schedule
-
-        Args:
-            id (:obj:`str`): the id of the job schedule
-        Returns:
-            :obj:`[azure.batch.models.Job]`: the most recently run job on the job schedule
-        """
-        return get_recent_job.get_recent_job(self, id)
-
     def get_task_state(self, id: str, task_name: str):
         """Get the status of a submitted task
 
@@ -311,6 +347,3 @@ class BaseOperations:
             :obj:`[aztk.models.Task]`: the submitted task with id task_id
         """
         get_task.get_task(self, id, task_id)
-
-    def update_task(self, id: str, task_id: str):
-        pass

@@ -1,9 +1,7 @@
-from datetime import timedelta
-
 import azure.batch.models as batch_models
 
 from aztk import models
-from aztk.utils import constants, helpers
+from aztk.utils import helpers
 
 
 def create_pool_and_job_and_table(
@@ -11,7 +9,7 @@ def create_pool_and_job_and_table(
         cluster_conf: models.ClusterConfiguration,
         software_metadata_key: str,
         start_task,
-        VmImageModel,
+        vm_image_model,
 ):
     """
         Create a pool and job
@@ -25,51 +23,22 @@ def create_pool_and_job_and_table(
     # save cluster configuration in storage
     core_cluster_operations.get_cluster_data(cluster_conf.cluster_id).save_cluster_config(cluster_conf)
 
-    # reuse pool_id as job_id
-    pool_id = cluster_conf.cluster_id
-    job_id = cluster_conf.cluster_id
-
-    # Get a verified node agent sku
-    sku_to_use, image_ref_to_use = helpers.select_latest_verified_vm_image_with_node_agent_sku(
-        VmImageModel.publisher, VmImageModel.offer, VmImageModel.sku, core_cluster_operations.batch_client)
-
-    network_conf = None
-    if cluster_conf.subnet_id is not None:
-        network_conf = batch_models.NetworkConfiguration(subnet_id=cluster_conf.subnet_id)
-    auto_scale_formula = "$TargetDedicatedNodes={0}; $TargetLowPriorityNodes={1}".format(
-        cluster_conf.size, cluster_conf.size_low_priority)
-
-    # Configure the pool
-    pool = batch_models.PoolAddParameter(
-        id=pool_id,
-        virtual_machine_configuration=batch_models.VirtualMachineConfiguration(
-            image_reference=image_ref_to_use, node_agent_sku_id=sku_to_use),
-        vm_size=cluster_conf.vm_size,
-        enable_auto_scale=True,
-        auto_scale_formula=auto_scale_formula,
-        auto_scale_evaluation_interval=timedelta(minutes=5),
+    core_cluster_operations.create_batch_resources(
+        id=cluster_conf.cluster_id,
         start_task=start_task,
-        enable_inter_node_communication=True if not cluster_conf.subnet_id else False,
-        max_tasks_per_node=4,
-        network_configuration=network_conf,
-        metadata=[
-            batch_models.MetadataItem(name=constants.AZTK_SOFTWARE_METADATA_KEY, value=software_metadata_key),
-            batch_models.MetadataItem(
-                name=constants.AZTK_MODE_METADATA_KEY, value=constants.AZTK_CLUSTER_MODE_METADATA),
-        ],
+        job_manager_task=None,
+        vm_size=cluster_conf.vm_size,
+        vm_image_model=vm_image_model,
+        on_all_tasks_complete=batch_models.OnAllTasksComplete.no_action,
+        mixed_mode=cluster_conf.mixed_mode,
+        software_metadata_key=software_metadata_key,
+        size_dedicated=cluster_conf.size,
+        size_low_priority=cluster_conf.size_low_priority,
+        subnet_id=cluster_conf.subnet_id,
     )
-
-    # Create the pool + create user for the pool
-    helpers.create_pool_if_not_exist(pool, core_cluster_operations.batch_client)
-
-    # Create job
-    job = batch_models.JobAddParameter(id=job_id, pool_info=batch_models.PoolInformation(pool_id=pool_id))
-
-    # Add job to batch
-    core_cluster_operations.batch_client.job.add(job)
 
     # create storage task table
     if cluster_conf.scheduling_target != models.SchedulingTarget.Any:
         core_cluster_operations.create_task_table(cluster_conf.cluster_id)
 
-    return helpers.get_cluster(cluster_conf.cluster_id, core_cluster_operations.batch_client)
+    return core_cluster_operations.get(cluster_conf.cluster_id)

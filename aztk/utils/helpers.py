@@ -24,13 +24,6 @@ def is_gpu_enabled(vm_size: str):
     return bool(re.search("nv|nc", vm_size, flags=re.IGNORECASE))
 
 
-def get_cluster(cluster_id, batch_client):
-    pool = batch_client.pool.get(cluster_id)
-    nodes = batch_client.compute_node.list(pool_id=cluster_id)
-
-    return aztk.models.Cluster(pool, nodes)
-
-
 def wait_for_tasks_to_complete(job_id, batch_client):
     """
     Waits for all the tasks in a particular job to complete.
