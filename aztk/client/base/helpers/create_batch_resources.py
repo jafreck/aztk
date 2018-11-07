@@ -18,6 +18,7 @@ def create_batch_resources(
         size_dedicated,
         size_low_priority,
         subnet_id,
+        job_metadata,
 ):
     autoscale_formula = "$TargetDedicatedNodes = {0}; " "$TargetLowPriorityNodes = {1}".format(
         size_dedicated, size_low_priority)
@@ -58,6 +59,7 @@ def create_batch_resources(
         pool_info=batch_models.PoolInformation(auto_pool_specification=auto_pool_specification),
         job_manager_task=job_manager_task,
         on_all_tasks_complete=on_all_tasks_complete,
+        metadata=job_metadata,
     )
 
     return batch_client.job.add(job)

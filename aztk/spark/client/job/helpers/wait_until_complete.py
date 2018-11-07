@@ -6,11 +6,11 @@ from aztk.utils import batch_error_manager
 
 
 def _wait_until_job_finished(core_job_operations, job_id):
-    job_state = core_job_operations.batch_client.job_schedule.get(job_id).state
+    job_state = core_job_operations.batch_client.job.get(job_id).state
 
-    while job_state not in [batch_models.JobScheduleState.completed, batch_models.JobScheduleState.terminating]:
+    while job_state not in [batch_models.JobState.completed, batch_models.JobState.terminating]:
         time.sleep(3)
-        job_state = core_job_operations.batch_client.job_schedule.get(job_id).state
+        job_state = core_job_operations.batch_client.job.get(job_id).state
 
 
 def wait_until_job_finished(core_job_operations, job_id):

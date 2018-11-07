@@ -30,7 +30,7 @@ def submit_job(
         job_configuration.to_cluster_config())
 
     core_job_operations.create_batch_resources(
-        id=job_configuration.cluster_id,
+        id=job_configuration.id,
         start_task=start_task,
         job_manager_task=job_manager_task,
         vm_size=job_configuration.vm_size,
@@ -41,9 +41,10 @@ def submit_job(
         size_dedicated=job_configuration.max_dedicated_nodes,
         size_low_priority=job_configuration.max_low_pri_nodes,
         subnet_id=job_configuration.subnet_id,
+        job_metadata=[batch_models.MetadataItem(name="applications", value=application_metadata)],
     )
 
     if job_configuration.scheduling_target != models.SchedulingTarget.Any:
         core_job_operations.create_task_table(job_configuration.id)
 
-    return core_job_operations.batch_client.job_schedule.get(job_schedule_id=job_configuration.id)
+    return core_job_operations.batch_client.job.get(job_id=job_configuration.id)

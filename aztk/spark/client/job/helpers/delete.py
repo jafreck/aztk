@@ -6,12 +6,12 @@ from aztk.utils import BackOffPolicy, helpers, retry
 
 
 def _delete(core_job_operations, spark_job_operations, job_id, keep_logs: bool = False):
-    deleted_job_schedule = False
+    deleted_job = False
 
-    # delete job_schedule
+    # delete batch job
     try:
-        core_job_operations.batch_client.job_schedule.delete(job_id)
-        deleted_job_schedule = True
+        core_job_operations.batch_client.job.delete(job_id)
+        deleted_job = True
     except BatchErrorException:
         pass
 
@@ -24,7 +24,7 @@ def _delete(core_job_operations, spark_job_operations, job_id, keep_logs: bool =
     if table_exists:
         core_job_operations.delete_task_table(job_id)
 
-    return deleted_job_schedule
+    return deleted_job
 
 
 @retry(retry_count=4, retry_interval=1, backoff_policy=BackOffPolicy.exponential, exceptions=(ClientRequestError))

@@ -261,16 +261,16 @@ class JobState(Enum):
 class Job:
     def __init__(
             self,
-            cloud_job_schedule: batch_models.CloudJobSchedule,
+            cloud_job: batch_models.CloudJob,
             tasks: List[aztk.models.Task] = None,
             pool: batch_models.CloudPool = None,
             nodes: batch_models.ComputeNodePaged = None,
     ):
-        self.id = cloud_job_schedule.id
-        self.last_modified = cloud_job_schedule.last_modified
-        self.state = JobState(cloud_job_schedule.state.name)
-        self.state_transition_time = cloud_job_schedule.state_transition_time
-        self.creation_time = cloud_job_schedule.creation_time
+        self.id = cloud_job.id
+        self.last_modified = cloud_job.last_modified
+        self.state = JobState(cloud_job.state.name)
+        self.state_transition_time = cloud_job.state_transition_time
+        self.creation_time = cloud_job.creation_time
         self.applications = [Application(task) for task in (tasks or [])]
         if pool:
             self.cluster = Cluster(aztk.models.Cluster(pool, nodes))

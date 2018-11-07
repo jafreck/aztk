@@ -35,6 +35,7 @@ def create_pool_and_job_and_table(
         size_dedicated=cluster_conf.size,
         size_low_priority=cluster_conf.size_low_priority,
         subnet_id=cluster_conf.subnet_id,
+        job_metadata=None,
     )
 
     # create storage task table

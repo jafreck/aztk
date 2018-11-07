@@ -1,6 +1,5 @@
 from aztk.models import SchedulingTarget
 
-from .get_recent_job import get_recent_job
 from .task_table import get_batch_task, get_task_from_table
 
 

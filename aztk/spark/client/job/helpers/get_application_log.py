@@ -10,12 +10,8 @@ def _get_application_log(core_job_operations, spark_job_operations, job_id, appl
     if scheduling_target is not models.SchedulingTarget.Any:
         return core_job_operations.get_application_log(job_id, application_name)
 
-    # TODO: change where the logs are uploaded so they aren't overwritten on scheduled runs
-    #           current: job_id, application_name/output.log
-    #           new: job_id, recent_run_job.id/application_name/output.log
-    recent_run_job = core_job_operations.get_recent_job(job_id)
     try:
-        task = core_job_operations.get_batch_task(id=recent_run_job.id, task_id=application_name)
+        task = core_job_operations.get_batch_task(id=job_id, task_id=application_name)
     except batch_models.BatchErrorException as e:
         # task may not exist since it may not yet be scheduled
         # see if the task is written to metadata of pool

@@ -1,15 +1,10 @@
-import azure.batch.models as batch_models
-
 from aztk import error, models
 
 
 def convert_job_id_to_pool_id(batch_client, cluster_id):
-    jobs = batch_client.pool.list(pool_list_options=batch_models.PoolListOptions(filter="id eq {}".format(cluster_id)))
-    job = next(jobs)
-    assert str.split('_', job.id)[0] == cluster_id
-    print(job.pool_info.auto_pool_specification.pool.__dict__)
-    if job.pool_info:
-        return job.pool_info.pool_id
+    job = batch_client.job.get(cluster_id)
+    if job.execution_info and job.execution_info.pool_id:
+        return job.execution_info.pool_id
     raise error.AztkError("No cluster with id {} does not exist.".format(cluster_id))
 
 def get_pool_details(core_cluster_operations, cluster_id: str):
