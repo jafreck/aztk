@@ -154,6 +154,7 @@ class ApplicationConfiguration:
 
 
 class ApplicationState(Enum):
+    Active = "active"    #TODO
     Running = "running"
     Completed = "completed"
     Failed = "failed"

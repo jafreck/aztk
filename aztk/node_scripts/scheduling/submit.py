@@ -82,10 +82,10 @@ def ssh_submit(task_sas_url):
         task = scheduling_target.insert_task_into_task_table(aztk_cluster_id, task_definition)
         # run task and upload log
         exit_code = common.run_command(config.spark_client, cmd.to_str(), application.name)
-        log("completed application, updating storage table")
+        log.info("completed application, updating storage table")
         scheduling_target.mark_task_complete(aztk_cluster_id, task.id, exit_code)
     except Exception as e:
-        log("application failed, updating storage table")
+        log.info("application failed, updating storage table")
         import traceback
         scheduling_target.mark_task_failure(aztk_cluster_id, task_definition.id, exit_code, traceback.format_exc())
 

@@ -35,7 +35,7 @@ def submit_job(
         job_manager_task=job_manager_task,
         vm_size=job_configuration.vm_size,
         vm_image_model=vm_image_model,
-        on_all_tasks_complete=batch_models.OnAllTasksComplete.no_action,
+        on_all_tasks_complete=batch_models.OnAllTasksComplete.terminate_job,
         mixed_mode=job_configuration.mixed_mode,
         software_metadata_key=software_metadata_key,
         mode_metadata_key=constants.AZTK_JOB_MODE_METADATA,

@@ -76,8 +76,6 @@ def wait_until_tasks_complete(id):
         applications = config.spark_client.job.list_applications(id=id)
         for application_id in applications:
             if not applications[application_id]:
-                log.info("not all applications completed: %s", application_id)
-                print("not all applications completed: {}".format(application_id))
                 time.sleep(3)
                 config.spark_client.job.list_applications(id=id)
                 break
