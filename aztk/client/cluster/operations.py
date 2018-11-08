@@ -1,7 +1,7 @@
 from aztk.client.base import BaseOperations
 from aztk.models import ClusterConfiguration
 
-from .helpers import copy, create, delete, get, list, wait_for_task_to_complete
+from .helpers import copy, create, get, list, wait_for_task_to_complete
 
 
 class CoreClusterOperations(BaseOperations):
@@ -57,20 +57,6 @@ class CoreClusterOperations(BaseOperations):
                 A list of NodeOutput objects representing the output of the copy command.
         """
         return copy.cluster_copy(self, id, source_path, destination_path, container_name, internal, get, timeout)
-
-    def delete(self, id: str, keep_logs: bool = False):
-        """Copy files to or from every node in a cluster.
-
-        Args:
-            id (:obj:`str`): the id of the cluster to delete
-            keep_logs (:obj:`bool`): If True, the logs related to this cluster in Azure Storage are not deleted.
-                Defaults to False.
-
-        Returns:
-            :obj:`List[aztk.models.NodeOutput]`:
-                A list of NodeOutput objects representing the output of the copy command.
-        """
-        return delete.delete_pool_and_job_and_table(self, id, keep_logs)
 
     def list(self, software_metadata_key):
         """List clusters running the specified software.

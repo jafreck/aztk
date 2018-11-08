@@ -6,6 +6,7 @@ import azure.batch.models as batchmodels
 from azure.batch.models import BatchErrorException
 from msrest.exceptions import ClientRequestError
 
+import aztk.models
 from aztk.node_scripts.core import config, log
 
 MASTER_NODE_METADATA_KEY = "_spark_master_node"
@@ -15,29 +16,15 @@ class CannotAllocateMasterError(Exception):
     pass
 
 
-def get_master_node_id(pool: batchmodels.CloudPool):
-    """
-        :returns: the id of the node that is the assigned master of this pool
-    """
-    if pool.metadata is None:
-        return None
-
-    for metadata in pool.metadata:
-        if metadata.name == MASTER_NODE_METADATA_KEY:
-            return metadata.value
-
-    return None
-
-
-def try_assign_self_as_master(client: batch.BatchServiceClient, pool: batchmodels.CloudPool):
-    current_metadata = pool.metadata or []
+def try_assign_self_as_master(client: batch.BatchServiceClient, cluster: aztk.models.Cluster):
+    current_metadata = cluster.pool.metadata or []
     new_metadata = current_metadata + [{"name": MASTER_NODE_METADATA_KEY, "value": config.node_id}]
 
     try:
         client.pool.patch(
             config.pool_id,
             batchmodels.PoolPatchParameter(metadata=new_metadata),
-            batchmodels.PoolPatchOptions(if_match=pool.e_tag),
+            batchmodels.PoolPatchOptions(if_match=cluster.pool.e_tag),
         )
         return True
     except (BatchErrorException, ClientRequestError):
@@ -56,19 +43,18 @@ def find_master(client: batch.BatchServiceClient) -> bool:
     # return False
 
     for i in range(0, 5):
-        pool = client.pool.get(config.pool_id)
-        master = get_master_node_id(pool)
+        cluster = config.spark_client.cluster.get(config.cluster_id)
 
-        if master:
-            if master == config.node_id:
-                log.info("Node is already the master '{0}'".format(master))
+        if cluster.master_node_id:
+            if cluster.master_node_id == config.node_id:
+                log.info("Node is already the master '{0}'".format(cluster.master_node_id))
                 return True
             else:
-                log.info("Pool already has a master '{0}'. This node will be a worker".format(master))
+                log.info("Pool already has a master '{0}'. This node will be a worker".format(cluster.master_node_id))
                 return False
         else:
             log.info("Pool has no master. Trying to assign itself! ({0}/5)".format(i + 1))
-            result = try_assign_self_as_master(client, pool)
+            result = try_assign_self_as_master(client, cluster)
 
             if result:
                 log.info("Assignment was successful! Node {0} is the new master.".format(config.node_id))

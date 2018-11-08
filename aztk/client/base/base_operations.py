@@ -1,10 +1,10 @@
 from aztk import models
 from aztk.internal import cluster_data
 
-from .helpers import (create_batch_resources, create_user_on_cluster, create_user_on_node, delete_user_on_cluster,
-                      delete_user_on_node, generate_user_on_cluster, generate_user_on_node, get_application_log,
-                      get_remote_login_settings, get_task, get_task_state, list_tasks, node_run, run, ssh_into_node,
-                      task_table)
+from .helpers import (create_batch_resources, create_user_on_cluster, create_user_on_node, delete_batch_resources,
+                      delete_user_on_cluster, delete_user_on_node, generate_user_on_cluster, generate_user_on_node,
+                      get_application_log, get_remote_login_settings, get_task, get_task_state, list_tasks, node_run,
+                      run, ssh_into_node, task_table)
 
 
 class BaseOperations:
@@ -86,6 +86,7 @@ class BaseOperations:
             on_all_tasks_complete,
             mixed_mode,
             software_metadata_key,
+            mode_metadata_key,
             size_dedicated,
             size_low_priority,
             subnet_id,
@@ -108,11 +109,22 @@ class BaseOperations:
             on_all_tasks_complete,
             mixed_mode,
             software_metadata_key,
+            mode_metadata_key,
             size_dedicated,
             size_low_priority,
             subnet_id,
             job_metadata,
         )
+
+    def delete_batch_resources(self, id, keep_logs):
+        """Delete the underlying batch resources for a cluster or a job
+        Args:
+            ...
+        Returns:
+            ...
+        """
+
+        return delete_batch_resources.delete_batch_resources(self, id, keep_logs)
 
     def create_user_on_node(self, id, node_id, username, ssh_key=None, password=None):
         """Create a user on a node
@@ -338,4 +350,4 @@ class BaseOperations:
         Returns:
             :obj:`[aztk.models.Task]`: the submitted task with id task_id
         """
-        get_task.get_task(self, id, task_id)
+        return get_task.get_task(self, id, task_id)

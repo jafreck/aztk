@@ -13,3 +13,6 @@ def setup_logging():
 
     log.setLevel(logging.INFO)
     logging.basicConfig(stream=sys.stdout, format=VERBOSE_FORMAT)
+
+
+setup_logging()

@@ -20,5 +20,4 @@ def run():
 
 
 if __name__ == "__main__":
-    logger.setup_logging()
     run()

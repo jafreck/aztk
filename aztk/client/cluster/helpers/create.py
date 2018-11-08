@@ -1,7 +1,7 @@
 import azure.batch.models as batch_models
 
 from aztk import models
-from aztk.utils import helpers
+from aztk.utils import constants
 
 
 def create_pool_and_job_and_table(
@@ -32,10 +32,11 @@ def create_pool_and_job_and_table(
         on_all_tasks_complete=batch_models.OnAllTasksComplete.no_action,
         mixed_mode=cluster_conf.mixed_mode,
         software_metadata_key=software_metadata_key,
+        mode_metadata_key=constants.AZTK_CLUSTER_MODE_METADATA,
         size_dedicated=cluster_conf.size,
         size_low_priority=cluster_conf.size_low_priority,
         subnet_id=cluster_conf.subnet_id,
-        job_metadata=None,
+        job_metadata=[],
     )
 
     # create storage task table

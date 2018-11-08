@@ -13,37 +13,15 @@ def convert_application_name_to_blob_path(application_name):
     return application_name + "/" + constants.SPARK_SUBMIT_LOGS_FILE
 
 
-def wait_for_batch_task(base_operations, cluster_id: str, application_name: str) -> Task:
-    """
-        Wait for the batch task to leave the waiting state into running(or completed if it was fast enough)
-    """
-
-    while True:
-        task_state = base_operations.get_task_state(cluster_id, application_name)
-
-        if task_state in [batch_models.TaskState.active, batch_models.TaskState.preparing]:
-            # TODO: log
-            time.sleep(5)
-        else:
-            return base_operations.get_batch_task(id=cluster_id, task_id=application_name)
-
-
-def wait_for_scheduling_target_task(base_operations, cluster_id, application_name):
+def wait_for_task(base_operations, cluster_id, application_name):
     # TODO: ensure get_task_state not None or throw
     task = base_operations.get_task(cluster_id, application_name)
     while task.state not in [TaskState.Completed, TaskState.Failed, TaskState.Running]:
+        print(task.state)
         time.sleep(3)
         # TODO: enable logger
         # log.debug("{} {}: application not yet complete".format(cluster_id, application_name))
         task = base_operations.get_task(cluster_id, application_name)
-    return task
-
-
-def wait_for_task(base_operations, cluster_id: str, application_name: str, cluster_configuration):
-    if cluster_configuration.scheduling_target is not models.SchedulingTarget.Any:
-        task = wait_for_scheduling_target_task(base_operations, cluster_id, application_name)
-    else:
-        task = wait_for_batch_task(base_operations, cluster_id, application_name)
     return task
 
 
@@ -139,14 +117,15 @@ def stream_log_from_storage(base_operations, container_name, application_name, t
 
 def get_log(base_operations, cluster_id: str, application_name: str, tail=False, current_bytes: int = 0):
     cluster_configuration = base_operations.get_cluster_configuration(cluster_id)
-    task = wait_for_task(base_operations, cluster_id, application_name, cluster_configuration)
+    task = wait_for_task(base_operations, cluster_id, application_name)
 
     return get_log_from_storage(base_operations.blob_client, cluster_id, application_name, task, current_bytes)
 
 
 def stream_log(base_operations, cluster_id: str, application_name: str):
+    print("running stream_log")
     cluster_configuration = base_operations.get_cluster_configuration(cluster_id)
-    task = wait_for_task(base_operations, cluster_id, application_name, cluster_configuration)
+    task = wait_for_task(base_operations, cluster_id, application_name)
     return stream_log_from_storage(base_operations, cluster_id, application_name, task)
 
 

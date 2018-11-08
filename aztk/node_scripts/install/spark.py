@@ -10,7 +10,7 @@ from typing import List
 
 import azure.batch.models as batchmodels
 
-from aztk.node_scripts.core import config
+from aztk.node_scripts.core import config, log, utils
 from aztk.node_scripts.install import pick_master
 
 batch_client = config.batch_client
@@ -31,29 +31,12 @@ def setup_as_worker():
     start_spark_worker()
 
 
-def get_pool() -> batchmodels.CloudPool:
-    return batch_client.pool.get(config.pool_id)
-
-
-def get_node(node_id: str) -> batchmodels.ComputeNode:
-    return batch_client.compute_node.get(config.pool_id, node_id)
-
-
-def list_nodes() -> List[batchmodels.ComputeNode]:
-    """
-        List all the nodes in the pool.
-    """
-    # TODO use continuation token & verify against current/target dedicated of
-    # pool
-    return batch_client.compute_node.list(config.pool_id)
-
-
 def setup_connection():
     """
         This setup spark config with which nodes are slaves and which are master
     """
-    master_node_id = pick_master.get_master_node_id(batch_client.pool.get(config.pool_id))
-    master_node = get_node(master_node_id)
+    master_node_id = utils.get_master_node_id(config.cluster_id)
+    master_node = utils.get_node(master_node_id)
 
     master_config_file = os.path.join(spark_conf_folder, "master")
     master_file = open(master_config_file, "w", encoding="UTF-8")
@@ -66,13 +49,13 @@ def setup_connection():
 
 def wait_for_master():
     print("Waiting for master to be ready.")
-    master_node_id = pick_master.get_master_node_id(batch_client.pool.get(config.pool_id))
+    master_node_id = utils.get_master_node_id(config.cluster_id)
 
     if master_node_id == config.node_id:
         return
 
     while True:
-        master_node = get_node(master_node_id)
+        master_node = utils.get_node(master_node_id)
 
         if master_node.state in [batchmodels.ComputeNodeState.idle, batchmodels.ComputeNodeState.running]:
             break
@@ -82,7 +65,7 @@ def wait_for_master():
 
 
 def start_spark_master():
-    master_ip = get_node(config.node_id).ip_address
+    master_ip = utils.get_node(config.node_id).ip_address
     exe = os.path.join(spark_home, "sbin", "start-master.sh")
     cmd = [exe, "-h", master_ip, "--webui-port", str(config.spark_web_ui_port)]
     print("Starting master with '{0}'".format(" ".join(cmd)))
@@ -97,8 +80,7 @@ def start_spark_master():
 def start_spark_worker():
     wait_for_master()
     exe = os.path.join(spark_home, "sbin", "start-slave.sh")
-    master_node_id = pick_master.get_master_node_id(batch_client.pool.get(config.pool_id))
-    master_node = get_node(master_node_id)
+    master_node = utils.get_node(utils.get_master_node_id(config.cluster_id))
 
     cmd = [exe, "spark://{0}:7077".format(master_node.ip_address), "--webui-port", str(config.spark_worker_ui_port)]
     print("Connecting to master with '{0}'".format(" ".join(cmd)))
@@ -169,9 +151,9 @@ def copy_jars():
             dest = os.path.join(spark_default_path_dest, jar)
             print("copy {} to {}".format(src, dest))
             copyfile(src, dest)
-    except Exception as e:
-        print("Failed to copy jar files with error:")
-        print(e)
+    except Exception:
+        import traceback
+        print("Failed to copy jar files with error: {}".format(traceback.format_exc()))
 
 
 def parse_configuration_file(path_to_file: str):
@@ -183,9 +165,9 @@ def parse_configuration_file(path_to_file: str):
                 split = line.split()
                 properties[split[0]] = split[1]
         return properties
-    except Exception as e:
-        print("Failed to parse configuration file:", path_to_file, "with error:")
-        print(e)
+    except Exception:
+        import traceback
+        log.print("Failed to parse configuration file: {} with error {}".format(path_to_file, traceback.format_exc()))
 
 
 def start_history_server():

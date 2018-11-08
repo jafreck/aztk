@@ -15,7 +15,7 @@ def affinitize_task_to_master(core_cluster_operations, spark_cluster_operations,
     if cluster.master_node_id is None:
         raise AztkError("Master has not yet been selected. Please wait until the cluster is finished provisioning.")
     master_node = core_cluster_operations.batch_client.compute_node.get(
-        pool_id=cluster_id, node_id=cluster.master_node_id)
+        pool_id=cluster.pool.id, node_id=cluster.master_node_id)
     task.affinity_info = batch_models.AffinityInformation(affinity_id=master_node.affinity_id)
     return task
 

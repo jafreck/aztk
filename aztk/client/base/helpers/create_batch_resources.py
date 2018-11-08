@@ -15,6 +15,7 @@ def create_batch_resources(
         on_all_tasks_complete,
         mixed_mode,
         software_metadata_key,
+        mode_metadata_key,
         size_dedicated,
         size_low_priority,
         subnet_id,
@@ -49,9 +50,8 @@ def create_batch_resources(
             metadata=[
                 batch_models.MetadataItem(name=constants.AZTK_SOFTWARE_METADATA_KEY, value=software_metadata_key),
                 batch_models.MetadataItem(
-                    name=constants.AZTK_MODE_METADATA_KEY, value=constants.AZTK_JOB_MODE_METADATA),
-            ],
-        ),
+                    name=constants.AZTK_MODE_METADATA_KEY, value=constants.AZTK_JOB_MODE_METADATA)
+            ]),
     )
 
     job = batch_models.JobAddParameter(
@@ -59,7 +59,10 @@ def create_batch_resources(
         pool_info=batch_models.PoolInformation(auto_pool_specification=auto_pool_specification),
         job_manager_task=job_manager_task,
         on_all_tasks_complete=on_all_tasks_complete,
-        metadata=job_metadata,
+        metadata=[
+            batch_models.MetadataItem(name=constants.AZTK_SOFTWARE_METADATA_KEY, value=software_metadata_key),
+            batch_models.MetadataItem(name=constants.AZTK_MODE_METADATA_KEY, value=mode_metadata_key)
+        ] + job_metadata,
     )
 
     return batch_client.job.add(job)

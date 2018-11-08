@@ -6,12 +6,11 @@ def main():
 
     while master is None:
         try:
-            from aztk.node_scripts.core import config
-            from aztk.node_scripts.install.pick_master import get_master_node_id
+            from aztk.node_scripts.core import config, utils
 
             batch_client = config.batch_client
             pool = batch_client.pool.get(config.pool_id)
-            master = get_master_node_id(pool)
+            master = utils.get_master_node_id(pool)
             time.sleep(1)
 
         except Exception as e:

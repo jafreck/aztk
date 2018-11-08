@@ -20,5 +20,4 @@ def list_tasks(core_base_operations, id):
     if scheduling_target is not SchedulingTarget.Any:
         return list_task_table_entries(core_base_operations.table_service, id)
     else:
-        job = core_base_operations.job.get(id)
         return list_batch_tasks(batch_client=core_base_operations.batch_client, id=id)

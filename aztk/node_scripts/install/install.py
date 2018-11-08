@@ -20,27 +20,20 @@ def setup_host(docker_repo: str, docker_run_options: str):
     :param docker_repo: location of the Docker image to use
     :param docker_run_options: additional command-line options to pass to docker run
     """
-    client = config.batch_client
-
-    create_user.create_user(batch_client=client)
+    create_user.create_user(batch_client=config.batch_client)
     if os.environ["AZ_BATCH_NODE_IS_DEDICATED"] == "true" or os.environ["AZTK_MIXED_MODE"] == "false":
-        is_master = pick_master.find_master(client)
+        is_master = pick_master.find_master(config.batch_client)
     else:
         is_master = False
         wait_until_master_selected.main()
 
     is_worker = not is_master or os.environ.get("AZTK_WORKER_ON_MASTER") == "true"
-    master_node_id = pick_master.get_master_node_id(config.batch_client.pool.get(config.pool_id))
-    master_node = config.batch_client.compute_node.get(config.pool_id, master_node_id)
 
-    if is_master:
-        os.environ["AZTK_IS_MASTER"] = "true"
-    else:
-        os.environ["AZTK_IS_MASTER"] = "false"
-    if is_worker:
-        os.environ["AZTK_IS_WORKER"] = "true"
-    else:
-        os.environ["AZTK_IS_WORKER"] = "false"
+    cluster = config.spark_client.cluster.get(id=config.cluster_id)
+    master_node = config.batch_client.compute_node.get(config.pool_id, cluster.master_node_id)
+
+    os.environ["AZTK_IS_MASTER"] = "true" if is_master else "false"
+    os.environ["AZTK_IS_WORKER"] = "true" if is_worker else "true"
 
     os.environ["AZTK_MASTER_IP"] = master_node.ip_address
 
@@ -78,4 +71,7 @@ def setup_spark_container():
 
     plugins.setup_plugins(target=PluginTarget.SparkContainer, is_master=is_master, is_worker=is_worker)
 
+    # TODO: this is a good candidate for a lock.
+    #       this function holds lock until completion,
+    #       poller wait to aquire lock
     open("/tmp/setup_complete", "a").close()

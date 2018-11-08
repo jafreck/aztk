@@ -42,7 +42,7 @@ def __convert_batch_task_to_aztk_task(batch_task):
     task.id = batch_task.id
     if batch_task.node_info:
         task.node_id = batch_task.node_info.node_id
-    task.state = batch_task.state
+    task.state = TaskState(batch_task.state.value)
     task.state_transition_time = batch_task.state_transition_time
     task.command_line = batch_task.command_line
     task.exit_code = batch_task.execution_info.exit_code
@@ -90,7 +90,7 @@ def list_task_table_entries(table_service, id):
 def get_task_from_table(table_service, id, task_id):
     entity = table_service.get_entity(helpers.convert_id_to_table_id(id), id, task_id)
     # TODO: enable logger
-    # print("Running get_task_from_table: {}".format(entity))
+    print("Running get_task_from_table: {}".format(entity))
     return __convert_entity_to_task(entity)
 
 

@@ -35,7 +35,7 @@ class JobOperations(SparkBaseOperations):
         Returns:
             :obj:`bool`: True if the deletion process was successful.
         """
-        return delete.delete(self._core_job_operations, self, id, keep_logs)
+        return delete.delete(self._core_job_operations, id, keep_logs)
 
     def get(self, id):
         """Get details about the state of a job.

@@ -5,6 +5,7 @@
     pip install -e .
 """
 import argparse
+import traceback
 import warnings
 from typing import NamedTuple
 
@@ -44,8 +45,10 @@ def main():
         run_software(args)
     except BatchErrorException as e:
         utils.print_batch_exception(e)
+        log.debug(traceback.format_exc())
     except aztk.error.AztkError as e:
         log.error(str(e))
+        log.debug(traceback.format_exc())
 
 
 def setup_common_args(parser: argparse.ArgumentParser):
