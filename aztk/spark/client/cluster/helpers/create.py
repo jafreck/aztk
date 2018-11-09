@@ -3,7 +3,7 @@ import azure.batch.models as batch_models
 from aztk import models as base_models
 from aztk.internal.cluster_data import NodeData
 from aztk.spark import models
-from aztk.spark.utils import constants, util
+from aztk.spark.utils import constants, wait_for_master
 from aztk.utils import batch_error_manager
 
 POOL_ADMIN_USER_IDENTITY = batch_models.UserIdentity(
@@ -65,7 +65,7 @@ def create_cluster(core_cluster_operations,
 
         # Wait for the master to be ready
         if wait:
-            util.wait_for_master_to_be_ready(core_cluster_operations, spark_cluster_operations, cluster.id)
+            wait_for_master.wait_for_master(core_cluster_operations, spark_cluster_operations, cluster.id)
             cluster = spark_cluster_operations.get(cluster.id)
 
         return cluster

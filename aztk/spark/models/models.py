@@ -19,7 +19,7 @@ class SparkToolkit(aztk.models.Toolkit):
 
 class Cluster(aztk.models.Cluster):
     def __init__(self, cluster: aztk.models.Cluster):
-        super().__init__(cluster.pool, cluster.nodes)
+        super().__init__(cluster.id, cluster.pool, cluster.nodes)
         self.master_node_id = self.__get_master_node_id()
         self.gpu_enabled = helpers.is_gpu_enabled(cluster.pool.vm_size)
 
@@ -274,7 +274,7 @@ class Job:
         self.creation_time = cloud_job.creation_time
         self.applications = [Application(task) for task in (tasks or [])]
         if pool:
-            self.cluster = Cluster(aztk.models.Cluster(pool, nodes))
+            self.cluster = Cluster(aztk.models.Cluster(cloud_job.id, pool, nodes))
         else:
             self.cluster = None
 

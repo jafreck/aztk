@@ -11,7 +11,7 @@ def _get_application_log(core_job_operations, spark_job_operations, job_id, appl
         return core_job_operations.get_application_log(job_id, application_name)
 
     try:
-        task = core_job_operations.get_batch_task(id=job_id, task_id=application_name)
+        task = core_job_operations.get_task(id=job_id, task_id=application_name)
     except batch_models.BatchErrorException as e:
         # task may not exist since it may not yet be scheduled
         # see if the task is written to metadata of pool

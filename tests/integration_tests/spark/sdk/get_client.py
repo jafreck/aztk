@@ -42,6 +42,6 @@ def get_spark_client():
 def get_test_suffix(prefix: str):
     # base cluster name
     dt = datetime.now()
-    current_time = dt.microsecond
+    current_time = str(dt.microsecond)[:4]
     base_cluster_id = "{0}-{1}".format(prefix, current_time)
     return base_cluster_id

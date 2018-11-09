@@ -3,8 +3,8 @@ from aztk.internal import cluster_data
 
 from .helpers import (create_batch_resources, create_user_on_cluster, create_user_on_node, delete_batch_resources,
                       delete_user_on_cluster, delete_user_on_node, generate_user_on_cluster, generate_user_on_node,
-                      get_application_log, get_remote_login_settings, get_task, get_task_state, list_tasks, node_run,
-                      run, ssh_into_node, task_table)
+                      get_application_log, get_node, get_remote_login_settings, get_task, get_task_state, list_tasks,
+                      node_run, run, ssh_into_node, task_table)
 
 
 class BaseOperations:
@@ -351,3 +351,14 @@ class BaseOperations:
             :obj:`[aztk.models.Task]`: the submitted task with id task_id
         """
         return get_task.get_task(self, id, task_id)
+
+    def get_node(self, id: str, node_id: str):
+        """Get a node in a cluster
+        Args:
+            id (:obj:`str`): the id of the cluster
+            node_id (:obj:`str`): the id of the node
+
+        Returns:
+            :obj:`[azure.batch.models.ComputeNode]`: the requested node
+        """
+        return get_node.get_node(self, id, node_id)

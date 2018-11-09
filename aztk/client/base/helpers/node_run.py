@@ -11,7 +11,7 @@ def node_run(base_client, cluster_id, node_id, command, internal, container_name
     if internal:
         node_rls = models.RemoteLogin(ip_address=node.ip_address, port="22")
     else:
-        node_rls = base_client.get_remote_login_settings(cluster.pool.id, node.id)
+        node_rls = base_client.get_remote_login_settings(cluster_id, node.id)
     try:
         generated_username, ssh_key = base_client.generate_user_on_node(cluster.pool.id, node.id)
         output = ssh_lib.node_exec_command(

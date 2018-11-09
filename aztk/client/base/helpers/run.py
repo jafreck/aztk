@@ -11,7 +11,7 @@ def cluster_run(base_operations, cluster_id, command, internal, container_name=N
     if internal:
         cluster_nodes = [(node, models.RemoteLogin(ip_address=node.ip_address, port="22")) for node in nodes]
     else:
-        cluster_nodes = [(node, base_operations.get_remote_login_settings(pool.id, node.id)) for node in nodes]
+        cluster_nodes = [(node, base_operations.get_remote_login_settings(cluster_id, node.id)) for node in nodes]
     with batch_error_manager():
         generated_username, ssh_key = base_operations.generate_user_on_cluster(pool.id, nodes)
 

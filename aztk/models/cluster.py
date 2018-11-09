@@ -4,8 +4,8 @@ from .cluster_state import ClusterState
 
 
 class Cluster:
-    def __init__(self, pool: batch_models.CloudPool, nodes: batch_models.ComputeNodePaged = None):
-        self.id = pool.id
+    def __init__(self, id, pool: batch_models.CloudPool, nodes: batch_models.ComputeNodePaged = None):
+        self.id = id
         self.pool = pool
         self.nodes = nodes
         self.vm_size = pool.vm_size

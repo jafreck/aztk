@@ -1,6 +1,7 @@
 import azure.batch.models as batch_models
 import yaml
 
+import aztk.spark.utils.constants
 from aztk import models as base_models
 from aztk.internal.cluster_data import NodeData
 from aztk.spark import models
@@ -105,8 +106,6 @@ def submit_job(core_job_operations,
 
         software_metadata_key = base_models.Software.spark
 
-        vm_image = models.VmImage(publisher="Canonical", offer="UbuntuServer", sku="16.04")
-
         autoscale_formula = "$TargetDedicatedNodes = {0}; " "$TargetLowPriorityNodes = {1}".format(
             job_configuration.max_dedicated_nodes, job_configuration.max_low_pri_nodes)
 
@@ -116,7 +115,7 @@ def submit_job(core_job_operations,
             job_manager_task=job_manager_task,
             autoscale_formula=autoscale_formula,
             software_metadata_key=software_metadata_key,
-            vm_image_model=vm_image,
+            vm_image_model=aztk.spark.utils.constants.SPARK_VM_IMAGE,
             application_metadata="\n".join(application.name for application in (job_configuration.applications or [])),
         )
 

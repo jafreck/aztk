@@ -16,4 +16,4 @@ def get_pool_details(core_cluster_operations, cluster_id: str):
     pool_id = convert_job_id_to_pool_id(core_cluster_operations.batch_client, cluster_id)
     pool = core_cluster_operations.batch_client.pool.get(pool_id)
     nodes = core_cluster_operations.batch_client.compute_node.list(pool_id=pool_id)
-    return models.Cluster(pool, nodes)
+    return models.Cluster(cluster_id, pool, nodes)

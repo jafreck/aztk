@@ -22,7 +22,7 @@ def cluster_copy(
     if internal:
         cluster_nodes = [(node, models.RemoteLogin(ip_address=node.ip_address, port="22")) for node in nodes]
     else:
-        cluster_nodes = [(node, cluster_operations.get_remote_login_settings(pool.id, node.id)) for node in nodes]
+        cluster_nodes = [(node, cluster_operations.get_remote_login_settings(cluster_id, node.id)) for node in nodes]
 
     
     with batch_error_manager():

@@ -4,7 +4,7 @@ from .task_table import get_batch_task, get_task_from_table
 
 
 def get_task(core_base_operations, id, task_id):
-    """List all tasks on a job or cluster
+    """Get a task submitted to a job or cluster
 
     This will work for both Batch scheduling and scheduling_target
 

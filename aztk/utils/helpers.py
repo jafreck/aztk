@@ -259,20 +259,6 @@ def wrap_commands_in_shell(commands):
     return "/bin/bash -c 'set -e -o pipefail; {};'".format(";".join(commands))
 
 
-def get_connection_info(pool_id, node_id, batch_client):
-    """
-    Get connection info of specified node in pool
-    :param batch_client: The batch client to use.
-    :type batch_client: `batchserviceclient.BatchServiceClient`
-    :param str pool_id: The pool id to look up
-    :param str node_id: The node id to look up
-    """
-    rls = batch_client.compute_node.get_remote_login_settings(pool_id, node_id)
-    remote_ip = rls.remote_login_ip_address
-    ssh_port = str(rls.remote_login_port)
-    return (remote_ip, ssh_port)
-
-
 def get_cluster_total_target_nodes(pool):
     """
     Get the total number of target nodes (dedicated + low pri) for the pool

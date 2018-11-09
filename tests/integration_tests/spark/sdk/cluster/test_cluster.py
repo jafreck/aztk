@@ -73,7 +73,7 @@ def test_list_clusters():
 
 
 def test_get_remote_login_settings():
-    test_id = "get-remote-login-"
+    test_id = "remote-login-"
     cluster_configuration = aztk.spark.models.ClusterConfiguration(
         cluster_id=test_id + base_cluster_id,
         size=2,
@@ -187,7 +187,7 @@ def test_create_user_ssh_key():
 
 
 def test_get_application_state_complete():
-    test_id = "app-status-complete-"
+    test_id = "app-status-"
     cluster_configuration = aztk.spark.models.ClusterConfiguration(
         cluster_id=test_id + base_cluster_id,
         size=2,
@@ -214,7 +214,6 @@ def test_get_application_state_complete():
         max_retry_count=None)
     try:
         spark_client.cluster.create(cluster_configuration, wait=True)
-
         spark_client.cluster.submit(
             id=cluster_configuration.cluster_id, application=application_configuration, wait=True)
         state = spark_client.cluster.get_application_state(
@@ -249,7 +248,7 @@ def test_delete_cluster():
 
 
 def test_spark_processes_up():
-    test_id = "spark-processes-up-"
+    test_id = "spark-up-"
     cluster_configuration = aztk.spark.models.ClusterConfiguration(
         cluster_id=test_id + base_cluster_id,
         size=2,
