@@ -33,7 +33,7 @@ def setup_host(docker_repo: str, docker_run_options: str):
     master_node = config.batch_client.compute_node.get(config.pool_id, cluster.master_node_id)
 
     os.environ["AZTK_IS_MASTER"] = "true" if is_master else "false"
-    os.environ["AZTK_IS_WORKER"] = "true" if is_worker else "true"
+    os.environ["AZTK_IS_WORKER"] = "true" if is_worker else "false"
 
     os.environ["AZTK_MASTER_IP"] = master_node.ip_address
 

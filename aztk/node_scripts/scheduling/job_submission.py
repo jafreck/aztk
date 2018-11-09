@@ -29,7 +29,8 @@ def read_downloaded_tasks():
 
 def affinitize_task_to_master(cluster_id, task):
     cluster = config.spark_client.cluster.get(id=cluster_id)
-    master_node = master_node = config.batch_client.compute_node.get(id=cluster.pool.id, node_id=cluster.master_node_id)
+    master_node = master_node = config.batch_client.compute_node.get(
+        pool_id=cluster.pool.id, node_id=cluster.master_node_id)
     task.affinity_info = batch_models.AffinityInformation(affinity_id=master_node.affinity_id)
     return task
 
@@ -40,7 +41,7 @@ def schedule_tasks(tasks):
     """
     for task in tasks:
         task = affinitize_task_to_master(config.cluster_id, task)
-        config.batch_client.task.add(job_id=config.job_id, task=task)
+        config.batch_client.task.add(job_id=config.cluster_id, task=task)
 
 
 def select_scheduling_target_node(spark_cluster_operations, cluster_id, scheduling_target):

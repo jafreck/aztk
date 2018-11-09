@@ -5,7 +5,7 @@ The ability to load a file share on the cluster is really useful when you want t
 Mounting an Azure Files share in the cluster only required updating the cluster.yaml file at `.aztk/cluster.yaml`. For example, the following configuration will load two files shares into the cluster, one with my notebooks and one will a small data set that I have previously uploaded to Azure Files.
 
 ```yaml
-azure_files:
+file_shares:
     - storage_account_name: STORAGE_ACCOUNT_NAME
       storage_account_key: STORAGE_ACCOUNT_KEY
       # Name of the file share in Azure Files

@@ -53,7 +53,7 @@ def generate_job_manager_task(core_job_operations, job, application_tasks):
         command_line=helpers.wrap_commands_in_shell([task_cmd]),
         resource_files=resource_files,
         kill_job_on_completion=False,
-        allow_low_priority_node=True,
+        allow_low_priority_node=True, #TODO: false unless job only has low priority
         user_identity=batch_models.UserIdentity(
             auto_user=batch_models.AutoUserSpecification(
                 scope=batch_models.AutoUserScope.task, elevation_level=batch_models.ElevationLevel.admin)),
