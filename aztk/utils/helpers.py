@@ -123,25 +123,6 @@ def upload_file_to_container(container_name,
     return batch_models.ResourceFile(file_path=node_path, blob_source=sas_url)
 
 
-def create_pool_if_not_exist(pool, batch_client):
-    """
-    Creates the specified pool if it doesn't already exist
-    :param batch_client: The batch client to use.
-    :type batch_client: `batchserviceclient.BatchServiceClient`
-    :param pool: The pool to create.
-    :type pool: `batchserviceclient.models.PoolAddParameter`
-    """
-    try:
-        batch_client.pool.add(pool)
-    except batch_models.BatchErrorException as e:
-        if e.error.code == "PoolExists":
-            raise error.AztkError(
-                "A cluster with the same id already exists. Use a different id or delete the existing cluster")
-        else:
-            raise
-    return True
-
-
 def wait_for_all_nodes_state(pool, node_state, batch_client):
     """
     Waits for all nodes in pool to reach any specified state in set
@@ -193,61 +174,6 @@ def select_latest_verified_vm_image_with_node_agent_sku(publisher, offer, sku_st
     return (sku_to_use.id, image_ref_to_use)
 
 
-def create_sas_token(container_name, blob_name, permission, blob_client, expiry=None, timeout=None):
-    """
-    Create a blob sas token
-    :param blob_client: The storage block blob client to use.
-    :type blob_client: `azure.storage.blob.BlockBlobService`
-    :param str container_name: The name of the container to upload the blob to.
-    :param str blob_name: The name of the blob to upload the local file to.
-    :param expiry: The SAS expiry time.
-    :type expiry: `datetime.datetime`
-    :param int timeout: timeout in minutes from now for expiry,
-        will only be used if expiry is not specified
-    :return: A SAS token
-    :rtype: str
-    """
-    if expiry is None:
-        if timeout is None:
-            timeout = 30
-        expiry = datetime.datetime.utcnow() + datetime.timedelta(minutes=timeout)
-    return blob_client.generate_blob_shared_access_signature(
-        container_name, blob_name, permission=permission, expiry=expiry)
-
-
-def upload_blob_and_create_sas(container_name, blob_name, file_name, expiry, blob_client, timeout=None):
-    """
-    Uploads a file from local disk to Azure Storage and creates a SAS for it.
-    :param blob_client: The storage block blob client to use.
-    :type blob_client: `azure.storage.blob.BlockBlobService`
-    :param str container_name: The name of the container to upload the blob to.
-    :param str blob_name: The name of the blob to upload the local file to.
-    :param str file_name: The name of the local file to upload.
-    :param expiry: The SAS expiry time.
-    :type expiry: `datetime.datetime`
-    :param int timeout: timeout in minutes from now for expiry,
-        will only be used if expiry is not specified
-    :return: A SAS URL to the blob with the specified expiry time.
-    :rtype: str
-    """
-    blob_client.create_container(container_name, fail_on_exist=False)
-
-    blob_client.create_blob_from_path(container_name, blob_name, file_name)
-
-    sas_token = create_sas_token(
-        container_name,
-        blob_name,
-        permission=blob.BlobPermissions.READ,
-        blob_client=None,
-        expiry=expiry,
-        timeout=timeout,
-    )
-
-    sas_url = blob_client.make_blob_url(container_name, blob_name, sas_token=sas_token)
-
-    return sas_url
-
-
 def wrap_commands_in_shell(commands):
     """
     Wrap commands in a shell
@@ -257,20 +183,6 @@ def wrap_commands_in_shell(commands):
     :return: a shell wrapping commands
     """
     return "/bin/bash -c 'set -e -o pipefail; {};'".format(";".join(commands))
-
-
-def get_cluster_total_target_nodes(pool):
-    """
-    Get the total number of target nodes (dedicated + low pri) for the pool
-    """
-    return pool.target_dedicated_nodes + pool.target_low_priority_nodes
-
-
-def get_cluster_total_current_nodes(pool):
-    """
-    Get the total number of current nodes (dedicated + low pri) in the pool
-    """
-    return pool.current_dedicated_nodes + pool.current_low_priority_nodes
 
 
 def normalize_path(path: str) -> str:

@@ -47,7 +47,6 @@ def get_blob_from_storage(block_blob_client, container_name, application_name, s
         stream.seek(0)
         return blob
     except azure.common.AzureMissingResourceHttpError:
-        raise
         raise error.AztkError("Logs not found in your storage account. They were either deleted or never existed.")
     except azure.common.AzureHttpError as e:
         if e.error_code in ["InvalidRange"]:
@@ -116,15 +115,12 @@ def stream_log_from_storage(base_operations, container_name, application_name, t
 
 
 def get_log(base_operations, cluster_id: str, application_name: str, tail=False, current_bytes: int = 0):
-    cluster_configuration = base_operations.get_cluster_configuration(cluster_id)
     task = wait_for_task(base_operations, cluster_id, application_name)
 
     return get_log_from_storage(base_operations.blob_client, cluster_id, application_name, task, current_bytes)
 
 
 def stream_log(base_operations, cluster_id: str, application_name: str):
-    print("running stream_log")
-    cluster_configuration = base_operations.get_cluster_configuration(cluster_id)
     task = wait_for_task(base_operations, cluster_id, application_name)
     return stream_log_from_storage(base_operations, cluster_id, application_name, task)
 
