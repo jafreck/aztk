@@ -1,5 +1,4 @@
 import os
-from datetime import datetime
 
 import aztk.spark
 from aztk_cli import config
@@ -37,11 +36,3 @@ def get_spark_client():
         spark_client = aztk.spark.Client(config.load_aztk_secrets())
 
     return spark_client
-
-
-def get_test_suffix(prefix: str):
-    # base cluster name
-    dt = datetime.now()
-    current_time = dt.microsecond
-    base_cluster_id = "{0}-{1}".format(prefix, current_time)
-    return base_cluster_id

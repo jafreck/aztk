@@ -1,13 +1,9 @@
-import os
-import subprocess
-from datetime import datetime
-
 from azure.batch.models import BatchErrorException
-from tests.integration_tests.spark.sdk.get_client import (get_spark_client, get_test_suffix)
+from tests.integration_tests.spark.get_test_suffix import get_test_suffix
+from tests.integration_tests.spark.sdk.get_client import get_spark_client
 
 import aztk.spark
 from aztk.error import AztkError
-from aztk_cli import config
 
 base_job_id = get_test_suffix("j")
 spark_client = get_spark_client()

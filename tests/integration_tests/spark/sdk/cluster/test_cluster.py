@@ -1,23 +1,14 @@
-import os
-import subprocess
-import time
-from datetime import datetime
 from zipfile import ZipFile
 
-import azure.batch.models as batch_models
-import pytest
-from azure.batch.models import BatchErrorException
+from tests.integration_tests.spark.get_test_suffix import get_test_suffix
 from tests.integration_tests.spark.sdk.clean_up_cluster import clean_up_cluster
 from tests.integration_tests.spark.sdk.ensure_spark_processes import \
     ensure_spark_processes
-from tests.integration_tests.spark.sdk.get_client import (get_spark_client, get_test_suffix)
+from tests.integration_tests.spark.sdk.get_client import get_spark_client
 from tests.integration_tests.spark.sdk.wait_for_all_nodes import \
     wait_for_all_nodes
 
 import aztk.spark
-from aztk.error import AztkError
-from aztk.utils import constants
-from aztk_cli import config
 
 base_cluster_id = get_test_suffix("c")
 spark_client = get_spark_client()
