@@ -17,12 +17,12 @@ Submit helper methods
 
 
 def __app_submit_cmd(application):
-    spark_home = os.environ["SPARK_HOME"]
+    spark_home = config.spark_home
     with open(os.path.join(spark_home, "conf", "master")) as f:
         master_ip = f.read().rstrip()
 
     # set file paths to correct path on container
-    files_path = os.environ["AZ_BATCH_TASK_WORKING_DIR"]
+    files_path = config.task_working_dir
     jars = [os.path.join(files_path, os.path.basename(jar)) for jar in application.jars]
     py_files = [os.path.join(files_path, os.path.basename(py_file)) for py_file in application.py_files]
     files = [os.path.join(files_path, os.path.basename(f)) for f in application.files]
@@ -68,7 +68,7 @@ def receive_submit_request(application_file_path):
         exit_code = subprocess.call(cmd.to_str(), shell=True)
         common.upload_log(blob_client, application)
     except Exception as e:
-        common.upload_error_log(str(e), os.path.join(os.environ["AZ_BATCH_TASK_WORKING_DIR"], "application.yaml"))
+        common.upload_error_log(str(e), os.path.join(config.task_working_dir, "application.yaml"))
     return exit_code
 
 
@@ -76,25 +76,24 @@ def ssh_submit(task_sas_url):
     task_definition = common.download_task_definition(task_sas_url)
     scheduling_target.download_task_resource_files(task_definition.id, task_definition.resource_files)
 
-    application = common.load_application(os.path.join(os.environ["AZ_BATCH_TASK_WORKING_DIR"], "application.yaml"))
+    application = common.load_application(os.path.join(config.task_working_dir, "application.yaml"))
 
     cmd = __app_submit_cmd(application)
 
     exit_code = -1
-    aztk_cluster_id = os.environ.get("AZTK_CLUSTER_ID")
     try:
         # update task table before running
-        task = insert_task_into_task_table(aztk_cluster_id, task_definition)
+        task = insert_task_into_task_table(config.cluster_id, task_definition)
         # run task and upload log
         exit_code = subprocess.call(cmd.to_str(), shell=True)
         common.upload_log(config.blob_client, application)
         #TODO: enable logging
         # print("completed application, updating storage table")
-        mark_task_complete(aztk_cluster_id, task.id, exit_code)
+        mark_task_complete(config.cluster_id, task.id, exit_code)
     except Exception as e:
         #TODO: enable logging
         # print("application failed, updating storage table")
-        mark_task_failure(aztk_cluster_id, task_definition.id, exit_code, str(e))
+        mark_task_failure(config.cluster_id, task_definition.id, exit_code, str(e))
 
     return exit_code
 
@@ -103,7 +102,7 @@ def insert_task_into_task_table(cluster_id, task_definition):
     current_time = datetime.datetime.utcnow()
     task = Task(
         id=task_definition.id,
-        node_id=os.environ.get("AZ_BATCH_NODE_ID", None),
+        node_id=config.node_id,
         state=TaskState.Running,
         state_transition_time=current_time,
         command_line=task_definition.command_line,
@@ -157,8 +156,8 @@ if __name__ == "__main__":
         except Exception as e:
             import traceback
             common.upload_error_log(traceback.format_exc() + str(e),
-                                    os.path.join(os.environ["AZ_BATCH_TASK_WORKING_DIR"], "application.yaml"))
+                                    os.path.join(config.task_working_dir, "application.yaml"))
     else:
-        exit_code = receive_submit_request(os.path.join(os.environ["AZ_BATCH_TASK_WORKING_DIR"], "application.yaml"))
+        exit_code = receive_submit_request(os.path.join(config.task_working_dir, "application.yaml"))
         # print("exit code", exit_code)
         sys.exit(exit_code)

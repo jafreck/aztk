@@ -28,9 +28,12 @@ storage_resource_id = os.environ.get("SP_STORAGE_RESOURCE_ID")
 
 cluster_id = os.environ.get("AZTK_CLUSTER_ID")
 pool_id = os.environ["AZ_BATCH_POOL_ID"]
+job_id = os.environ.get("AZ_BATCH_JOB_ID")
+task_working_dir = os.environ.get("AZ_BATCH_TASK_WORKING_DIR")
 node_id = os.environ["AZ_BATCH_NODE_ID"]
 is_dedicated = os.environ["AZ_BATCH_NODE_IS_DEDICATED"] == "true"
 
+spark_home = os.environ.get("SPARK_HOME")
 spark_web_ui_port = os.environ["SPARK_WEB_UI_PORT"]
 spark_worker_ui_port = os.environ["SPARK_WORKER_UI_PORT"]
 spark_job_ui_port = os.environ["SPARK_JOB_UI_PORT"]
@@ -38,6 +41,15 @@ spark_job_ui_port = os.environ["SPARK_JOB_UI_PORT"]
 storage_account_name = os.environ.get("STORAGE_ACCOUNT_NAME")
 storage_account_key = os.environ.get("STORAGE_ACCOUNT_KEY")
 storage_account_suffix = os.environ.get("STORAGE_ACCOUNT_SUFFIX")
+
+mixed_mode = os.environ["AZTK_MIXED_MODE"] == "false"
+spark_submit_logs_file = os.environ["SPARK_SUBMIT_LOGS_FILE"]
+aztk_working_dir = os.environ.get("AZTK_WORKING_DIR")
+worker_on_master = os.environ.get("AZTK_WORKER_ON_MASTER") == "true"
+gpu_enabled = os.environ.get("AZTK_GPU_ENABLED") == "true"
+is_master = os.environ.get("AZTK_IS_MASTER") == "true"
+is_worker = os.environ.get("AZTK_IS_WORKER") == "true"
+storage_logs_contianer = os.environ.get("STORAGE_LOGS_CONTAINER")
 
 
 def get_blob_client() -> blob.BlockBlobService:

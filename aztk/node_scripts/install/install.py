@@ -23,24 +23,18 @@ def setup_host(docker_repo: str, docker_run_options: str):
     client = config.batch_client
 
     create_user.create_user(batch_client=client)
-    if os.environ["AZ_BATCH_NODE_IS_DEDICATED"] == "true" or os.environ["AZTK_MIXED_MODE"] == "false":
+    if config.is_dedicated or config.mixed_mode == "false":
         is_master = pick_master.find_master(client)
     else:
         is_master = False
         wait_until_master_selected.main()
 
-    is_worker = not is_master or os.environ.get("AZTK_WORKER_ON_MASTER") == "true"
+    is_worker = not is_master or config.worker_on_master
     master_node_id = pick_master.get_master_node_id(config.batch_client.pool.get(config.pool_id))
     master_node = config.batch_client.compute_node.get(config.pool_id, master_node_id)
 
-    if is_master:
-        os.environ["AZTK_IS_MASTER"] = "true"
-    else:
-        os.environ["AZTK_IS_MASTER"] = "false"
-    if is_worker:
-        os.environ["AZTK_IS_WORKER"] = "true"
-    else:
-        os.environ["AZTK_IS_WORKER"] = "false"
+    os.environ["AZTK_IS_MASTER"] = "true" if is_master else "false"
+    os.environ["AZTK_IS_WORKER"] = "true" if is_worker else "false"
 
     os.environ["AZTK_MASTER_IP"] = master_node.ip_address
 
@@ -50,19 +44,18 @@ def setup_host(docker_repo: str, docker_run_options: str):
     spark_container.start_spark_container(
         docker_repo=docker_repo,
         docker_run_options=docker_run_options,
-        gpu_enabled=os.environ.get("AZTK_GPU_ENABLED") == "true",
+        gpu_enabled=config.gpu_enabled,
         plugins=cluster_conf.plugins,
     )
-    plugins.setup_plugins(target=PluginTarget.Host, is_master=is_master, is_worker=is_worker)
+    plugins.setup_plugins(target=PluginTarget.Host, is_master=config.is_master, is_worker=config.is_worker)
 
 
 def setup_spark_container():
     """
     Code run in the main spark container
     """
-    is_master = os.environ.get("AZTK_IS_MASTER") == "true"
-    is_worker = os.environ.get("AZTK_IS_WORKER") == "true"
-    print("Setting spark container. Master: ", is_master, ", Worker: ", is_worker)
+
+    print("Setting spark container. Master: ", config.is_master, ", Worker: ", config.is_worker)
 
     print("Copying spark setup config")
     spark.setup_conf()
@@ -70,12 +63,12 @@ def setup_spark_container():
 
     spark.setup_connection()
 
-    if is_master:
+    if config.is_master:
         spark.start_spark_master()
 
-    if is_worker:
+    if config.is_worker:
         spark.start_spark_worker()
 
-    plugins.setup_plugins(target=PluginTarget.SparkContainer, is_master=is_master, is_worker=is_worker)
+    plugins.setup_plugins(target=PluginTarget.SparkContainer, is_master=config.is_master, is_worker=config.is_worker)
 
     open("/tmp/setup_complete", "a").close()

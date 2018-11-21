@@ -1,17 +1,20 @@
 import os
+from datetime import datetime, timedelta, timezone
+
 import azure.batch.models as batch_models
-from azure.batch.models import BatchErrorException
-from Cryptodome.PublicKey import RSA
-from Cryptodome.Cipher import AES, PKCS1_OAEP
-from datetime import datetime, timezone, timedelta
 import yaml
+from azure.batch.models import BatchErrorException
+from Cryptodome.Cipher import AES, PKCS1_OAEP
+from Cryptodome.PublicKey import RSA
+
+from aztk.node_scripts.core import config
 """
     Creates a user if the user configuration file at $AZTK_WORKING_DIR/user.yaml exists
 """
 
 
 def create_user(batch_client):
-    path = os.path.join(os.environ["AZTK_WORKING_DIR"], "user.yaml")
+    path = os.path.join(config.aztk_working_dir, "user.yaml")
 
     if not os.path.isfile(path):
         print("No user to create.")
@@ -24,8 +27,8 @@ def create_user(batch_client):
         password = None if user_conf["ssh-key"] else decrypt_password(user_conf)
 
         batch_client.compute_node.add_user(
-            pool_id=os.environ["AZ_BATCH_POOL_ID"],
-            node_id=os.environ["AZ_BATCH_NODE_ID"],
+            pool_id=config.pool_id,
+            node_id=config.node_id,
             user=batch_models.ComputeNodeUser(
                 name=user_conf["username"],
                 is_admin=True,
@@ -45,7 +48,7 @@ def decrypt_password(user_conf):
     tag = user_conf["tag"]
 
     # Read private key
-    with open(os.path.join(os.environ["AZTK_WORKING_DIR"], "id_rsa"), encoding="UTF-8") as f:
+    with open(os.path.join(config.aztk_working_dir, "id_rsa"), encoding="UTF-8") as f:
         private_key = RSA.import_key(f.read())
     # Decrypt the session key with the public RSA key
     cipher_rsa = PKCS1_OAEP.new(private_key)

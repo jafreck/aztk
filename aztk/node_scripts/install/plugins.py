@@ -5,8 +5,9 @@ import subprocess
 import yaml
 
 from aztk.models.plugins import PluginTarget, PluginTargetRole
+from aztk.node_scripts.core import config
 
-log_folder = os.path.join(os.environ["AZTK_WORKING_DIR"], "logs", "plugins")
+log_folder = os.path.join(config.aztk_working_dir, "logs", "plugins")
 
 
 def _read_manifest_file(path=None):
@@ -33,7 +34,7 @@ def setup_plugins(target: PluginTarget, is_master: bool = False, is_worker: bool
 
 
 def _plugins_dir():
-    return os.path.join(os.environ["AZTK_WORKING_DIR"], "plugins")
+    return os.path.join(config.aztk_working_dir, "plugins")
 
 
 def _run_on_this_node(plugin_obj, target: PluginTarget, is_master, is_worker):
@@ -92,7 +93,7 @@ def _run_script(name: str, script_path: str = None, args: dict = None, env: dict
 
     my_env = os.environ.copy()
     if env:
-        for [key, value] in env.items():
+        for key, value in env.items():
             my_env[key] = value
 
     if args is None:

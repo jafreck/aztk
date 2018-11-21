@@ -5,6 +5,7 @@ import time
 import requests
 
 from aztk import error
+from aztk.node_scripts import config
 
 
 def http_request_wrapper(func, *args, timeout=None, max_execution_time=300, **kwargs):
@@ -28,7 +29,7 @@ def http_request_wrapper(func, *args, timeout=None, max_execution_time=300, **kw
 def _download_resource_file(task_id, resource_file):
     response = http_request_wrapper(requests.get, url=resource_file.blob_source, timeout=None, stream=True)
     if resource_file.file_path:
-        write_path = os.path.join(os.environ.get("AZ_BATCH_TASK_WORKING_DIR"), resource_file.file_path)
+        write_path = os.path.join(config.task_working_dir, resource_file.file_path)
         with open(write_path, 'wb') as stream:
             for chunk in response.iter_content(chunk_size=16777216):
                 stream.write(chunk)

@@ -23,9 +23,9 @@ def upload_log(blob_client, application):
     """
         upload output.log to storage account
     """
-    log_file = os.path.join(os.environ["AZ_BATCH_TASK_WORKING_DIR"], os.environ["SPARK_SUBMIT_LOGS_FILE"])
+    log_file = os.path.join(config.task_working_dir, config.spark_submit_log_file)
     upload_file_to_container(
-        container_name=os.environ["STORAGE_LOGS_CONTAINER"],
+        container_name=config.storage_logs_contianer,
         application_name=application.name,
         file_path=log_file,
         blob_client=blob_client,
@@ -81,12 +81,12 @@ def upload_error_log(error, application_file_path):
     application = load_application(application_file_path)
     blob_client = config.blob_client
 
-    error_log_path = os.path.join(os.environ["AZ_BATCH_TASK_WORKING_DIR"], "error.log")
+    error_log_path = os.path.join(config.task_working_dir, "error.log")
     with open(error_log_path, "w", encoding="UTF-8") as error_log:
         error_log.write(error)
 
     upload_file_to_container(
-        container_name=os.environ["STORAGE_LOGS_CONTAINER"],
+        container_name=config.storage_logs_contianer,
         application_name=application.name,
         file_path=os.path.realpath(error_log.name),
         blob_client=blob_client,
