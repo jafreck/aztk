@@ -55,13 +55,13 @@ def receive_submit_request(application_file_path):
     """
         Handle the request to submit a task
     """
-    blob_client = config.blob_client
     application = common.load_application(application_file_path)
 
     cmd = __app_submit_cmd(application)
     exit_code = -1
     try:
         exit_code = common.run_command(config.spark_client, cmd.to_str(), application.name)
+        common.upload_log(config.block_blob_service, application)
     except Exception as e:
         common.upload_error_log(str(e), os.path.join(os.environ["AZ_BATCH_TASK_WORKING_DIR"], "application.yaml"))
     return exit_code

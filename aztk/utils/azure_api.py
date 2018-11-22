@@ -71,7 +71,7 @@ def make_batch_client(secrets):
     return batch_client
 
 
-def make_blob_client(secrets):
+def make_cloud_storage_account(secrets):
     """
         Creates a blob client object
         :param str storage_account_key: storage account key
@@ -81,10 +81,9 @@ def make_blob_client(secrets):
 
     if secrets.shared_key:
         # Set up SharedKeyCredentials
-        blob_client = blob.BlockBlobService(
+        cloud_storage_account = CloudStorageAccount(
             account_name=secrets.shared_key.storage_account_name,
             account_key=secrets.shared_key.storage_account_key,
-            endpoint_suffix=secrets.shared_key.storage_account_suffix,
         )
     else:
         # Set up ServicePrincipalCredentials
@@ -107,9 +106,9 @@ def make_blob_client(secrets):
             resource_group_name=resourcegroup,
             account_name=accountname,
         ).keys[0].value)
-        storage_client = CloudStorageAccount(accountname, key)
+        cloud_storage_account = CloudStorageAccount(accountname, key)
 
-    return storage_client
+    return cloud_storage_account
 
 
 def make_table_service(secrets):
@@ -144,6 +143,7 @@ def make_table_service(secrets):
     return table_service
 
 
+#TODO:replace with retry decorator
 def retry_function(function, retry_attempts: int, retry_interval: int, exception: Exception, *args, **kwargs):
     import time
 

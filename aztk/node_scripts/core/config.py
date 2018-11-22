@@ -63,10 +63,13 @@ def get_spark_client():
 
 
 spark_client = get_spark_client()
-# note: the batch_client and blob_client in _core_cluster_operations
+# note: the batch_client and cloud_storage_account in _core_cluster_operations
 # is the same as in _core_job_operations
 batch_client = spark_client.cluster._core_cluster_operations.batch_client
-blob_client = spark_client.cluster._core_cluster_operations.blob_client
+cloud_storage_account = spark_client.cluster._core_cluster_operations.cloud_storage_account
+block_blob_service = spark_client.cluster._core_cluster_operations.block_blob_service
+file_service = spark_client.cluster._core_cluster_operations.file_service
+table_service = spark_client.cluster._core_cluster_operations.table_service
 
 log.info("Pool id is %s", pool_id)
 log.info("Node id is %s", node_id)

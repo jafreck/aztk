@@ -13,15 +13,22 @@ class BaseOperations:
     Attributes:
         batch_client (:obj:`azure.batch.batch_service_client.BatchServiceClient`): Client used to interact with the
             Azure Batch service.
-        blob_client (:obj:`azure.storage.blob.CloudStorageAccount`):  Client used to interact with the Azure Storage
-            Blob service.
+        cloud_storage_account (:obj:`azure.storage.blob.CloudStorageAccount`):  Azure Storage account used
+        block_blob_service (:obj:`azure.storage.blob.CloudStorageAccount`):  Client used to interact with the 
+            Azure Storage Blob service.
+        file_service (:obj:`azure.storage.blob.CloudStorageAccount`):  Client used to interact with the Azure Storage
+            File service.
+        table_service (:obj:`azure.storage.blob.CloudStorageAccount`):  Client used to interact with the Azure Storage
+            Table service.
         secrets_configuration (:obj:`aztk.models.SecretsConfiguration`):
             Model that holds AZTK secrets used to authenticate with Azure and the clusters.
     """
 
     def __init__(self, context):
         self.batch_client = context["batch_client"]
-        self.blob_client = context["blob_client"]
+        self.cloud_storage_account = context["cloud_storage_account"]
+        self.block_blob_service = context["block_blob_service"]
+        self.file_service = context["file_service"]
         self.table_service = context["table_service"]
         self.secrets_configuration = context["secrets_configuration"]
 
@@ -54,7 +61,7 @@ class BaseOperations:
         Returns:
             :obj:`aztk.models.ClusterData`: Object used to manage the data and storage functions for a cluster
         """
-        return cluster_data.ClusterData(self.blob_client, id)
+        return cluster_data.ClusterData(self.block_blob_service, id)
 
     def ssh_into_node(self, id, node_id, username, ssh_key=None, password=None, port_forward_list=None, internal=False):
         """Open an ssh tunnel to a node

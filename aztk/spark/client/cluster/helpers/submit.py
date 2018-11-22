@@ -20,13 +20,13 @@ def affinitize_task_to_master(core_cluster_operations, spark_cluster_operations,
     return task
 
 
-def upload_serialized_task_to_storage(blob_client, cluster_id, task):
+def upload_serialized_task_to_storage(cloud_storage_account, cluster_id, task):
     return helpers.upload_text_to_container(
         container_name=cluster_id,
         application_name=task.id,
         file_path="task.yaml",
         content=yaml.dump(task),
-        blob_client=blob_client,
+        cloud_storage_account=cloud_storage_account,
     )
 
 
@@ -48,7 +48,7 @@ def schedule_with_target(
         internal,
 ):
     # upload "real" task definition to storage
-    serialized_task_resource_file = upload_serialized_task_to_storage(core_cluster_operations.blob_client, cluster_id,
+    serialized_task_resource_file = upload_serialized_task_to_storage(core_cluster_operations.block_blob_service, cluster_id,
                                                                       task)
     # # schedule "ghost" task
     ghost_task = batch_models.TaskAddParameter(

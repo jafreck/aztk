@@ -3,7 +3,7 @@ import logging
 
 import azure.common
 import yaml
-from azure.storage.common import CloudStorageAccount
+from azure.storage.blob import BlockBlobService
 from msrest.exceptions import ClientRequestError
 
 from aztk import error
@@ -24,8 +24,8 @@ class ClusterData:
     APPLICATIONS_DIR = "applications"
     CLUSTER_CONFIG_FILE = "config.yaml"
 
-    def __init__(self, blob_client: CloudStorageAccount, cluster_id: str):
-        self.block_blob_client = blob_client.create_block_blob_service()
+    def __init__(self, block_blob_service: BlockBlobService, cluster_id: str):
+        self.block_blob_service = block_blob_service
         self.cluster_id = cluster_id
         self._ensure_container()
 
@@ -34,13 +34,13 @@ class ClusterData:
         blob_path = self.CLUSTER_DIR + "/" + self.CLUSTER_CONFIG_FILE
         content = yaml.dump(cluster_config)
         container_name = cluster_config.cluster_id
-        self.block_blob_client.create_blob_from_text(container_name, blob_path, content)
+        self.block_blob_service.create_blob_from_text(container_name, blob_path, content)
 
     @retry(retry_count=4, retry_interval=1, backoff_policy=BackOffPolicy.exponential, exceptions=(ClientRequestError))
     def read_cluster_config(self):
         blob_path = self.CLUSTER_DIR + "/" + self.CLUSTER_CONFIG_FILE
         try:
-            result = self.block_blob_client.get_blob_to_text(self.cluster_id, blob_path)
+            result = self.block_blob_service.get_blob_to_text(self.cluster_id, blob_path)
             return yaml.load(result.content)
         except azure.common.AzureMissingResourceHttpError:
             raise error.AztkError("Cluster {} doesn't have cluster configuration in storage".format(self.cluster_id))
@@ -49,13 +49,13 @@ class ClusterData:
 
     @retry(retry_count=4, retry_interval=1, backoff_policy=BackOffPolicy.exponential, exceptions=(ClientRequestError))
     def upload_file(self, blob_path: str, local_path: str) -> BlobData:
-        self.block_blob_client.create_blob_from_path(self.cluster_id, blob_path, local_path)
-        return BlobData(self.block_blob_client, self.cluster_id, blob_path)
+        self.block_blob_service.create_blob_from_path(self.cluster_id, blob_path, local_path)
+        return BlobData(self.block_blob_service, self.cluster_id, blob_path)
 
     @retry(retry_count=4, retry_interval=1, backoff_policy=BackOffPolicy.exponential, exceptions=(ClientRequestError))
     def upload_bytes(self, blob_path: str, bytes_io: io.BytesIO) -> BlobData:
-        self.block_blob_client.create_blob_from_bytes(self.cluster_id, blob_path, bytes_io.getvalue())
-        return BlobData(self.block_blob_client, self.cluster_id, blob_path)
+        self.block_blob_service.create_blob_from_bytes(self.cluster_id, blob_path, bytes_io.getvalue())
+        return BlobData(self.block_blob_service, self.cluster_id, blob_path)
 
     def upload_cluster_file(self, blob_path: str, local_path: str) -> BlobData:
         blob_data = self.upload_bytes(self.CLUSTER_DIR + "/" + blob_path, local_path)
@@ -72,8 +72,8 @@ class ClusterData:
 
     @retry(retry_count=4, retry_interval=1, backoff_policy=BackOffPolicy.exponential, exceptions=(ClientRequestError))
     def _ensure_container(self):
-        self.block_blob_client.create_container(self.cluster_id, fail_on_exist=False)
+        self.block_blob_service.create_container(self.cluster_id, fail_on_exist=False)
 
     @retry(retry_count=4, retry_interval=1, backoff_policy=BackOffPolicy.exponential, exceptions=(ClientRequestError))
     def delete_container(self, container_name: str):
-        self.block_blob_client.delete_container(container_name)
+        self.block_blob_service.delete_container(container_name)

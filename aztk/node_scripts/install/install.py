@@ -8,7 +8,7 @@ from aztk.node_scripts.install import (create_user, pick_master, plugins, spark,
 
 
 def read_cluster_config():
-    data = cluster_data.ClusterData(config.blob_client, config.cluster_id)
+    data = cluster_data.ClusterData(config.block_blob_service, config.cluster_id)
     cluster_config = data.read_cluster_config()
     log.info("Got cluster config: %s", cluster_config)
     return cluster_config

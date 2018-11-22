@@ -25,8 +25,8 @@ def wait_for_task(base_operations, cluster_id, application_name):
     return task
 
 
-def get_blob_from_storage(block_blob_client, container_name, application_name, stream, start_range, end_range=None):
-    print(block_blob_client, container_name, application_name, stream, start_range, end_range)
+def get_blob_from_storage(block_blob_service, container_name, application_name, stream, start_range, end_range=None):
+    print(block_blob_service, container_name, application_name, stream, start_range, end_range)
     previous = 0
 
     def download_callback(current, total):
@@ -37,7 +37,7 @@ def get_blob_from_storage(block_blob_client, container_name, application_name, s
         previous = current
 
     try:
-        blob = block_blob_client.get_blob_to_stream(
+        blob = block_blob_service.get_blob_to_stream(
             container_name,
             convert_application_name_to_blob_path(application_name),
             stream,
@@ -55,10 +55,9 @@ def get_blob_from_storage(block_blob_client, container_name, application_name, s
         raise
 
 
-def get_log_from_storage(blob_client, container_name, application_name, task, current_bytes):
+def get_log_from_storage(block_blob_service, container_name, application_name, task, current_bytes):
     stream = tempfile.TemporaryFile()
-    blob = get_blob_from_storage(blob_client.create_block_blob_service(), container_name, application_name, stream,
-                                 current_bytes)
+    blob = get_blob_from_storage(block_blob_service, container_name, application_name, stream, current_bytes)
     return models.ApplicationLog(
         name=application_name,
         cluster_id=container_name,
@@ -80,9 +79,8 @@ def stream_log_from_storage(base_operations, container_name, application_name, t
     stream = tempfile.TemporaryFile()
     last_read_byte = 0
 
-    block_blob_client = base_operations.blob_client.create_block_blob_service()
     blob = get_blob_from_storage(
-        block_blob_client,
+        base_operations.block_blob_service,
         container_name,
         application_name,
         stream,
@@ -95,7 +93,7 @@ def stream_log_from_storage(base_operations, container_name, application_name, t
         task = base_operations.get_task(container_name, task.id)
         last_read_byte = blob.properties.content_length
         blob = get_blob_from_storage(
-            block_blob_client,
+            base_operations.block_blob_service,
             container_name,
             application_name,
             stream,
@@ -117,7 +115,7 @@ def stream_log_from_storage(base_operations, container_name, application_name, t
 def get_log(base_operations, cluster_id: str, application_name: str, tail=False, current_bytes: int = 0):
     task = wait_for_task(base_operations, cluster_id, application_name)
 
-    return get_log_from_storage(base_operations.blob_client, cluster_id, application_name, task, current_bytes)
+    return get_log_from_storage(base_operations.block_blob_service, cluster_id, application_name, task, current_bytes)
 
 
 def stream_log(base_operations, cluster_id: str, application_name: str):

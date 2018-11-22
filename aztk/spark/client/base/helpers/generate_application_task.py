@@ -16,7 +16,7 @@ def generate_application_task(core_base_operations, container_id, application, r
             container_name=container_id,
             application_name=application.name,
             file_path=application.application,
-            blob_client=core_base_operations.blob_client,
+            block_blob_service=core_base_operations.block_blob_service,
             use_full_path=False,
         )
 
@@ -32,7 +32,7 @@ def generate_application_task(core_base_operations, container_id, application, r
             container_name=container_id,
             application_name=application.name,
             file_path=jar,
-            blob_client=core_base_operations.blob_client,
+            block_blob_service=core_base_operations.block_blob_service,
             use_full_path=False,
         )
         jar_resource_file_paths.append(current_jar_resource_file_path)
@@ -45,7 +45,7 @@ def generate_application_task(core_base_operations, container_id, application, r
             container_name=container_id,
             application_name=application.name,
             file_path=py_file,
-            blob_client=core_base_operations.blob_client,
+            block_blob_service=core_base_operations.block_blob_service,
             use_full_path=False,
         )
         py_files_resource_file_paths.append(current_py_files_resource_file_path)
@@ -58,7 +58,7 @@ def generate_application_task(core_base_operations, container_id, application, r
             container_name=container_id,
             application_name=application.name,
             file_path=file,
-            blob_client=core_base_operations.blob_client,
+            block_blob_service=core_base_operations.block_blob_service,
             use_full_path=False,
         )
         files_resource_file_paths.append(files_resource_file_path)
@@ -73,7 +73,7 @@ def generate_application_task(core_base_operations, container_id, application, r
         application_name=application.name,
         file_path="application.yaml",
         content=yaml.dump(application),
-        blob_client=core_base_operations.blob_client,
+        block_blob_service=core_base_operations.block_blob_service,
     )
     resource_files.append(application_definition_file)
 

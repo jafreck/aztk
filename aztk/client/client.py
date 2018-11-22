@@ -13,7 +13,9 @@ class CoreClient:
     def __init__(self):
         self.secrets_configuration = None
         self.batch_client = None
-        self.blob_client = None
+        self.cloud_storage_account = None
+        self.file_service = None
+        self.block_blob_service = None
         self.table_service = None
 
     def _get_context(self, secrets_configuration: models.SecretsConfiguration):
@@ -21,11 +23,15 @@ class CoreClient:
 
         azure_api.validate_secrets(secrets_configuration)
         self.batch_client = azure_api.make_batch_client(secrets_configuration)
-        self.blob_client = azure_api.make_blob_client(secrets_configuration)
+        self.cloud_storage_account = azure_api.make_cloud_storage_account(secrets_configuration)
+        self.file_service = self.cloud_storage_account.create_file_service()
+        self.block_blob_service = self.cloud_storage_account.create_block_blob_service()
         self.table_service = azure_api.make_table_service(secrets_configuration)
         context = {
             "batch_client": self.batch_client,
-            "blob_client": self.blob_client,
+            "cloud_storage_account": self.cloud_storage_account,
+            "file_service": self.file_service,
+            "block_blob_service": self.block_blob_service,
             "table_service": self.table_service,
             "secrets_configuration": self.secrets_configuration,
         }
