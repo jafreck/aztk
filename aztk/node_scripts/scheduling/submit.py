@@ -60,8 +60,7 @@ def receive_submit_request(application_file_path):
     cmd = __app_submit_cmd(application)
     exit_code = -1
     try:
-        exit_code = common.run_command(config.spark_client, cmd.to_str(), application.name)
-        common.upload_log(config.block_blob_service, application)
+        exit_code = common.run_command(cmd.to_str(), config.cluster_id, application.name)
     except Exception as e:
         common.upload_error_log(str(e), os.path.join(os.environ["AZ_BATCH_TASK_WORKING_DIR"], "application.yaml"))
     return exit_code
@@ -81,7 +80,7 @@ def ssh_submit(task_sas_url):
         # update task table before running
         task = scheduling_target.insert_task_into_task_table(aztk_cluster_id, task_definition)
         # run task and upload log
-        exit_code = common.run_command(config.spark_client, cmd.to_str(), application.name)
+        exit_code = common.run_command(cmd.to_str(), config.cluster_id, application.name)
         log.info("completed application, updating storage table")
         scheduling_target.mark_task_complete(aztk_cluster_id, task.id, exit_code)
     except Exception as e:
