@@ -68,7 +68,6 @@ spark_client = get_spark_client()
 batch_client = spark_client.cluster._core_cluster_operations.batch_client
 cloud_storage_account = spark_client.cluster._core_cluster_operations.cloud_storage_account
 block_blob_service = spark_client.cluster._core_cluster_operations.block_blob_service
-file_service = spark_client.cluster._core_cluster_operations.file_service
 table_service = spark_client.cluster._core_cluster_operations.table_service
 
 log.info("Pool id is %s", pool_id)

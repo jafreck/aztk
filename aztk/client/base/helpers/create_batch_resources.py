@@ -50,7 +50,8 @@ def create_batch_resources(
             metadata=[
                 batch_models.MetadataItem(name=constants.AZTK_SOFTWARE_METADATA_KEY, value=software_metadata_key),
                 batch_models.MetadataItem(
-                    name=constants.AZTK_MODE_METADATA_KEY, value=constants.AZTK_JOB_MODE_METADATA)
+                    name=constants.AZTK_MODE_METADATA_KEY,
+                    value=constants.AZTK_JOB_MODE_METADATA)    # dyanmically change to cluster/job metadata
             ]),
     )
 

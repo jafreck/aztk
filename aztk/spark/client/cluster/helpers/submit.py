@@ -20,13 +20,13 @@ def affinitize_task_to_master(core_cluster_operations, spark_cluster_operations,
     return task
 
 
-def upload_serialized_task_to_storage(cloud_storage_account, cluster_id, task):
+def upload_serialized_task_to_storage(block_blob_service, cluster_id, task):
     return helpers.upload_text_to_container(
         container_name=cluster_id,
         application_name=task.id,
         file_path="task.yaml",
         content=yaml.dump(task),
-        cloud_storage_account=cloud_storage_account,
+        block_blob_service=block_blob_service,
     )
 
 

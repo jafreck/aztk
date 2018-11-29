@@ -104,23 +104,7 @@ def download_task_definition(task_sas_url):
     return yaml.load(yaml_serialized_task)
 
 
-def run_command(command, cluster_id, application_name):
-    process = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    stream_upload_to_file_share(cluster_id, application_name, process.stdout)
-    rc = process.wait()
-    return rc
-
-
-def create_file_share(cluster_id, application_id, quota=5120, fail_on_exist=True):
-    config.file_service.create_share(share_name=cluster_id + application_id, quota=quota, fail_on_exist=fail_on_exist)
-
-
-def stream_upload_to_file_share(cluster_id, application_name, stream):
-    create_file_share(cluster_id, application_name)
-    config.file_service.create_file_from_stream(
-        share_name=cluster_id + application_name,
-        directory_name="",
-        file_name="output.log",
-        stream=stream,
-        max_connections=4,
-    )
+def run_command(command, cluster_id, application):
+    return_code = subprocess.call(command, shell=True)
+    upload_log(config.block_blob_service, application)
+    return return_code

@@ -90,7 +90,7 @@ def list_task_table_entries(table_service, id):
 def get_task_from_table(table_service, id, task_id):
     entity = table_service.get_entity(helpers.convert_id_to_table_id(id), id, task_id)
     # TODO: enable logger
-    print("Running get_task_from_table: {}".format(entity))
+    # print("Running get_task_from_table: {}".format(entity))
     return __convert_entity_to_task(entity)
 
 

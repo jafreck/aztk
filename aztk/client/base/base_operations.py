@@ -16,8 +16,6 @@ class BaseOperations:
         cloud_storage_account (:obj:`azure.storage.blob.CloudStorageAccount`):  Azure Storage account used
         block_blob_service (:obj:`azure.storage.blob.CloudStorageAccount`):  Client used to interact with the 
             Azure Storage Blob service.
-        file_service (:obj:`azure.storage.blob.CloudStorageAccount`):  Client used to interact with the Azure Storage
-            File service.
         table_service (:obj:`azure.storage.blob.CloudStorageAccount`):  Client used to interact with the Azure Storage
             Table service.
         secrets_configuration (:obj:`aztk.models.SecretsConfiguration`):
@@ -28,7 +26,6 @@ class BaseOperations:
         self.batch_client = context["batch_client"]
         self.cloud_storage_account = context["cloud_storage_account"]
         self.block_blob_service = context["block_blob_service"]
-        self.file_service = context["file_service"]
         self.table_service = context["table_service"]
         self.secrets_configuration = context["secrets_configuration"]
 
