@@ -237,7 +237,7 @@ def print_batch_exception(batch_exception):
             for mesg in batch_exception.error.values:
                 log.error("%s:\t%s", mesg.key, mesg.value)
     log.error("-------------------------------------------")
-    
+
 
 def print_jobs(jobs: List[models.Job]):
     print_format = "{:<34}| {:<10}| {:<20}"
