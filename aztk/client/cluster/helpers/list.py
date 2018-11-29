@@ -6,6 +6,7 @@ def job_get_pool(core_cluster_operations, job):
     if job.execution_info and job.execution_info.pool_id:
         return core_cluster_operations.batch_client.pool.get(job.execution_info.pool_id)
 
+
 def list_clusters(core_cluster_operations, software_metadata_key):
     """
         List all the cluster on your account.

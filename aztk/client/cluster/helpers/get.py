@@ -7,6 +7,7 @@ def convert_job_id_to_pool_id(batch_client, cluster_id):
         return job.execution_info.pool_id
     raise error.AztkError("No cluster with id {} does not exist.".format(cluster_id))
 
+
 def get_pool_details(core_cluster_operations, cluster_id: str):
     """
         Print the information for the given cluster

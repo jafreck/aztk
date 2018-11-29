@@ -24,7 +24,6 @@ def cluster_copy(
     else:
         cluster_nodes = [(node, cluster_operations.get_remote_login_settings(cluster_id, node.id)) for node in nodes]
 
-    
     with batch_error_manager():
         generated_username, ssh_key = cluster_operations.generate_user_on_cluster(pool.id, nodes)
 

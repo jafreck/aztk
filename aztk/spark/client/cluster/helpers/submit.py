@@ -48,15 +48,8 @@ def schedule_with_target(
         internal,
 ):
     # upload "real" task definition to storage
-    serialized_task_resource_file = upload_serialized_task_to_storage(core_cluster_operations.block_blob_service, cluster_id,
-                                                                      task)
-    # # schedule "ghost" task
-    ghost_task = batch_models.TaskAddParameter(
-        id=task.id,
-        command_line="/bin/bash",
-    )
-    # tell the node to run the task
-    core_cluster_operations.batch_client.task.add(cluster_id, task=ghost_task)
+    serialized_task_resource_file = upload_serialized_task_to_storage(core_cluster_operations.block_blob_service,
+                                                                      cluster_id, task)
 
     task_working_dir = "/mnt/aztk/startup/tasks/workitems/{}".format(task.id)
 
