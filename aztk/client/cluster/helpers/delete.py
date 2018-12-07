@@ -1,5 +1,4 @@
 from azure.batch.models import BatchErrorException
-from azure.common import AzureMissingResourceHttpError
 from msrest.exceptions import ClientRequestError
 
 from aztk.utils import BackOffPolicy, retry
