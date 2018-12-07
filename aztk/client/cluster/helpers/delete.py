@@ -20,7 +20,7 @@ def delete_pool_and_job_and_table(core_cluster_operations, pool_id: str, keep_lo
 
     pool_exists = core_cluster_operations.batch_client.pool.exists(pool_id)
 
-    table_deleted = delete_object(core_cluster_operations.delete_task_table, pool_id)
+    table_deleted = core_cluster_operations.delete_task_table(pool_id)
 
     if job_exists:
         delete_object(core_cluster_operations.batch_client.job.delete, pool_id)
