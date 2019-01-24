@@ -2,9 +2,11 @@ from aztk.client.cluster import CoreClusterOperations
 from aztk.spark import models
 from aztk.spark.client.base import SparkBaseOperations
 
-from .helpers import (copy, create, create_user, delete, diagnostics, download, get, get_application_log,
-                      get_application_state, get_configuration, get_remote_login_settings, list, node_run, run,
-                      ssh_into_master, submit, wait)
+from .helpers import (copy, create, create_user, delete, diagnostics, download,
+                      get, get_application_log, get_application_state,
+                      get_configuration, get_remote_login_settings, list,
+                      list_applications, node_run, run, ssh_into_master,
+                      submit, wait)
 
 
 class ClusterOperations(SparkBaseOperations):
@@ -117,7 +119,7 @@ class ClusterOperations(SparkBaseOperations):
         """
         return get_application_state.get_application_state(self._core_cluster_operations, id, application_name)
 
-    def list_applications(self, id: str):
+    def list_applications(self):
         """Get all tasks that have been submitted to the cluster
 
         Args:
@@ -126,7 +128,7 @@ class ClusterOperations(SparkBaseOperations):
         Returns:
             :obj:`[aztk.spark.models.Application]`: list of aztk applications
         """
-        return self._list_applications(self._core_cluster_operations, id)
+        return list_applications.list_applications(self._core_cluster_operations, id)
 
     def run(self, id: str, command: str, host=False, internal: bool = False, timeout=None):
         """Run a bash command on every node in the cluster

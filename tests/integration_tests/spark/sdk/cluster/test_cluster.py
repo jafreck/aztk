@@ -343,3 +343,43 @@ def test_scheduling_target():
 
     finally:
         clean_up_cluster(spark_client, cluster_configuration.cluster_id)
+
+
+def test_list_apps():
+    test_id = "list-apps-"
+    cluster_configuration = aztk.spark.models.ClusterConfiguration(
+        cluster_id=test_id + base_cluster_id,
+        size=2,
+        size_low_priority=0,
+        vm_size="standard_f2",
+        subnet_id=None,
+        file_shares=None,
+        toolkit=aztk.spark.models.SparkToolkit(version="2.3.0"),
+        spark_configuration=None)
+    application_configuration = aztk.spark.models.ApplicationConfiguration(
+        name="pipy100",
+        application="./examples/src/main/python/pi.py",
+        application_args=[100],
+        main_class=None,
+        jars=[],
+        py_files=[],
+        files=[],
+        driver_java_options=None,
+        driver_class_path=None,
+        driver_memory=None,
+        driver_cores=None,
+        executor_memory=None,
+        executor_cores=None,
+        max_retry_count=None)
+    try:
+        spark_client.cluster.create(cluster_configuration, wait=True)
+
+        spark_client.cluster.submit(
+            id=cluster_configuration.cluster_id, application=application_configuration, wait=True)
+        applications = spark_client.cluster.list_applications()
+
+        assert isinstance(applications, list)
+        assert len(applications) == 1
+        assert applications[0].id == "pipy100"
+    finally:
+        clean_up_cluster(spark_client, cluster_configuration.cluster_id)

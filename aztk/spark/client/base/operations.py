@@ -71,14 +71,3 @@ class SparkBaseOperations:
         """
         return generate_application_task.generate_application_task(core_base_operations, container_id, application,
                                                                    remote)
-
-    def _list_applications(self, core_base_operations, id):
-        """Get information on tasks submitted to a cluster
-
-        Args:
-            id (:obj:`str`): the name of the cluster the tasks belong to
-
-        Returns:
-            :obj:`[aztk.spark.models.Application]`: list of aztk applications
-        """
-        return list_applications.list_applications(core_base_operations, id)
