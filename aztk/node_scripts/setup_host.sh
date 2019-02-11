@@ -66,7 +66,7 @@ pull_docker_container () {
     for i in {1..5}; do
         docker pull $docker_repo_name && break ||
         echo "ERROR: docker pull $docker_repo_name failed ... retrying after $($i**2) seconds" &&
-        sleep $i**2;
+        sleep $(($i**2));
     done
     echo "Finished pulling $docker_repo_name"
 }
