@@ -62,7 +62,6 @@ pull_docker_container () {
         docker login $DOCKER_ENDPOINT --username $DOCKER_USERNAME --password $DOCKER_PASSWORD
     fi
 
-
     for i in {1..5}; do
         docker pull $docker_repo_name && break ||
         echo "ERROR: docker pull $docker_repo_name failed ... retrying after $($i**2) seconds" &&
@@ -106,19 +105,13 @@ run_docker_container () {
         ln -s $docker_log $AZ_BATCH_TASK_WORKING_DIR/logs/docker.log
     fi
     echo "Finished running docker container"
-
 }
 
 
-
-
-
 main () {
-
     time(
         install_prerequisites
     ) 2>&1
-
 
     # set hostname in /etc/hosts if dns cannot resolve
     if ! host $HOSTNAME ; then
@@ -149,8 +142,9 @@ main () {
     # set up aztk python environment
     export LC_ALL=C.UTF-8
     export LANG=C.UTF-8
-    # ensure these packages are  compatibile before upgrading
-    python3 -m pip install pip=="18.0" pipenv=="2018.7.1"
+    # ensure these packages (pip, pipenv, setuptools) are compatibile before upgrading
+    python3 -m pip install pip=="18.0" setuptools=="45.2.0"
+    python3 -m pip install pipenv=="2018.7.1"
     mkdir -p $AZTK_WORKING_DIR/.aztk-env
     cp $AZTK_WORKING_DIR/aztk/node_scripts/Pipfile $AZTK_WORKING_DIR/.aztk-env
     cp $AZTK_WORKING_DIR/aztk/node_scripts/Pipfile.lock $AZTK_WORKING_DIR/.aztk-env
