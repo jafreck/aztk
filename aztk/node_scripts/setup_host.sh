@@ -142,9 +142,12 @@ main () {
     # set up aztk python environment
     export LC_ALL=C.UTF-8
     export LANG=C.UTF-8
-    # ensure these packages (pip, pipenv, setuptools) are compatibile before upgrading
-    python3 -m pip install pip=="18.0" setuptools=="45.2.0"
-    python3 -m pip install pipenv=="2018.7.1"
+    # pin pipenv dependencies (and transitive dependencies) since pipenv does not
+    python3 -m pip install setuptools=="42.0.2"
+    python3 -m pip install zipp=="1.1.0"
+    python3 -m pip install virtualenv=="20.0.0"
+    # ensure these packages (pip, pipenv) are compatibile before upgrading
+    python3 -m pip install pip=="18.0" pipenv=="2018.7.1"
     mkdir -p $AZTK_WORKING_DIR/.aztk-env
     cp $AZTK_WORKING_DIR/aztk/node_scripts/Pipfile $AZTK_WORKING_DIR/.aztk-env
     cp $AZTK_WORKING_DIR/aztk/node_scripts/Pipfile.lock $AZTK_WORKING_DIR/.aztk-env
