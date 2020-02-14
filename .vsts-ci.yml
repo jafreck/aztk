@@ -44,7 +44,7 @@ jobs:
         export STORAGE_ACCOUNT_RESOURCE_ID=$(STORAGE_ACCOUNT_RESOURCE_ID)
         export TENANT_ID=$(TENANT_ID)
         pytest --numprocesses=70 tests/integration_tests
-      condition: and(succeeded())
+      condition: succeeded()
       displayName: integration tests
 
     - script: |
